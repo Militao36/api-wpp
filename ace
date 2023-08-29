@@ -1,0 +1,211 @@
+const fs = require('fs')
+const path = require('path')
+
+function capitalizeFirstLetterUpperCase (str = '') {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function capitalizeFirstLetterLowerCase (str = '') {
+  return str.charAt(0).toLocaleLowerCase() + str.slice(1)
+}
+
+function writeFile (dirFile = '', data = '') {
+  try {
+    fs.writeFileSync(dirFile, data)
+  } catch (error) {
+    console.error(error)
+    process.exit(0)
+  }
+}
+
+const createEntity = (fileName = '', force = true) => {
+  if (!fileName) {
+    throw new Error('O nome do arquivo é obrigatório.')
+  }
+
+  const className = `${capitalizeFirstLetterUpperCase(fileName)}Entity`
+
+  const dirFile = path.resolve(__dirname, 'src', 'entities', `${className}.ts`)
+
+  if (fs.existsSync(dirFile) && !force) {
+    throw new Error('O arquivo já existe na pasta')
+  }
+
+  const classEntity = `
+      import { ${className.replace('Entity', '').concat('s')} } from '@prisma/client'
+      
+      class ${className} implements ${className.replace('Entity', '').concat('s')} {
+         
+      }
+
+      export { ${className} }
+  `
+
+  writeFile(dirFile, classEntity)
+}
+
+const createRepo = (fileName = '', force = true) => {
+  if (!fileName) {
+    throw new Error('O nome do arquivo é obrigatório.')
+  }
+
+  const className = `${capitalizeFirstLetterUpperCase(fileName)}Repo`
+  const dirFile = path.resolve(__dirname, 'src', 'repositories', `${className}.ts`)
+
+  if (fs.existsSync(dirFile) && !force) {
+    throw new Error('O arquivo já existe na pasta')
+  }
+
+  const classNameEntity = `${capitalizeFirstLetterUpperCase(fileName)}Entity`
+
+  const classRepo = `
+    import { ${classNameEntity} } from '../entities/${classNameEntity}'
+    import { BaseRepo } from './Base'
+
+    class ${className} extends BaseRepo<${classNameEntity}> {
+        constructor ({ prisma }) {
+            super(prisma, '${capitalizeFirstLetterLowerCase(fileName)}s')
+        }
+    }
+
+    export { ${className} }
+  `
+
+  writeFile(dirFile, classRepo)
+}
+
+const createService = (fileName = '', force = true) => {
+  if (!fileName) {
+    throw new Error('O nome do arquivo é obrigatório.')
+  }
+
+  const className = `${capitalizeFirstLetterUpperCase(fileName)}Service`
+  const dirFile = path.resolve(__dirname, 'src', 'services', `${className}.ts`)
+
+  if (fs.existsSync(dirFile) && !force) {
+    throw new Error('O arquivo já existe na pasta')
+  }
+
+  const classNameEntity = `${capitalizeFirstLetterUpperCase(fileName)}Entity`
+  const classNameRepoUpperCase = `${capitalizeFirstLetterUpperCase(fileName)}Repo`
+  const classNameRepoLowerCase = `${capitalizeFirstLetterLowerCase(fileName)}Repo`
+
+  const classService = `
+      import { ${classNameRepoUpperCase} } from '../repositories/${classNameRepoUpperCase}'
+      import { ${classNameEntity} } from '../entities/${classNameEntity}'
+      import { BaseService } from './Base'
+      
+      class ${className} extends BaseService<${classNameRepoUpperCase}, ${classNameEntity}>  {
+        private ${classNameRepoLowerCase}: ${classNameRepoUpperCase};
+        constructor ({ ${classNameRepoLowerCase} }) {
+            super(${classNameRepoLowerCase})
+            this.${classNameRepoLowerCase} = ${classNameRepoLowerCase}
+        }
+      }
+
+      export { ${className} }
+  `
+
+  writeFile(dirFile, classService)
+}
+
+const createController = (fileName = '', force = true) => {
+  if (!fileName) {
+    throw new Error('O nome do arquivo é obrigatório.')
+  }
+
+  const className = `${capitalizeFirstLetterUpperCase(fileName)}Controller`
+  const dirFile = path.resolve(__dirname, 'src', 'controllers', `${className}.ts`)
+
+  if (fs.existsSync(dirFile) && !force) {
+    throw new Error('O arquivo já existe na pasta')
+  }
+
+  const classNameService = `${capitalizeFirstLetterUpperCase(fileName)}Service`
+  const classNameServiceLower = `${capitalizeFirstLetterLowerCase(fileName)}Service`
+
+  const classController = `
+      import { ${classNameService} } from '../services/${classNameService}'
+      import { GET, PATCH, POST, DELETE, route } from 'awilix-express'
+      import { Request, Response } from 'express'
+
+      @route('/${fileName.toLowerCase()}s')
+      class ${className} {
+        private ${classNameServiceLower}: ${classNameService}
+        constructor ({ ${classNameServiceLower} }) {
+          this.${classNameServiceLower} = ${classNameServiceLower}
+        } 
+
+        @route('/:id')
+        @GET()
+        async getById (request: Request, response: Response) {
+          const id = request.params.id
+          const data = await this.${classNameServiceLower}.findById(id)
+          return response.status(200).json({ data })
+        }
+
+        @POST()
+        async save (request: Request, response: Response) {
+          const data = request.body
+          const id = await this.${classNameServiceLower}.save(data)
+          return response.status(201).json({ id })
+        }
+
+        @route('/:id')
+        @PATCH()
+        async update (request: Request, response: Response) {
+          const id = request.params.id
+          const data = request.body
+          await this.${classNameServiceLower}.update(id, data)
+        }
+
+        @DELETE()
+        async delete (request: Request, response: Response) {
+          const id = request.params.id
+          await this.${classNameServiceLower}.delete(id)
+        }
+      }
+
+      export { ${className} }
+  `
+
+  writeFile(dirFile, classController)
+}
+
+const main = () => {
+  const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
+
+  readline.question('Qual o nome do arquivo que gostaria de gerar?\nObs: Digite no singular. \n', fileName => {
+    readline.question('Qual desses tipos gostaria de gerar? \n[1]-Entity\n[2]-Repositories\n[3]-Service\n[4]-Controller\n[5]-Todos\nDigite o numero correspondente.\n', typeFile => {
+      if (typeFile === '1') {
+        createEntity(fileName, false)
+      }
+
+      if (typeFile === '2') {
+        createRepo(fileName, false)
+      }
+
+      if (typeFile === '3') {
+        createService(fileName, false)
+      }
+
+      if (typeFile === '4') {
+        createController(fileName, false)
+      }
+
+      if (typeFile === '5') {
+        createEntity(fileName, false)
+        createRepo(fileName, false)
+        createService(fileName, false)
+        createController(fileName, false)
+      }
+
+      readline.close()
+    })
+  })
+}
+
+main()
