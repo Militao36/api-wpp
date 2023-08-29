@@ -30,7 +30,6 @@ export class UserRepository extends RepositoryBase<UserEntity> {
       .select<UserEntity[]>()
 
     query = this.builderFilters(query, filter)
-    console.log(await query)
     const result = await this.builderIncludes((await query), filter)
 
     return result

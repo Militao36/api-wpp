@@ -1,25 +1,25 @@
 import { GET, POST, route } from 'awilix-express'
 import { Request, Response } from 'express'
 
-import { UserService } from '../services/UserService'
-import { UserEntity } from '../entities/UserEntity'
+import { ContactService } from '../services/ContactService'
+import { ContactEntity } from '../entities/ContactEntity'
 
-@route('/users')
-export class UserController {
-  #userService: UserService
-  constructor({ userService }) {
-    this.#userService = userService
+@route('/contacts')
+export class ContactController {
+  #contactService: ContactService
+  constructor({ contactService }) {
+    this.#contactService = contactService
   }
 
   @POST()
   async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-    const user = new UserEntity({
+    const contact = new ContactEntity({
       ...request.body,
       idEmpresa
     })
 
-    const id = await this.#userService.save(user)
+    const id = await this.#contactService.save(contact)
     return response.status(201).json({ id })
   }
 
@@ -29,7 +29,7 @@ export class UserController {
 
     const query = request.query
 
-    const data = await this.#userService.list({ ...query, idEmpresa } as any)
+    const data = await this.#contactService.list({ ...query, idEmpresa } as any)
     return response.status(200).json(data)
   }
 }
