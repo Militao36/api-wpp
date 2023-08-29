@@ -1,5 +1,4 @@
 import { ContactRepository, FilterUserContactRepository } from '../repositories/ContactRepository'
-import { UserEntity } from '../entities/UserEntity'
 import { ContactEntity } from '../entities/ContactEntity'
 
 export class ContactService {
