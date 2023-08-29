@@ -1,32 +1,25 @@
-import { asClass, asValue, createContainer, InjectionMode, Lifetime } from 'awilix'
-import Emittery from 'emittery'
+import { asClass, asValue, createContainer, InjectionMode } from 'awilix'
 
-import { prisma } from './util/config/database'
+import { database } from './util/config/database'
 import { CryptoHash } from './util/hash'
 import { Logger } from './util/Logger'
+import { UserService } from './services/UserService'
+import { UserRepository } from './repositories/UserRepository'
 
 const definition = {
-    prisma: asValue(prisma),
     hash: asClass(CryptoHash).singleton(),
     logger: asClass(Logger).singleton(),
-    emittery: asClass(Emittery).singleton()
+    database: asValue(database),
+
+    //services
+    userService: asClass(UserService).singleton(),
+    //repository
+    userRepository: asClass(UserRepository).singleton()
 }
 
 const container = createContainer({
     injectionMode: InjectionMode.PROXY
 })
-
-container.loadModules(
-    [
-        [process.env.AWILIX_SERVICES, Lifetime.SINGLETON]
-    ]
-)
-
-container.loadModules(
-    [
-        [process.env.AWILIX_REPOSITORIES, Lifetime.SINGLETON]
-    ]
-)
 
 container.register(definition)
 

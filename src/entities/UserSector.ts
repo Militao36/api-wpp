@@ -5,10 +5,8 @@ import { Entity } from "./base/Entity";
 export class UserSectorEntity extends Entity {
   idUser: number
   idSector: number
- 
-  // aux
-  sectors: SectorEntity
-  users: UserEntity
+  sectors?: SectorEntity
+  users?: UserEntity
 
   constructor(body: Omit<UserSectorEntity, 'id'>, id?: string) {
     super(body, id)

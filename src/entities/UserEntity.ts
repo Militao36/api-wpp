@@ -6,16 +6,14 @@ export class UserEntity extends Entity {
   username: string
   password: string
   isMaster: boolean
-
-  // aux
   sectors?: SectorEntity[]
 
   constructor(body: Omit<UserEntity, 'id'>, id?: string) {
     super(body, id)
     this.name = body.name
+    this.username = body.username
     this.password = body.password
     this.isMaster = body?.isMaster ?? null
-
     this.sectors = body?.sectors ?? []
   }
 }

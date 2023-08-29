@@ -10,6 +10,7 @@ const app = express()
 app.use(express.json())
 
 app.disable('x-powered-by')
+
 // middlewares
 app.use(scopePerRequest(container))
 app.use(convertBodyRequestToNull)

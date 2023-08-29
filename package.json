@@ -27,7 +27,6 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@prisma/client": "^4.8.1",
     "@types/uuid": "^9.0.0",
     "awilix": "^8.0.0",
     "awilix-express": "^8.0.0",

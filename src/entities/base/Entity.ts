@@ -9,7 +9,6 @@ export class Entity {
 
   constructor(body: any, id?: string) {
     if (!id) {
-      this.id = randomUUID()
       this.createdAt = DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss')
       this.updatedAt = DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss')
     } else {

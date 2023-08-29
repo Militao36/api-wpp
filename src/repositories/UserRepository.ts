@@ -30,6 +30,7 @@ export class UserRepository extends RepositoryBase<UserEntity> {
       .select<UserEntity[]>()
 
     query = this.builderFilters(query, filter)
+    console.log(await query)
     const result = await this.builderIncludes((await query), filter)
 
     return result
@@ -59,10 +60,10 @@ export class UserRepository extends RepositoryBase<UserEntity> {
   }
 
   private async builderIncludes(users: UserEntity[], { includes }: FilterUserRepository) {
-    if (includes.sectors) {
+    if (Boolean(includes?.sectors)) {
       for await (const sector of users) {
         const usersSectors = await this.#database.table('user_sector')
-          .select<UserSectorEntity[]>('idUser')
+          .select<UserSectorEntity[]>('idSector')
           .where({ idSector: sector.id })
 
         const sectors = await this.#database.table('sectors').select<SectorEntity[]>()
