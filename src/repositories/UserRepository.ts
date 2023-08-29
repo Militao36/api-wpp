@@ -37,7 +37,6 @@ export class UserRepository extends RepositoryBase<UserEntity> {
 
   // #region privates
   private builderFilters(query: Knex.QueryBuilder<{}, UserEntity[]>, { filter, limit, first }: FilterUserRepository) {
-
     for (const key in filter) {
       if (filter[key]) {
         query.where(key, '=', filter[key])
