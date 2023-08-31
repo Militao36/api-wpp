@@ -42,7 +42,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
   // #region privates
   private async builderFilters(
     query: Knex.QueryBuilder<{},
-      ConversationEntity[]>, { filter, limit, first }: FilterConversationRepository
+      ConversationEntity[]>, { filter = {} as any, limit, first }: FilterConversationRepository
   ) {
     Object.keys(filter).map(async (key) => {
       if (key === 'idPreviousConversation') {
@@ -59,7 +59,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       }
     })
 
-
     if (filter?.idEmpresa) {
       query.where({ idEmpresa: filter.idEmpresa })
     }
@@ -74,7 +73,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
   }
 
-  private async builderIncludes(conversations: ConversationEntity[], { includes }: FilterConversationRepository) {
+  private async builderIncludes(conversations: ConversationEntity[], { includes = {} as any }: FilterConversationRepository) {
     if (includes.users || includes.contact || includes.conversation) {
       for await (const conversation of conversations) {
 

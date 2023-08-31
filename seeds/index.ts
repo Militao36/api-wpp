@@ -39,8 +39,50 @@ async function seedUserSector(knex: Knex) {
     await knex("user_sector").insert(data);
 }
 
+async function seedContacts(knex: Knex) {
+    await knex("contacts").del();
+
+    const data = [
+        ({ id: 1, idEmpresa: '1', name: 'name 1', phone: '31996508625' }),
+        ({ id: 2, idEmpresa: '1', name: 'name 2', phone: '31996508625' }),
+        ({ id: 3, idEmpresa: '1', name: 'name 3', phone: '31996508625' }),
+        ({ id: 4, idEmpresa: '1', name: 'name 4', phone: '31996508625' }),
+    ]
+
+    await knex("contacts").insert(data);
+}
+
+async function seedConversations(knex: Knex) {
+    await knex("conversations").del();
+
+    const data = [
+        ({ id: 1, idEmpresa: '1', idContact: 1, idPreviousConversation: null, finishedAt: null }),
+        ({ id: 2, idEmpresa: '1', idContact: 2, idPreviousConversation: null, finishedAt: null }),
+        ({ id: 3, idEmpresa: '1', idContact: 3, idPreviousConversation: null, finishedAt: null }),
+        ({ id: 4, idEmpresa: '1', idContact: 4, idPreviousConversation: null, finishedAt: null }),
+    ]
+
+    await knex("conversations").insert(data);
+}
+
+async function seedConversationsUsers(knex: Knex) {
+    await knex("conversation_users").del();
+
+    const data = [
+        ({ id: 1, idEmpresa: '1', idUser: 1, idConversation: 1 }),
+        ({ id: 2, idEmpresa: '1', idUser: 2, idConversation: 2 }),
+        ({ id: 3, idEmpresa: '1', idUser: 3, idConversation: 3 }),
+        ({ id: 4, idEmpresa: '1', idUser: 4, idConversation: 4 }),
+    ]
+
+    await knex("conversation_users").insert(data);
+}
+
 export async function seed(knex: Knex): Promise<void> {
     await seedUser(knex)
     await seedSector(knex)
     await seedUserSector(knex)
+    await seedContacts(knex)
+    await seedConversations(knex)
+    await seedConversationsUsers(knex)
 };

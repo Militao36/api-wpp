@@ -4,7 +4,6 @@ import { Entity } from "./base/Entity";
 
 export class ConversationEntity extends Entity {
   idContact: number
-  idUser: number
   idPreviousConversation: number
   finishedAt: string
 
@@ -16,7 +15,6 @@ export class ConversationEntity extends Entity {
   constructor(body: Omit<ConversationEntity, 'id'>, id?: string) {
     super(body, id)
     this.idContact = body.idContact
-    this.idUser = body.idUser
     this.idPreviousConversation = body.idPreviousConversation
     this.finishedAt = body.finishedAt
 
