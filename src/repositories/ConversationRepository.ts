@@ -10,15 +10,15 @@ export type FilterConversationRepository = {
   first: boolean
   filter: {
     idEmpresa: string
-    idUser: number
     idConversation: number
     idContact: number
     idPreviousConversation: number
+    idUser: number
   }
   includes: {
-    user: UserEntity
-    contact: ContactEntity
-    conversation: ConversationEntity
+    users: Boolean
+    contact: Boolean
+    conversation: Boolean
   }
 }
 
@@ -33,24 +33,32 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     let query = this.#database.table(this.table)
       .select<ConversationEntity[]>()
 
-    query = this.builderFilters(query, filter)
+    await this.builderFilters(query, filter)
     const result = await this.builderIncludes((await query), filter)
 
     return result
   }
 
   // #region privates
-  private builderFilters(query: Knex.QueryBuilder<{}, ConversationEntity[]>, { filter, limit, first }: FilterConversationRepository) {
-    for (const key in filter) {
-
+  private async builderFilters(
+    query: Knex.QueryBuilder<{},
+      ConversationEntity[]>, { filter, limit, first }: FilterConversationRepository
+  ) {
+    Object.keys(filter).map(async (key) => {
       if (key === 'idPreviousConversation') {
         query.where('id', '=', filter[key])
+      } else if (key === 'idUser') {
+        const usersConversation = await this.#database
+          .table('conversation_users').select<any[]>()
+          .where('idUser', '=', filter[key])
+        query.whereIn('id', usersConversation.map(e => e.idConversation))
+      } else {
+        if (filter[key]) {
+          query.where(key, 'like', `%${filter[key]}%`)
+        }
       }
+    })
 
-      if (filter[key]) {
-        query.where(key, 'like', `%${filter[key]}%`)
-      }
-    }
 
     if (filter?.idEmpresa) {
       query.where({ idEmpresa: filter.idEmpresa })
@@ -64,19 +72,20 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       query.first()
     }
 
-    return query
   }
 
   private async builderIncludes(conversations: ConversationEntity[], { includes }: FilterConversationRepository) {
-    if (includes.user || includes.contact || includes.conversation) {
+    if (includes.users || includes.contact || includes.conversation) {
       for await (const conversation of conversations) {
 
-        if (includes.user) {
-          const user = await this.#database.table('users').select<UserEntity>()
-            .where('id', '=', conversation.idUser)
-            .first()
+        if (includes.users) {
+          const usersConversation = await this.#database.table('conversation_users').select<any[]>()
+            .where('idConversation', '=', conversation.id)
 
-          conversation.user = user
+          const users = await this.#database.table('users').select<UserEntity[]>()
+            .whereIn('id', usersConversation.map(e => e.idUser))
+
+          conversation.users = users
         }
 
         if (includes.contact) {

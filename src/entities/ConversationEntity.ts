@@ -9,7 +9,7 @@ export class ConversationEntity extends Entity {
   finishedAt: string
 
   // aux
-  user?: UserEntity
+  users?: UserEntity[]
   contact?: ContactEntity
   conversation?: ConversationEntity
 
@@ -20,7 +20,7 @@ export class ConversationEntity extends Entity {
     this.idPreviousConversation = body.idPreviousConversation
     this.finishedAt = body.finishedAt
 
-    this.user = body.user
+    this.users = body.users
     this.contact = body.contact
     this.conversation = body.conversation
   }
