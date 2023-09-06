@@ -1,5 +1,4 @@
-import { FilterUserRepository, UserRepository } from '../repositories/UserRepository'
-import { UserEntity } from '../entities/UserEntity'
+import { FilterUserRepository, User, UserRepository } from '../repositories/UserRepository'
 
 export class UserService {
   #userRepository: UserRepository
@@ -7,7 +6,7 @@ export class UserService {
     this.#userRepository = userRepository
   }
 
-  public async save(user: UserEntity): Promise<number> {
+  public async save(user: User): Promise<number> {
     const id = await this.#userRepository.save(user)
     return id
   }

@@ -8,5 +8,14 @@ Content-Type: application/json
   "users": [{"id":1}]
 }
 
-### 
-GET http://localhost:3000/conversations?includes[users]=true
+### Buscar conversas 
+GET http://localhost:3000/conversations?includes[users]=true&includes[conversation]=true&includes[contact]=true
+
+### Adicionar usuário na conversa
+POST http://localhost:3000/conversations/add-users
+Content-Type: application/json
+
+{
+  "ids": [1],
+  "idConversation": 5
+}

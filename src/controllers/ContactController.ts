@@ -2,7 +2,6 @@ import { GET, POST, route } from 'awilix-express'
 import { Request, Response } from 'express'
 
 import { ContactService } from '../services/ContactService'
-import { ContactEntity } from '../entities/ContactEntity'
 
 @route('/contacts')
 export class ContactController {
@@ -14,12 +13,11 @@ export class ContactController {
   @POST()
   async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-    const contact = new ContactEntity({
+
+    const id = await this.#contactService.save({
       ...request.body,
       idEmpresa
     })
-
-    const id = await this.#contactService.save(contact)
     return response.status(201).json({ id })
   }
 

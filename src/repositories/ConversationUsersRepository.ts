@@ -16,4 +16,13 @@ export class ConversationUsersRepository extends RepositoryBase<Partial<Conversa
     super('conversation_users', database)
     this.#database = database
   }
+
+  async relationExists(idUser: number, idConversation: number, idEmpresa: string) {
+    const exists = await this.#database.table<ConversationUser>(this.table)
+      .select()
+      .where({ idUser, idConversation, idEmpresa })
+      .first()
+      
+    return !!exists
+  }
 }

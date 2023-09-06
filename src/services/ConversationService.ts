@@ -1,5 +1,5 @@
 import { Conversation, ConversationRepository, FilterConversationRepository } from '../repositories/ConversationRepository'
-import { ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
+import { ConversationUser, ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -24,6 +24,19 @@ export class ConversationService {
     }
 
     return conversationId
+  }
+
+  public async addUser(conversationUser: ConversationUser[]) {
+    for await (const item of conversationUser) {
+      const conversationUser = await this.#conversationUsersRepository
+        .relationExists(item.idUser, item.idConversation, item.idEmpresa)
+      if (!conversationUser)
+        await this.#conversationUsersRepository.save({
+          idUser: item.idUser,
+          idConversation: item.idConversation,
+          idEmpresa: item.idEmpresa,
+        })
+    }
   }
 
   public async list(filter: FilterConversationRepository) {

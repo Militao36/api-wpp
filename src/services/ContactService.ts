@@ -1,5 +1,4 @@
-import { ContactRepository, FilterUserContactRepository } from '../repositories/ContactRepository'
-import { ContactEntity } from '../entities/ContactEntity'
+import { Contact, ContactRepository, FilterUserContactRepository } from '../repositories/ContactRepository'
 
 export class ContactService {
   #contactRepository: ContactRepository
@@ -7,7 +6,7 @@ export class ContactService {
     this.#contactRepository = contactRepository
   }
 
-  public async save(contact: ContactEntity): Promise<number> {
+  public async save(contact: Contact): Promise<number> {
     const id = await this.#contactRepository.save(contact)
     return id
   }
