@@ -7,9 +7,9 @@ export class UserService {
     this.#userRepository = userRepository
   }
 
-  public async save(user: UserEntity): Promise<string> {
-    await this.#userRepository.save(user)
-    return user.id
+  public async save(user: UserEntity): Promise<number> {
+    const id = await this.#userRepository.save(user)
+    return id
   }
 
   public async list(filter: FilterUserRepository) {

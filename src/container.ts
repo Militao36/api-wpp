@@ -9,6 +9,7 @@ import { UserService } from './services/UserService'
 import { database } from './util/config/database'
 import { CryptoHash } from './util/hash'
 import { Logger } from './util/Logger'
+import { ConversationUsersRepository } from './repositories/ConversationUsersRepository'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
@@ -18,10 +19,12 @@ const definition = {
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),
     conversationService: asClass(ConversationService).singleton(),
+    
     //repository
     userRepository: asClass(UserRepository).singleton(),
     contactRepository: asClass(ContactRepository).singleton(),
     conversationRepository: asClass(ConversationRepository).singleton(),
+    conversationUsersRepository: asClass(ConversationUsersRepository).singleton(),
 }
 
 const container = createContainer({

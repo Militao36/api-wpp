@@ -7,9 +7,9 @@ export class ContactService {
     this.#contactRepository = contactRepository
   }
 
-  public async save(contact: ContactEntity): Promise<string> {
-    await this.#contactRepository.save(contact)
-    return contact.id
+  public async save(contact: ContactEntity): Promise<number> {
+    const id = await this.#contactRepository.save(contact)
+    return id
   }
 
   public async list(filter: FilterUserContactRepository) {

@@ -9,7 +9,8 @@ export class RepositoryBase<T> {
   }
 
   async save (data: T) {
-    await this.database.table(this.table).insert(data)
+    const id = await this.database.table(this.table).insert(data)
+    return id[0]
   }
 
   async update (data: T, id: string, idEmpresa: string) {

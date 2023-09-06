@@ -1,9 +1,7 @@
 import { Knex } from "knex";
-
-import { ConversationEntity } from "../entities/ConversationEntity";
-import { ContactEntity } from "../entities/ContactEntity";
+import { Contact } from "./ContactRepository";
+import { User } from "./UserRepository";
 import { RepositoryBase } from "./base/RepositoryBase";
-import { UserEntity } from "../entities/UserEntity";
 
 export type FilterConversationRepository = {
   limit?: number
@@ -22,7 +20,18 @@ export type FilterConversationRepository = {
   }
 }
 
-export class ConversationRepository extends RepositoryBase<ConversationEntity> {
+export type Conversation = {
+  id: number
+  idEmpresa: string
+  idContact: number
+  idPreviousConversation: number
+  finishedAt: string
+  users: User[]
+  contact: Contact
+  conversation: Conversation
+}
+
+export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
   #database: Knex
   constructor({ database }) {
     super('conversations', database)
@@ -31,7 +40,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
   async list(filter: FilterConversationRepository) {
     let query = this.#database.table(this.table)
-      .select<ConversationEntity[]>()
+      .select<Conversation[]>()
 
     await this.builderFilters(query, filter)
     const result = await this.builderIncludes((await query), filter)
@@ -42,7 +51,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
   // #region privates
   private async builderFilters(
     query: Knex.QueryBuilder<{},
-      ConversationEntity[]>, { filter = {} as any, limit, first }: FilterConversationRepository
+      Conversation[]>, { filter = {} as any, limit, first }: FilterConversationRepository
   ) {
     Object.keys(filter).map(async (key) => {
       if (key === 'idPreviousConversation') {
@@ -73,7 +82,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
   }
 
-  private async builderIncludes(conversations: ConversationEntity[], { includes = {} as any }: FilterConversationRepository) {
+  private async builderIncludes(conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
     if (includes.users || includes.contact || includes.conversation) {
       for await (const conversation of conversations) {
 
@@ -81,14 +90,14 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
           const usersConversation = await this.#database.table('conversation_users').select<any[]>()
             .where('idConversation', '=', conversation.id)
 
-          const users = await this.#database.table('users').select<UserEntity[]>()
+          const users = await this.#database.table('users').select<User[]>()
             .whereIn('id', usersConversation.map(e => e.idUser))
 
           conversation.users = users
         }
 
         if (includes.contact) {
-          const contact = await this.#database.table('contacts').select<ContactEntity>()
+          const contact = await this.#database.table('contacts').select<Contact>()
             .where('id', '=', conversation.idContact)
             .first()
 
@@ -96,7 +105,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
         }
 
         if (includes.conversation) {
-          const dataConversation = await this.#database.table('conversations').select<ConversationEntity>()
+          const dataConversation = await this.#database.table('conversations').select<Conversation>()
             .where('id', '=', conversation.idPreviousConversation)
             .first()
 

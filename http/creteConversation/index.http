@@ -1,0 +1,12 @@
+
+# create conversation
+POST http://localhost:3000/conversations
+Content-Type: application/json
+
+{
+  "idContact":1,
+  "users": [{"id":1}]
+}
+
+### 
+GET http://localhost:3000/conversations?includes[users]=true

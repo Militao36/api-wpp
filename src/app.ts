@@ -11,6 +11,11 @@ app.use(express.json())
 
 app.disable('x-powered-by')
 
+app.use((req, res, next) => {
+  req.idEmpresa = '1'
+  return next()
+})
+
 // middlewares
 app.use(scopePerRequest(container))
 app.use(convertBodyRequestToNull)

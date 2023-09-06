@@ -1,9 +1,8 @@
 import { Knex } from "knex";
 
 import { RepositoryBase } from "./base/RepositoryBase";
-import { UserEntity } from "../entities/UserEntity";
-import { UserSectorEntity } from "../entities/UserSector";
-import { SectorEntity } from "../entities/SectorEntity";
+import { Sector } from "./SectorRepository";
+import { UserSector } from "./UserSectorRepository";
 
 export type FilterUserRepository = {
   limit?: number
@@ -18,7 +17,17 @@ export type FilterUserRepository = {
   }
 }
 
-export class UserRepository extends RepositoryBase<UserEntity> {
+export type User = {
+  id: number
+  idEmpresa: string
+  name: string
+  username: string
+  password: string
+  isMaster: boolean
+  sectors: Sector[]
+}
+
+export class UserRepository extends RepositoryBase<User> {
   #database: Knex
   constructor({ database }) {
     super('users', database)
@@ -27,7 +36,7 @@ export class UserRepository extends RepositoryBase<UserEntity> {
 
   async list(filter: FilterUserRepository) {
     let query = this.#database.table(this.table)
-      .select<UserEntity[]>()
+      .select<User[]>()
 
     query = this.builderFilters(query, filter)
     const result = await this.builderIncludes((await query), filter)
@@ -36,7 +45,7 @@ export class UserRepository extends RepositoryBase<UserEntity> {
   }
 
   // #region privates
-  private builderFilters(query: Knex.QueryBuilder<{}, UserEntity[]>, { filter, limit, first }: FilterUserRepository) {
+  private builderFilters(query: Knex.QueryBuilder<{}, User[]>, { filter, limit, first }: FilterUserRepository) {
     for (const key in filter) {
       if (filter[key]) {
         query.where(key, '=', filter[key])
@@ -58,14 +67,14 @@ export class UserRepository extends RepositoryBase<UserEntity> {
     return query
   }
 
-  private async builderIncludes(users: UserEntity[], { includes }: FilterUserRepository) {
+  private async builderIncludes(users: User[], { includes }: FilterUserRepository) {
     if (Boolean(includes?.sectors)) {
       for await (const sector of users) {
         const usersSectors = await this.#database.table('user_sector')
-          .select<UserSectorEntity[]>('idSector')
+          .select<UserSector[]>('idSector')
           .where({ idSector: sector.id })
 
-        const sectors = await this.#database.table('sectors').select<SectorEntity[]>()
+        const sectors = await this.#database.table('sectors').select<Sector[]>()
           .whereIn('id', usersSectors.map(e => e.idSector))
 
         sector.sectors = sectors
