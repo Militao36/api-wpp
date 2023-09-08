@@ -2,6 +2,7 @@ import { Knex } from "knex";
 import { Contact } from "./ContactRepository";
 import { User } from "./UserRepository";
 import { RepositoryBase } from "./base/RepositoryBase";
+import { ConversationMessage } from "./ConversationMessageRepository";
 
 export type FilterConversationRepository = {
   limit?: number
@@ -17,6 +18,7 @@ export type FilterConversationRepository = {
     users: Boolean
     contact: Boolean
     conversation: Boolean
+    messages: Boolean
   }
 }
 
@@ -29,6 +31,7 @@ export type Conversation = {
   users: User[]
   contact: Contact
   conversation: Conversation
+  messages: ConversationMessage[]
 }
 
 export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
@@ -110,6 +113,13 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
             .first()
 
           conversation.conversation = dataConversation
+        }
+
+        if (includes.messages) {
+          const dataConversation = await this.#database.table('conversation_message').select<ConversationMessage[]>()
+            .where('idConversation', '=', conversation.id)
+
+          conversation.messages = dataConversation
         }
       }
     }

@@ -60,6 +60,20 @@ export class ConversationController {
     return response.status(201).json({ id })
   }
 
+  @route('/add-users')
+  @POST()
+  async message(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+
+    const id = await this.#conversationService.message({
+      idConversation: request.body.idConversation,
+      idUser: request.body.idUser,
+      message: request.body.message,
+    })
+
+    return response.status(201).json({ id })
+  }
+
   @GET()
   async list(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa

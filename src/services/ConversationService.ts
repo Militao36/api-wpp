@@ -1,12 +1,16 @@
+import { ConversationMessage, ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
 import { Conversation, ConversationRepository, FilterConversationRepository } from '../repositories/ConversationRepository'
 import { ConversationUser, ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
   #conversationUsersRepository: ConversationUsersRepository
-  constructor({ conversationRepository, conversationUsersRepository }) {
+  #conversationMessageRepository: ConversationMessageRepository
+  constructor({ conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
+    this.#conversationMessageRepository = conversationMessageRepository
+
   }
 
   public async save(conversation: Conversation): Promise<number> {
@@ -37,6 +41,16 @@ export class ConversationService {
           idEmpresa: item.idEmpresa,
         })
     }
+  }
+
+  public async message(conversationMessage: Partial<ConversationMessage>) {
+    const id = await this.#conversationMessageRepository.save({
+      idConversation: conversationMessage.idConversation,
+      idUser: conversationMessage.idUser,
+      message: conversationMessage.message
+    })
+
+    return id
   }
 
   public async list(filter: FilterConversationRepository) {
