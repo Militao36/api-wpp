@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ### Buscar conversas 
-GET http://localhost:3000/conversations?includes[users]=true&includes[conversation]=true&includes[contact]=true
+GET http://localhost:3000/conversations
 
 ### Adicionar usuário na conversa
 POST http://localhost:3000/conversations/add-users

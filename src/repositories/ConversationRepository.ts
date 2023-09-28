@@ -92,8 +92,8 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
         if (includes.users) {
           const usersConversation = await this.#database.table('conversation_users').select<any[]>()
             .where('idConversation', '=', conversation.id)
-          console.log(usersConversation.map(e => e.idUser))
-          const users = await this.#database.table('users').select<User[]>()
+
+            const users = await this.#database.table('users').select<User[]>()
             .whereIn('id', usersConversation.map(e => e.idUser))
 
           conversation.users = users
