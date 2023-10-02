@@ -6,12 +6,12 @@ import { ContactService } from '../services/ContactService'
 @route('/contacts')
 export class ContactController {
   #contactService: ContactService
-  constructor({ contactService }) {
+  constructor ({ contactService }) {
     this.#contactService = contactService
   }
 
   @POST()
-  async save(request: Request, response: Response) {
+  async save (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#contactService.save({
@@ -22,7 +22,7 @@ export class ContactController {
   }
 
   @GET()
-  async list(request: Request, response: Response) {
+  async list (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const query = request.query
