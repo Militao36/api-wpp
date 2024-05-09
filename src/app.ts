@@ -2,12 +2,14 @@ import express from 'express'
 import { loadControllers, scopePerRequest } from 'awilix-express'
 import { convertBodyRequestToNull } from './util/middlewares/ConvertBodyRequestToNull'
 import { errorHandler } from './util/middlewares/errorHandler'
+import cors from 'cors'
 
 import container from './container'
 
 const app = express()
 
 app.use(express.json())
+app.use(cors())
 
 app.disable('x-powered-by')
 

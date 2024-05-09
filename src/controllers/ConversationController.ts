@@ -8,12 +8,12 @@ import { ConversationService } from '../services/ConversationService'
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  constructor({ conversationService }) {
+  constructor ({ conversationService }) {
     this.#conversationService = conversationService
   }
 
   @POST()
-  async save(request: Request, response: Response) {
+  async save (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.save({
@@ -38,20 +38,20 @@ export class ConversationController {
     if (error?.details?.length > 0) {
       return res.status(422).json({
         message: 'Schema validation',
-        error: error
+        error
       })
     } else {
       return next()
     }
   }])
-  async addUser(request: Request, response: Response) {
+  async addUser (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const body = request.body.ids.map((e: any): Partial<ConversationUser> => {
       return {
         idUser: e,
         idConversation: request.body.idConversation,
-        idEmpresa,
+        idEmpresa
       }
     })
 
@@ -62,21 +62,21 @@ export class ConversationController {
 
   @route('/message')
   @POST()
-  async message(request: Request, response: Response) {
+  async message (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.message({
       idEmpresa,
       idConversation: request.body.idConversation,
       idUser: request.body.idUser,
-      message: request.body.message,
+      message: request.body.message
     })
 
     return response.status(201).json({ id })
   }
 
   @GET()
-  async list(request: Request, response: Response) {
+  async list (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const query = request.query
