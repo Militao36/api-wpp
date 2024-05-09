@@ -78,6 +78,19 @@ async function seedConversationsUsers(knex: Knex) {
     await knex("conversation_users").insert(data);
 }
 
+async function seedConversationsUsersMessages(knex: Knex) {
+    await knex("conversation_message").del();
+
+    const data = [
+        ({ id: 1, idEmpresa: '1', idUser: 1, idConversation: 1, message: 'menagem teste' }),
+        ({ id: 2, idEmpresa: '1', idUser: 2, idConversation: 2, message: 'menagem teste' }),
+        ({ id: 3, idEmpresa: '1', idUser: 3, idConversation: 3, message: 'menagem teste' }),
+        ({ id: 4, idEmpresa: '1', idUser: 4, idConversation: 4, message: 'menagem teste' }),
+    ]
+
+    await knex("conversation_message").insert(data);
+}
+
 export async function seed(knex: Knex): Promise<void> {
     await seedUser(knex)
     await seedSector(knex)
@@ -85,4 +98,5 @@ export async function seed(knex: Knex): Promise<void> {
     await seedContacts(knex)
     await seedConversations(knex)
     await seedConversationsUsers(knex)
+    await seedConversationsUsersMessages(knex)
 };
