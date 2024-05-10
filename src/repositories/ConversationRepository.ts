@@ -1,8 +1,8 @@
-import { Knex } from "knex";
-import { Contact } from "./ContactRepository";
-import { User } from "./UserRepository";
-import { RepositoryBase } from "./base/RepositoryBase";
-import { ConversationMessage } from "./ConversationMessageRepository";
+import { Knex } from 'knex'
+import { Contact } from './ContactRepository'
+import { User } from './UserRepository'
+import { RepositoryBase } from './base/RepositoryBase'
+import { ConversationMessage } from './ConversationMessageRepository'
 
 export type FilterConversationRepository = {
   limit?: number
@@ -36,13 +36,13 @@ export type Conversation = {
 
 export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
   #database: Knex
-  constructor({ database }) {
+  constructor ({ database }) {
     super('conversations', database)
     this.#database = database
   }
 
-  async list(filter: FilterConversationRepository) {
-    let query = this.#database.table(this.table)
+  async list (filter: FilterConversationRepository) {
+    const query = this.#database.table(this.table)
       .select<Conversation[]>()
 
     await this.builderFilters(query, filter)
@@ -52,7 +52,7 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
   }
 
   // #region privates
-  private async builderFilters(
+  private async builderFilters (
     query: Knex.QueryBuilder<{},
       Conversation[]>, { filter = {} as any, limit, first }: FilterConversationRepository
   ) {
@@ -82,13 +82,11 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
     if (first) {
       query.first()
     }
-
   }
 
-  private async builderIncludes(conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
+  private async builderIncludes (conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
     if (includes.users || includes.contact || includes.conversation) {
       for await (const conversation of conversations) {
-
         if (includes.users) {
           const usersConversation = await this.#database.table('conversation_users').select<any[]>()
             .where('idConversation', '=', conversation.id)
@@ -126,5 +124,5 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
 
     return conversations
   }
-  // #region 
+  // #region
 }
