@@ -7,8 +7,8 @@ import { ConversationMessage } from './ConversationMessageRepository'
 export type FilterConversationRepository = {
   limit?: number
   first: boolean
+  idEmpresa: string
   filter: {
-    idEmpresa: string
     idConversation: number
     idContact: number
     idPreviousConversation: number
@@ -54,12 +54,12 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
   // #region privates
   private async builderFilters (
     query: Knex.QueryBuilder<{},
-      Conversation[]>, { filter = {} as any, limit, first }: FilterConversationRepository
+      Conversation[]>, { filter = {} as any, idEmpresa, limit, first }: FilterConversationRepository
   ) {
     Object.keys(filter).map(async (key) => {
-      if (key === 'idPreviousConversation') {
+      if (key === 'idPreviousConversation' && filter[key]) {
         query.where('id', '=', filter[key])
-      } else if (key === 'idUser') {
+      } else if (key === 'idUser' && filter[key]) {
         const usersConversation = await this.#database
           .table('conversation_users').select<any[]>()
           .where('idUser', '=', filter[key])
@@ -71,8 +71,8 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
       }
     })
 
-    if (filter?.idEmpresa) {
-      query.where({ idEmpresa: filter.idEmpresa })
+    if (idEmpresa) {
+      query.where({ idEmpresa })
     }
 
     if (limit) {
@@ -91,7 +91,7 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
           const usersConversation = await this.#database.table('conversation_users').select<any[]>()
             .where('idConversation', '=', conversation.id)
 
-            const users = await this.#database.table('users').select<User[]>()
+          const users = await this.#database.table('users').select<User[]>()
             .whereIn('id', usersConversation.map(e => e.idUser))
 
           conversation.users = users
