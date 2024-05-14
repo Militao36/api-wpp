@@ -11,11 +11,13 @@ import { CryptoHash } from './util/hash'
 import { Logger } from './util/Logger'
 import { ConversationUsersRepository } from './repositories/ConversationUsersRepository'
 import { ConversationMessageRepository } from './repositories/ConversationMessageRepository'
+import { ClientsWpp } from './wpp'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
     logger: asClass(Logger).singleton(),
     database: asValue(database),
+    clientsWpp: asClass(ClientsWpp).singleton(),
     //services
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),

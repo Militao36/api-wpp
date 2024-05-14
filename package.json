@@ -31,6 +31,7 @@
     "@types/uuid": "^9.0.0",
     "awilix": "^8.0.0",
     "awilix-express": "^8.0.0",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "edge.js": "^5.5.1",

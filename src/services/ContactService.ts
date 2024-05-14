@@ -2,16 +2,16 @@ import { Contact, ContactRepository, FilterUserContactRepository } from '../repo
 
 export class ContactService {
   #contactRepository: ContactRepository
-  constructor ({ contactRepository }) {
+  constructor({ contactRepository }) {
     this.#contactRepository = contactRepository
   }
 
-  public async save (contact: Contact): Promise<number> {
+  public async save(contact: Contact): Promise<number> {
     const id = await this.#contactRepository.save(contact)
     return id
   }
 
-  public async list (filter: FilterUserContactRepository) {
+  public async list(filter: FilterUserContactRepository) {
     return this.#contactRepository.list(filter)
   }
 }
