@@ -1,7 +1,7 @@
-import { Knex } from "knex";
-import { User } from "./UserRepository";
-import { RepositoryBase } from "./base/RepositoryBase";
-import { Conversation } from "./ConversationRepository";
+import { Knex } from 'knex'
+import { User } from './UserRepository'
+import { RepositoryBase } from './base/RepositoryBase'
+import { Conversation } from './ConversationRepository'
 
 export type FilterConversationMessageRepository = {
   limit?: number
@@ -29,13 +29,13 @@ export type ConversationMessage = {
 
 export class ConversationMessageRepository extends RepositoryBase<Partial<ConversationMessage>> {
   #database: Knex
-  constructor({ database }) {
+  constructor ({ database }) {
     super('conversation_message', database)
     this.#database = database
   }
 
-  async list(filter: FilterConversationMessageRepository) {
-    let query = this.#database.table(this.table)
+  async list (filter: FilterConversationMessageRepository) {
+    const query = this.#database.table(this.table)
       .select<ConversationMessage[]>()
 
     await this.builderFilters(query, filter)
@@ -45,7 +45,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
   }
 
   // #region privates
-  private async builderFilters(query: Knex.QueryBuilder<{}, ConversationMessage[]>, { filter = {} as any, limit, first }: FilterConversationMessageRepository) {
+  private async builderFilters (query: Knex.QueryBuilder<{}, ConversationMessage[]>, { filter = {} as any, limit, first }: FilterConversationMessageRepository) {
     Object.keys(filter).map(async (key) => {
       if (key === 'idPreviousConversation') {
         query.where('id', '=', filter[key])
@@ -72,10 +72,9 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     if (first) {
       query.first()
     }
-
   }
 
-  private async builderIncludes(conversationMessages: ConversationMessage[], { includes = {} as any }: FilterConversationMessageRepository) {
+  private async builderIncludes (conversationMessages: ConversationMessage[], { includes = {} as any }: FilterConversationMessageRepository) {
     if (includes.user || includes.conversation) {
       for await (const conversationMessage of conversationMessages) {
         if (includes.user) {
@@ -96,5 +95,5 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
 
     return conversationMessages
   }
-  // #region 
+  // #region
 }

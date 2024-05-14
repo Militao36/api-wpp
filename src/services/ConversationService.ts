@@ -1,4 +1,4 @@
-import { ConversationMessage, ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
+import { ConversationMessage, ConversationMessageRepository, FilterConversationMessageRepository } from '../repositories/ConversationMessageRepository'
 import { Conversation, ConversationRepository, FilterConversationRepository } from '../repositories/ConversationRepository'
 import { ConversationUser, ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 
@@ -34,12 +34,12 @@ export class ConversationService {
       const conversationUser = await this.#conversationUsersRepository
         .relationExists(item.idUser, item.idConversation, item.idEmpresa)
       if (!conversationUser) {
- await this.#conversationUsersRepository.save({
+        await this.#conversationUsersRepository.save({
           idUser: item.idUser,
           idConversation: item.idConversation,
           idEmpresa: item.idEmpresa
         })
-}
+      }
     }
   }
 
@@ -55,5 +55,9 @@ export class ConversationService {
 
   public async list (filter: FilterConversationRepository) {
     return this.#conversationRepository.list(filter)
+  }
+
+  public async listMessages (filter: FilterConversationMessageRepository) {
+    return this.#conversationMessageRepository.list(filter)
   }
 }
