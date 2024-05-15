@@ -9,7 +9,8 @@ Content-Type: application/json
 }
 
 ### Buscar conversas 
-GET http://localhost:3000/conversations
+
+GET http://localhost:3000/conversations?includes[messages]=true&includes[users]=true
 
 ### Adicionar usuário na conversa
 POST http://localhost:3000/conversations/add-users
@@ -17,5 +18,15 @@ Content-Type: application/json
 
 {
   "ids": [1],
-  "idConversation": 5
+  "idConversation": 1
+}
+
+### Envia mensagem na conversa
+POST http://localhost:3000/conversations/message
+Content-Type: application/json
+
+{
+  "idConversation": 2,
+  "idUser": 1,
+  "message": "Bom dia"
 }

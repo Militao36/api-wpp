@@ -26,15 +26,15 @@ export type FilterConversationRepository = {
 }
 
 export type Conversation = {
-  id: number
-  idEmpresa: string
-  idContact: number
-  idPreviousConversation: number
-  finishedAt: string
-  users: User[]
-  contact: Contact
-  conversation: Conversation
-  messages: ConversationMessage[]
+  id?: number
+  idEmpresa?: string
+  idContact?: number
+  idPreviousConversation?: number
+  finishedAt?: string
+  users?: User[]
+  contact?: Contact
+  conversation?: Conversation
+  messages?: ConversationMessage[]
 }
 
 export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
@@ -98,8 +98,9 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
     }
   }
 
-  private async builderIncludes (conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
-    if (includes.users || includes.contact || includes.conversation) {
+  private async builderIncludes(conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
+    console.log(includes.messages)
+    if (includes.users || includes.contact || includes.conversation || includes.messages) {
       for await (const conversation of conversations) {
         if (includes.users) {
           const usersConversation = await this.#database.table('conversation_users').select<any[]>()
