@@ -9,12 +9,12 @@ import { FilterConversationMessageRepository } from '../repositories/Conversatio
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  constructor ({ conversationService }) {
+  constructor({ conversationService }) {
     this.#conversationService = conversationService
   }
 
   @POST()
-  async save (request: Request, response: Response) {
+  async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.save({
@@ -45,7 +45,7 @@ export class ConversationController {
       return next()
     }
   }])
-  async addUser (request: Request, response: Response) {
+  async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const body = request.body.ids.map((e: any): Partial<ConversationUser> => {
@@ -63,9 +63,9 @@ export class ConversationController {
 
   @route('/message')
   @POST()
-  async message (request: Request, response: Response) {
+  async message(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-
+    
     const id = await this.#conversationService.message({
       idEmpresa,
       idConversation: request.body.idConversation,
@@ -77,12 +77,16 @@ export class ConversationController {
   }
 
   @GET()
-  async list (request: Request, response: Response) {
+  async list(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const query = request.query
 
-    const data = await this.#conversationService.list({ ...query, idEmpresa } as any)
+    const data = await this.#conversationService.list({
+      ...query,
+      idEmpresa,
+    } as any)
+
     return response.status(200).json(data)
   }
 

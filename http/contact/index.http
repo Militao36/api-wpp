@@ -1,0 +1,9 @@
+POST http://localhost:3000/contacts
+Content-Type: application/json
+
+{
+  "name": "Matheus M Militão",
+  "phone": "31996508625",
+  "cellPhone": "31996508625",
+  "email": "matheus@gmail.com"
+}

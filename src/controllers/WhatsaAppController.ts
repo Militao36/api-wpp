@@ -94,7 +94,6 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-
     if (!eventsNamesValids.includes(body.event)) {
       return response.status(200).send()
     }
@@ -111,7 +110,7 @@ export class WhatsAppController {
 
     let idContact = null
 
-    if (contact?.length <= 0) {
+    if (contact?.length === 0) {
       const data = body.payload._data
       idContact = await this.#contactService.save({
         idEmpresa,
@@ -131,6 +130,23 @@ export class WhatsAppController {
         idContact: idContact,
         finishedAt: false
       }
+    })
+
+    let idConversation = null
+
+    if (conversation.length === 0) {
+      idConversation = await this.#conversationService.save({
+        idContact,
+        idEmpresa,
+      })
+    } else {
+      idConversation = conversation[0].id
+    }
+
+    await this.#conversationService.message({
+      idConversation,
+      idEmpresa,
+      message: body.payload.body,
     })
 
     return response.status(200).send()
