@@ -47,7 +47,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
   // #region privates
   private async builderFilters (query: Knex.QueryBuilder<{}, ConversationMessage[]>, { filter = {} as any, limit, first }: FilterConversationMessageRepository) {
     Object.keys(filter).map(async (key) => {
-      if (key === 'idPreviousConversation') {
+      if (key === 'idPreviousConversation' && filter[key]) {
         query.where('id', '=', filter[key])
       } else if (key === 'idUser') {
         const usersConversation = await this.#database

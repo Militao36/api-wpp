@@ -39,12 +39,12 @@ export type Conversation = {
 
 export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
   #database: Knex
-  constructor({ database }) {
+  constructor ({ database }) {
     super('conversations', database)
     this.#database = database
   }
 
-  async list(filter: FilterConversationRepository) {
+  async list (filter: FilterConversationRepository) {
     const query = this.#database.table(this.table)
       .select<Conversation[]>()
 
@@ -60,7 +60,7 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
   }
 
   // #region privates
-  private async builderFilters(
+  private async builderFilters (
     query: Knex.QueryBuilder<{},
       Conversation[]>, { filter = {} as any, idEmpresa, limit, first }: FilterConversationRepository
   ) {
@@ -98,7 +98,7 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
     }
   }
 
-  private async builderIncludes(conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
+  private async builderIncludes (conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
     if (includes.users || includes.contact || includes.conversation) {
       for await (const conversation of conversations) {
         if (includes.users) {
