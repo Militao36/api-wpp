@@ -5,6 +5,7 @@ import { ClientsWpp } from '../wpp'
 import { Conversation } from '../repositories/ConversationRepository'
 import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
+import { Contact } from '../repositories/ContactRepository'
 
 @route('/zap')
 export class WhatsAppController {
@@ -94,11 +95,10 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    if (!eventsNamesValids.includes(body.event)) {
+    if (!eventsNamesValids.includes(body.event) || body.payload.from.includes('@g.us')) {
       return response.status(200).send()
     }
-
-    const phoneNumber = body.payload.from as string
+    const phoneNumber = body.payload.from.replace('@c.us', '') as string
     const contact = await this.#contactService.list({
       first: true,
       limit: 1,
@@ -106,19 +106,19 @@ export class WhatsAppController {
         idEmpresa,
         phone: phoneNumber
       }
-    })
+    }) as Contact
 
     let idContact = null
 
-    if (contact?.length === 0) {
+    if (!contact) {
       const data = body.payload._data
       idContact = await this.#contactService.save({
         idEmpresa,
         name: data.pushName,
-        cellPhone: phoneNumber,
+        phone: phoneNumber,
       })
     } else {
-      idContact = contact.at(-1).id
+      idContact = contact.id
     }
 
     const conversation = await this.#conversationService.list({
@@ -134,7 +134,7 @@ export class WhatsAppController {
 
     let idConversation = null
 
-    if (conversation.length === 0) {
+    if ((conversation?.length ?? 0) === 0) {
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,

@@ -18,7 +18,7 @@ export class ConversationService {
       idEmpresa: conversation.idEmpresa
     })
 
-    for await (const item of conversation.users) {
+    for await (const item of (conversation?.users ?? [])) {
       await this.#conversationUsersRepository.save({
         idUser: item.id,
         idConversation: conversationId,

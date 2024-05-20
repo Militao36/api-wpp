@@ -21,7 +21,7 @@ export class ClientsWpp {
         proxy: null,
         webhooks: [
           {
-            url: `https://backend.bmspedidos.com.br/integration-whatsapp/sendSeen?token=${idEmpresa}`,
+            url: `https://5888-2804-1b1-b401-2b2e-c0cf-176b-e8b-c6ce.ngrok-free.app/zap/?token=${idEmpresa}`,
             events: [
               'message'
             ]

@@ -16,7 +16,7 @@ export type Contact = {
   id?: number
   idEmpresa: string
   name: string
-  cellPhone: string
+  phone: string
   email?: string
   gender?: string
   address?: string
@@ -36,7 +36,7 @@ export class ContactRepository extends RepositoryBase<Partial<Contact>> {
 
   async list (filter: Partial<FilterUserContactRepository>) {
     let query = this.#database.table(this.table)
-      .select<Contact[]>()
+      .select<Contact | Contact[]>()
 
     query = this.builderFilters(query, filter)
 
@@ -44,7 +44,7 @@ export class ContactRepository extends RepositoryBase<Partial<Contact>> {
   }
 
   // #region privates
-  private builderFilters (query: Knex.QueryBuilder<{}, Contact[]>, { filter, limit, first }: Partial<FilterUserContactRepository>) {
+  private builderFilters (query: Knex.QueryBuilder<{}, Contact | Contact[]>, { filter, limit, first }: Partial<FilterUserContactRepository>) {
     for (const key in filter) {
       if (filter[key]) {
         query.where(key, 'like', `%${filter[key]}%`)
