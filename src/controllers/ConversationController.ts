@@ -21,7 +21,7 @@ export class ConversationController {
       ...request.body,
       idEmpresa
     })
-    return response.status(201).json({ id })
+    return response.status(201).json(id)
   }
 
   @route('/add-users')
