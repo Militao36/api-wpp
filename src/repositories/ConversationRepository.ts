@@ -31,6 +31,7 @@ export type Conversation = {
   idContact?: number
   idPreviousConversation?: number
   finishedAt?: string
+  isRead: boolean
   users?: User[]
   contact?: Contact
   conversation?: Conversation
@@ -98,7 +99,7 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
     }
   }
 
-  private async builderIncludes(conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
+  private async builderIncludes (conversations: Conversation[], { includes = {} as any }: FilterConversationRepository) {
     console.log(includes.messages)
     if (includes.users || includes.contact || includes.conversation || includes.messages) {
       for await (const conversation of conversations) {

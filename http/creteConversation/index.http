@@ -9,7 +9,6 @@ Content-Type: application/json
 }
 
 ### Buscar conversas 
-
 GET http://localhost:3000/conversations?includes[messages]=true&includes[users]=true
 
 ### Adicionar usuário na conversa
@@ -30,3 +29,6 @@ Content-Type: application/json
   "idUser": 1,
   "message": "Bom dia"
 }
+
+### Buscar mensagens conversas 
+GET http://localhost:3000/conversations/list-messages?filter[idConversation]=10

@@ -6,10 +6,11 @@ import { Conversation } from './ConversationRepository'
 export type FilterConversationMessageRepository = {
   limit?: number
   first: boolean
+  idEmpresa: string
   filter: {
-    idEmpresa: string
     idConversation: number
     idUser: number
+    idPreviousConversation: number
   }
   includes: {
     user: Boolean
@@ -45,24 +46,25 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
   }
 
   // #region privates
-  private async builderFilters (query: Knex.QueryBuilder<{}, ConversationMessage[]>, { filter = {} as any, limit, first }: FilterConversationMessageRepository) {
-    Object.keys(filter).map(async (key) => {
-      if (key === 'idPreviousConversation' && filter[key]) {
-        query.where('id', '=', filter[key])
-      } else if (key === 'idUser') {
-        const usersConversation = await this.#database
-          .table('conversation_users').select<any[]>()
-          .where('idUser', '=', filter[key])
-        query.whereIn('id', usersConversation.map(e => e.idConversation))
-      } else {
-        if (filter[key]) {
-          query.where(key, 'like', `%${filter[key]}%`)
-        }
-      }
-    })
+  private async builderFilters (query: Knex.QueryBuilder<{}, ConversationMessage[]>, { filter = {} as any, idEmpresa, limit, first }: FilterConversationMessageRepository) {
+    if (filter?.idPreviousConversation) {
+      query.where('id', '=', filter?.idPreviousConversation)
+    }
 
-    if (filter?.idEmpresa) {
-      query.where({ idEmpresa: filter.idEmpresa })
+    if (filter?.idUser) {
+      const usersConversation = await this.#database
+        .table('conversation_users').select<any[]>()
+        .where('idUser', '=', filter?.idUser)
+
+      query.whereIn('id', usersConversation.map(e => e.idConversation))
+    }
+
+    if (filter?.idConversation) {
+      query.where('idConversation', '=', filter?.idConversation)
+    }
+
+    if (idEmpresa) {
+      query.where({ idEmpresa })
     }
 
     if (limit) {
@@ -88,7 +90,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
             .where('id', '=', conversationMessage.idUser)
             .first()
 
-            conversationMessage.user = user
+          conversationMessage.user = user
         }
       }
     }

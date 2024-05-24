@@ -6,6 +6,7 @@ export type FilterUserContactRepository = {
   limit?: number
   first?: boolean
   filter: {
+    id?: number
     idEmpresa?: string
     name?: string
     phone?: string
@@ -46,9 +47,13 @@ export class ContactRepository extends RepositoryBase<Partial<Contact>> {
   // #region privates
   private builderFilters (query: Knex.QueryBuilder<{}, Contact | Contact[]>, { filter, limit, first }: Partial<FilterUserContactRepository>) {
     for (const key in filter) {
-      if (filter[key]) {
+      if (filter[key] && !filter.id) {
         query.where(key, 'like', `%${filter[key]}%`)
       }
+    }
+
+    if (filter?.id) {
+      query.where({ id: filter.id })
     }
 
     if (filter?.idEmpresa) {
