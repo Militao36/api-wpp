@@ -2,7 +2,6 @@ import { GET, POST, route } from 'awilix-express'
 import { Request, Response } from 'express'
 
 import { ClientsWpp } from '../wpp'
-import { Conversation } from '../repositories/ConversationRepository'
 import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
 import { Contact } from '../repositories/ContactRepository'
@@ -13,7 +12,7 @@ export class WhatsAppController {
   #conversationService: ConversationService
   #contactService: ContactService
 
-  constructor({ clientsWpp, conversationService, contactService }) {
+  constructor ({ clientsWpp, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
@@ -21,7 +20,7 @@ export class WhatsAppController {
 
   @route('/send-message')
   @POST()
-  async sendMessage(request: Request, response: Response) {
+  async sendMessage (request: Request, response: Response) {
     const body = request.body
 
     // const listContactsSendSeen = await this.#whatsAppSchema.find({
@@ -44,7 +43,7 @@ export class WhatsAppController {
 
   @route('/health')
   @GET()
-  async health(request: Request, response: Response) {
+  async health (request: Request, response: Response) {
     try {
       const result = await this.#clientsWpp.health(request.idEmpresa)
 
@@ -56,7 +55,7 @@ export class WhatsAppController {
 
   @route('/connect')
   @POST()
-  async connect(request: Request, response: Response) {
+  async connect (request: Request, response: Response) {
     await this.#clientsWpp.start(request.idEmpresa)
 
     return response.status(200).json({})
@@ -64,7 +63,7 @@ export class WhatsAppController {
 
   @route('/disconnect')
   @GET()
-  async disconnect(request: Request, response: Response) {
+  async disconnect (request: Request, response: Response) {
     await this.#clientsWpp.stop(request.idEmpresa)
 
     return response.status(200).send()
@@ -72,7 +71,7 @@ export class WhatsAppController {
 
   @route('/qrcode')
   @GET()
-  async getQrCode(request: Request, response: Response) {
+  async getQrCode (request: Request, response: Response) {
     const result = await this.#clientsWpp.qrCode(request.idEmpresa)
 
     if (result === 'WORKING') {
@@ -90,7 +89,7 @@ export class WhatsAppController {
 
   @route('/')
   @POST()
-  async webhoook(request: Request, response: Response) {
+  async webhoook (request: Request, response: Response) {
     const eventsNamesValids = ['message']
     const body = request.body as any
     const idEmpresa = body.session
@@ -115,7 +114,7 @@ export class WhatsAppController {
       idContact = await this.#contactService.save({
         idEmpresa,
         name: data.pushName,
-        phone: phoneNumber,
+        phone: phoneNumber
       })
     } else {
       idContact = contact.id
@@ -127,7 +126,7 @@ export class WhatsAppController {
       orderBy: 'desc',
       orderByKey: 'createdAt',
       filter: {
-        idContact: idContact,
+        idContact,
         finishedAt: false
       }
     })
@@ -138,6 +137,7 @@ export class WhatsAppController {
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,
+        isRead: true
       })
     } else {
       idConversation = conversation[0].id
@@ -146,7 +146,7 @@ export class WhatsAppController {
     await this.#conversationService.message({
       idConversation,
       idEmpresa,
-      message: body.payload.body,
+      message: body.payload.body
     })
 
     return response.status(200).send()

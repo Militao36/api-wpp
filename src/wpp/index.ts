@@ -5,12 +5,12 @@ export class ClientsWpp {
   private readonly token: string
   private readonly url: string
 
-  constructor() {
+  constructor () {
     this.token = 'YWRtaW46amlnUUNPUWpTVklwR0hHY0tDbGZheFFJdkV3dUlXeUt4cnROQVM='
     this.url = 'https://mysql-wpp.jbvwrb.easypanel.host'
   }
 
-  public async start(idEmpresa: string) {
+  public async start (idEmpresa: string) {
     if (!idEmpresa) {
       throw new BadRequestExeption('Não conseguimos conectar ao whatsapp')
     }
@@ -50,7 +50,7 @@ export class ClientsWpp {
     throw new BadRequestExeption('Erro ao iniciar a integração com o whatsapp')
   }
 
-  public async qrCode(idEmpresa: string) {
+  public async qrCode (idEmpresa: string) {
     try {
       const config = {
         method: 'get',
@@ -78,7 +78,7 @@ export class ClientsWpp {
     }
   }
 
-  public async sendSeen(idEmpresa: string, chatId: string, messageId: string) {
+  public async sendSeen (idEmpresa: string, chatId: string, messageId: string) {
     try {
       if (!this.url || !this.token || !chatId || !messageId) {
         console.info('Webhook capturado porém não usado.')
@@ -107,7 +107,7 @@ export class ClientsWpp {
     }
   }
 
-  async stop(idEmpresa: string) {
+  async stop (idEmpresa: string) {
     try {
       const config = {
         method: 'post',
@@ -138,7 +138,7 @@ export class ClientsWpp {
     }
   }
 
-  async health(idEmpresa: string) {
+  async health (idEmpresa: string) {
     const config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -175,7 +175,7 @@ export class ClientsWpp {
     return 'Desconectado'
   }
 
-  async sendMessage(idEmpresa: string, data: { chatId: string, message: string }) {
+  async sendMessage (idEmpresa: string, data: { chatId: string, message: string }) {
     const health = await this.health(idEmpresa)
 
     if (health !== 'Conectado') {
@@ -197,7 +197,7 @@ export class ClientsWpp {
           Authorization: `Basic ${this.token}`
         },
         data: {
-          chatId: `55${data.chatId}@c.us`,
+          chatId: `55${data.chatId.replace(/\(/ig, '').replace(/\)/ig, '').replace(/-/ig, '').replace(/\(/ig, '')}@c.us`,
           text: data.message,
           session: idEmpresa
         }
@@ -215,7 +215,7 @@ export class ClientsWpp {
     }
   }
 
-  async getMessagesByChatId(idEmpresa: string, chatId: string) {
+  async getMessagesByChatId (idEmpresa: string, chatId: string) {
     const config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -230,7 +230,7 @@ export class ClientsWpp {
     return response.data as any[]
   }
 
-  private async startTyping(idEmpresa: string, chatId: string) {
+  private async startTyping (idEmpresa: string, chatId: string) {
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -248,7 +248,7 @@ export class ClientsWpp {
       .catch(console.log)
   }
 
-  private async stopTyping(idEmpresa: string, chatId: string) {
+  private async stopTyping (idEmpresa: string, chatId: string) {
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -265,7 +265,7 @@ export class ClientsWpp {
     await axios.request(config)
   }
 
-  private async sleep(seconds: number = 1000) {
+  private async sleep (seconds: number = 1000) {
     await new Promise((resolve) => {
       setTimeout(() => {
         return resolve('')

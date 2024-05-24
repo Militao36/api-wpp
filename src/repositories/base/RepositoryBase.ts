@@ -13,21 +13,21 @@ export class RepositoryBase<T> {
     return id[0]
   }
 
-  async update (data: T, id: string, idEmpresa: string) {
+  async update (data: T, id: number, idEmpresa: string) {
     await this.database.table(this.table)
       .update(data)
       .where('id', '=', id)
       .andWhere('idEmpresa', '=', idEmpresa)
   }
 
-  async delete (id: string, idEmpresa: string) {
+  async delete (id: number, idEmpresa: string) {
     await this.database.table(this.table)
       .delete()
       .where('id', '=', id)
       .andWhere('idEmpresa', '=', idEmpresa)
   }
 
-  async findById (id: string, idEmpresa: string): Promise<T> {
+  async findById (id: number, idEmpresa: string): Promise<T> {
     const data = this.database.table(this.table)
       .select('*')
       .where('id', '=', id)
