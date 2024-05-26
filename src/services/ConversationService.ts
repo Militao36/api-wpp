@@ -17,6 +17,7 @@ export class ConversationService {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
+    this.#contactService = contactService
     this.#clientsWpp = clientsWpp
   }
 
@@ -60,7 +61,7 @@ export class ConversationService {
     })
 
     const conversation = await this.#conversationRepository
-      .findById(conversationMessage.id, conversationMessage.idEmpresa)
+      .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
 
     const contact = await this.#contactService.list({
       filter: {

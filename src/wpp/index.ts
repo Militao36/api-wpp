@@ -150,25 +150,25 @@ export class ClientsWpp {
 
     const response = await axios.request(config)
 
-    if (response.status === 401) {
+    if (response?.status === 401) {
       return 'Desconectado'
     }
 
     const data = response.data.find(e => e.name === idEmpresa)
 
-    if (data.status === 'STARTING') {
+    if (data?.status === 'STARTING') {
       return 'Iniciando serviços'
     }
 
-    if (data.status === 'SCAN_QR_CODE') {
+    if (data?.status === 'SCAN_QR_CODE') {
       return 'Aguardando leitura do QRCODE'
     }
 
-    if (data.status === 'WORKING') {
+    if (data?.status === 'WORKING') {
       return 'Conectado'
     }
 
-    if (data.status === 'FAILED') {
+    if (data?.status === 'FAILED') {
       return 'Desconectado'
     }
 
@@ -205,7 +205,7 @@ export class ClientsWpp {
 
       const response = await axios.request(config)
 
-      if (response.status === 201) {
+      if (response?.status === 201) {
         return true
       }
 
