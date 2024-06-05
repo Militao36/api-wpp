@@ -74,6 +74,7 @@ export class ClientsWpp {
 
       return response.data
     } catch (error) {
+      console.log(error)
       throw new BadRequestExeption('Não conseguimos gerar o qrcode')
     }
   }

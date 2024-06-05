@@ -53,13 +53,6 @@ export class ConversationService {
   }
 
   public async message (conversationMessage: Partial<ConversationMessage>) {
-    const id = await this.#conversationMessageRepository.save({
-      idEmpresa: conversationMessage.idEmpresa,
-      idConversation: conversationMessage.idConversation,
-      idUser: conversationMessage.idUser,
-      message: conversationMessage.message
-    })
-
     const conversation = await this.#conversationRepository
       .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
 
@@ -72,8 +65,19 @@ export class ConversationService {
       limit: 1
     }) as Contact
 
-    await this.#clientsWpp.sendMessage(contact.idEmpresa, {
+    const isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
       chatId: contact.phone,
+      message: conversationMessage.message
+    })
+
+    if (isMessageSend !== true) {
+      throw new BadRequestExeption('Erro ao enviar mensagem')
+    }
+
+    const id = await this.#conversationMessageRepository.save({
+      idEmpresa: conversationMessage.idEmpresa,
+      idConversation: conversationMessage.idConversation,
+      idUser: conversationMessage.idUser,
       message: conversationMessage.message
     })
 
