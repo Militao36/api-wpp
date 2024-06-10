@@ -4,17 +4,16 @@ import Joi from 'joi'
 
 import { ConversationUser } from '../repositories/ConversationUsersRepository'
 import { ConversationService } from '../services/ConversationService'
-import { FilterConversationMessageRepository } from '../repositories/ConversationMessageRepository'
 
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  constructor ({ conversationService }) {
+  constructor({ conversationService }) {
     this.#conversationService = conversationService
   }
 
   @POST()
-  async save (request: Request, response: Response) {
+  async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.save({
@@ -45,7 +44,7 @@ export class ConversationController {
       return next()
     }
   }])
-  async addUser (request: Request, response: Response) {
+  async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const body = request.body.ids.map((e: any): Partial<ConversationUser> => {
@@ -63,7 +62,7 @@ export class ConversationController {
 
   @route('/message')
   @POST()
-  async message (request: Request, response: Response) {
+  async message(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.message({
@@ -77,27 +76,23 @@ export class ConversationController {
   }
 
   @GET()
-  async list (request: Request, response: Response) {
+  @route('/')
+  async findAll(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const query = request.query
-
-    const data = await this.#conversationService.list({
-      ...query,
-      idEmpresa
-    } as any)
+    const data = await this.#conversationService.findAll(idEmpresa)
 
     return response.status(200).json(data)
   }
 
-  @route('/list-messages')
+  @route('/list-messages/:idConversation')
   @GET()
-  async listMessages (request: Request, response: Response) {
+  async listMessages(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-    const query = request.query
 
     const data = await this.#conversationService
-      .listMessages({ ...query, idEmpresa } as unknown as FilterConversationMessageRepository)
+      .listMessages(idEmpresa, Number(request?.params?.idConversation))
+
     return response.status(200).json(data)
   }
 }

@@ -12,7 +12,7 @@ export class WhatsAppController {
   #conversationService: ConversationService
   #contactService: ContactService
 
-  constructor ({ clientsWpp, conversationService, contactService }) {
+  constructor({ clientsWpp, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
@@ -20,7 +20,7 @@ export class WhatsAppController {
 
   @route('/send-message')
   @POST()
-  async sendMessage (request: Request, response: Response) {
+  async sendMessage(request: Request, response: Response) {
     const body = request.body
 
     // const listContactsSendSeen = await this.#whatsAppSchema.find({
@@ -43,7 +43,7 @@ export class WhatsAppController {
 
   @route('/health')
   @GET()
-  async health (request: Request, response: Response) {
+  async health(request: Request, response: Response) {
     try {
       const result = await this.#clientsWpp.health(request.idEmpresa)
 
@@ -55,15 +55,15 @@ export class WhatsAppController {
 
   @route('/connect')
   @POST()
-  async connect (request: Request, response: Response) {
+  async connect(request: Request, response: Response) {
     await this.#clientsWpp.start(request.idEmpresa)
 
     return response.status(200).json({})
   }
 
-  @route('/disconnect')
+  @route('/health/:id')
   @GET()
-  async disconnect (request: Request, response: Response) {
+  async disconnect(request: Request, response: Response) {
     await this.#clientsWpp.stop(request.idEmpresa)
 
     return response.status(200).send()
@@ -71,7 +71,7 @@ export class WhatsAppController {
 
   @route('/qrcode')
   @GET()
-  async getQrCode (request: Request, response: Response) {
+  async getQrCode(request: Request, response: Response) {
     const result = await this.#clientsWpp.qrCode(request.idEmpresa)
 
     if (result === 'WORKING') {
@@ -89,7 +89,7 @@ export class WhatsAppController {
 
   @route('/')
   @POST()
-  async webhoook (request: Request, response: Response) {
+  async webhoook(request: Request, response: Response) {
     const eventsNamesValids = ['message']
     const body = request.body as any
     const idEmpresa = body.session
@@ -98,14 +98,7 @@ export class WhatsAppController {
       return response.status(200).send()
     }
     const phoneNumber = body.payload.from.replace('@c.us', '') as string
-    const contact = await this.#contactService.list({
-      first: true,
-      limit: 1,
-      filter: {
-        idEmpresa,
-        phone: phoneNumber
-      }
-    }) as Contact
+    const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
     let idContact = null
 
@@ -120,20 +113,11 @@ export class WhatsAppController {
       idContact = contact.id
     }
 
-    const conversation = await this.#conversationService.list({
-      idEmpresa,
-      first: true,
-      orderBy: 'desc',
-      orderByKey: 'createdAt',
-      filter: {
-        idContact,
-        finishedAt: false
-      }
-    })
+    const conversation = await this.#conversationService.findConversationByContactNotFinished(idEmpresa, idContact)
 
     let idConversation = null
 
-    if ((conversation?.length ?? 0) === 0) {
+    if (!conversation) {
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,

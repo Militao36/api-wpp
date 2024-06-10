@@ -1,6 +1,6 @@
 import { Contact } from '../repositories/ContactRepository'
-import { ConversationMessage, ConversationMessageRepository, FilterConversationMessageRepository } from '../repositories/ConversationMessageRepository'
-import { Conversation, ConversationRepository, FilterConversationRepository } from '../repositories/ConversationRepository'
+import { ConversationMessage, ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
+import { Conversation, ConversationRepository } from '../repositories/ConversationRepository'
 import { ConversationUser, ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 import { BadRequestExeption } from '../util/exceptions/BadRequest'
 import { ClientsWpp } from '../wpp'
@@ -13,7 +13,7 @@ export class ConversationService {
   #contactService: ContactService
   #clientsWpp: ClientsWpp
 
-  constructor ({ contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor({ contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
@@ -21,7 +21,7 @@ export class ConversationService {
     this.#clientsWpp = clientsWpp
   }
 
-  public async save (conversation: Conversation): Promise<number> {
+  public async save(conversation: Conversation): Promise<number> {
     const conversationId = await this.#conversationRepository.save({
       idContact: conversation.idContact,
       idEmpresa: conversation.idEmpresa
@@ -38,10 +38,11 @@ export class ConversationService {
     return conversationId
   }
 
-  public async addUser (conversationUser: ConversationUser[]) {
+  public async addUser(conversationUser: ConversationUser[]) {
     for await (const item of conversationUser) {
       const conversationUser = await this.#conversationUsersRepository
         .relationExists(item.idUser, item.idConversation, item.idEmpresa)
+
       if (!conversationUser) {
         await this.#conversationUsersRepository.save({
           idUser: item.idUser,
@@ -52,18 +53,14 @@ export class ConversationService {
     }
   }
 
-  public async message (conversationMessage: Partial<ConversationMessage>) {
+  public async message(conversationMessage: Partial<ConversationMessage>) {
     const conversation = await this.#conversationRepository
       .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
 
-    const contact = await this.#contactService.list({
-      filter: {
-        idEmpresa: conversation.idEmpresa,
-        id: conversation.idContact
-      },
-      first: true,
-      limit: 1
-    }) as Contact
+    const contact = await this.#contactService.findById(
+      conversationMessage.idEmpresa,
+      conversation.idContact
+    )
 
     const isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
       chatId: contact.phone,
@@ -84,21 +81,22 @@ export class ConversationService {
     return id
   }
 
-  public async list (filter: FilterConversationRepository) {
-    return this.#conversationRepository.list(filter)
+  public async findAll(idEmpresa: string) {
+    return this.#conversationRepository.findAll(idEmpresa)
   }
 
-  public async listMessages (filter: FilterConversationMessageRepository) {
-    if (!filter?.filter?.idConversation || !filter?.idEmpresa) {
-      throw new BadRequestExeption('Dados obrigatórios para pesquisa')
-    }
+  public async listMessages(idEmpresa: string, idConversation: number) {
+    const messages = await this.#conversationMessageRepository
+      .findMessagesByIdConversation(idEmpresa, idConversation)
 
-    const messages = await this.#conversationMessageRepository.list(filter)
-
-    await this.#conversationRepository.update({
-      isRead: true
-    }, filter.filter.idConversation, filter.idEmpresa)
+    await this.#conversationRepository
+      .update({ isRead: true }, idConversation, idEmpresa)
 
     return messages
+  }
+
+  public async findConversationByContactNotFinished(idEmpresa: string, idContact: number) {
+    return this.#conversationRepository
+      .findConversationByContactNotFinished(idEmpresa, idContact)
   }
 }

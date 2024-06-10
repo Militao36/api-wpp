@@ -22,12 +22,10 @@ export class ContactController {
   }
 
   @GET()
-  async list (request: Request, response: Response) {
+  async findAll (request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const query = request.query
-
-    const data = await this.#contactService.list({ ...query, idEmpresa } as any)
-    return response.status(200).json(data)
+    const contacts = await this.#contactService.findAll(idEmpresa)
+    return response.status(200).json(contacts)
   }
 }
