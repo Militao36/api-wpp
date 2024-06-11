@@ -28,4 +28,14 @@ export class ContactController {
     const contacts = await this.#contactService.findAll(idEmpresa)
     return response.status(200).json(contacts)
   }
+
+  @route('/:id')
+  @GET()
+  async findById (request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+    const { id } = request.params
+
+    const contacts = await this.#contactService.findById(idEmpresa, Number(id))
+    return response.status(200).json(contacts)
+  }
 }
