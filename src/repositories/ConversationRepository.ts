@@ -51,4 +51,14 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
       .where({ idEmpresa, idContact, finishedAt: null })
       .first()
   }
+
+  async findAllConversationByUser(idEmpresa: string, idUser: number): Promise<Conversation[]> {
+    const data = this.#database.table(this.table)
+      .select(['conversations.*'])
+      .where('idEmpresa', '=', idEmpresa)
+      .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idUser')
+      .where('conversation_users.idUser', '=', idUser)
+
+    return await data
+  }
 }

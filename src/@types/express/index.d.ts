@@ -5,6 +5,7 @@ declare global {
   namespace Express {
     interface Request {
       idEmpresa?: string
+      idUser?: number
       edge?: Edge
     }
   }

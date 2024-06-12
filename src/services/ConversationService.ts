@@ -81,8 +81,14 @@ export class ConversationService {
     return id
   }
 
-  public async findAll(idEmpresa: string) {
-    return this.#conversationRepository.findAll(idEmpresa)
+  public async findAll(idEmpresa: string, idUser: number): Promise<[Conversation & { latestInteraction: string }]> {
+    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser) as [Conversation & { latestInteraction: string }]
+
+    for await (const item of conversations) {
+      item.latestInteraction = (await this.#conversationMessageRepository.findByLatestMessageIdConversation(idEmpresa, item.id, idUser))?.message
+    }
+
+    return conversations
   }
 
   public async listMessages(idEmpresa: string, idConversation: number) {

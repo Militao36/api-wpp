@@ -20,10 +20,20 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     this.#database = database
   }
 
-  async findMessagesByIdConversation(idEmpresa: string, idConversation: number):Promise<ConversationMessage[]> {
+  async findMessagesByIdConversation(idEmpresa: string, idConversation: number): Promise<ConversationMessage[]> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa })
+
+    return messagesConverstion
+  }
+
+  async findByLatestMessageIdConversation(idEmpresa: string, idConversation: number, idUser: number): Promise<ConversationMessage> {
+    const messagesConverstion = await this.#database.table(this.table)
+      .select()
+      .where({ idConversation, idEmpresa, idUser })
+      .orderBy('id', 'desc')
+      .first()
 
     return messagesConverstion
   }

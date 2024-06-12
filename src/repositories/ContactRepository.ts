@@ -24,10 +24,18 @@ export class ContactRepository extends RepositoryBase<Partial<Contact>> {
     this.#database = database
   }
 
-  async findByPhone(idEmpresa: string, phone: string):Promise<Contact | null> {
+  async findByPhone(idEmpresa: string, phone: string): Promise<Contact | null> {
     return this.#database.table(this.table)
       .select()
       .where({ phone, idEmpresa })
       .first()
+  }
+
+  async findAll(idEmpresa: string): Promise<Pick<Contact, "name" | "phone" | "id">[]> {
+    const data = this.#database.table(this.table)
+      .select(["name", "phone", "id"])
+      .where('idEmpresa', '=', idEmpresa)
+
+    return await data
   }
 }

@@ -79,8 +79,9 @@ export class ConversationController {
   @route('/')
   async findAll(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
+    const idUser = request.idUser
 
-    const data = await this.#conversationService.findAll(idEmpresa)
+    const data = await this.#conversationService.findAll(idEmpresa, idUser)
 
     return response.status(200).json(data)
   }
