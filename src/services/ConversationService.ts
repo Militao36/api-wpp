@@ -78,16 +78,17 @@ export class ConversationService {
       message: conversationMessage.message
     })
 
+    await this.updateLastMessage(
+      conversationMessage.idConversation,
+      conversationMessage.idEmpresa,
+      conversationMessage.message
+    )
+
     return id
   }
 
-  public async findAll(idEmpresa: string, idUser: number): Promise<[Conversation & { latestInteraction: string }]> {
-    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser) as [Conversation & { latestInteraction: string }]
-
-    for await (const item of conversations) {
-      item.latestInteraction = (await this.#conversationMessageRepository.findByLatestMessageIdConversation(idEmpresa, item.id, idUser))?.message
-    }
-
+  public async findAll(idEmpresa: string, idUser: number): Promise<Conversation[]> {
+    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser)
     return conversations
   }
 
@@ -99,6 +100,12 @@ export class ConversationService {
       .update({ isRead: true }, idConversation, idEmpresa)
 
     return messages
+  }
+
+  public async updateLastMessage(idConversation: number, idEmpresa: string, lastMessage: string) {
+    await this.#conversationRepository.update({
+      lastMessage
+    }, idConversation, idEmpresa)
   }
 
   public async findConversationByContactNotFinished(idEmpresa: string, idContact: number) {

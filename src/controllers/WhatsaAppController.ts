@@ -127,6 +127,12 @@ export class WhatsAppController {
       idConversation = conversation[0].id
     }
 
+    await this.#conversationService.updateLastMessage(
+      idConversation,
+      idEmpresa,
+      body.payload.body
+    )
+
     await this.#conversationService.message({
       idConversation,
       idEmpresa,

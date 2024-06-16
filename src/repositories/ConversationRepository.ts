@@ -32,6 +32,7 @@ export type Conversation = {
   idPreviousConversation?: number
   finishedAt?: string
   isRead: boolean
+  lastMessage?: string
   users?: User[]
   contact?: Contact
   conversation?: Conversation
