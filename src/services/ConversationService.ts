@@ -53,7 +53,7 @@ export class ConversationService {
     }
   }
 
-  public async message(conversationMessage: Partial<ConversationMessage>) {
+  public async message(conversationMessage: Partial<ConversationMessage & { fileName: string, mimetype: string }>) {
     const conversation = await this.#conversationRepository
       .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
 
@@ -62,10 +62,32 @@ export class ConversationService {
       conversation.idContact
     )
 
-    const isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
-      chatId: contact.phone,
-      message: conversationMessage.message
-    })
+    let isMessageSend = null
+
+    if (!conversationMessage.hasMedia)
+      isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
+        chatId: contact.phone,
+        message: conversationMessage.message
+      })
+
+    if (conversationMessage.hasMedia) {
+
+      if (
+        !conversationMessage?.mimetype ||
+        !conversationMessage?.file
+      ) {
+        throw new BadRequestExeption('Campos obrigatórios não informado (base64, file).')
+       }
+
+      isMessageSend = await this.#clientsWpp.sendMessageImage(contact.idEmpresa, {
+        chatId: contact.phone,
+        caption: conversationMessage.message,
+        base64: conversationMessage.file,
+        mimetype: conversationMessage.mimetype,
+        fileName: conversationMessage.fileName
+      })
+    }
+
 
     if (isMessageSend !== true) {
       throw new BadRequestExeption('Erro ao enviar mensagem')

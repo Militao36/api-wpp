@@ -74,7 +74,11 @@ export class ConversationController {
       idEmpresa,
       idConversation: request.body.idConversation,
       idUser: request.body.idUser,
-      message: request.body.message
+      message: request.body.message,
+      hasMedia: request?.body?.hasMedia,
+      file: request?.body?.file,
+      fileName: request?.body?.fileName,
+      mimetype: request?.body?.mimetype,
     })
 
     return response.status(201).json({ id })

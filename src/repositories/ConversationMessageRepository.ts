@@ -11,6 +11,8 @@ export type ConversationMessage = {
   message: string
   user: User
   conversation: Conversation
+  hasMedia: boolean
+  file: string
 }
 
 export class ConversationMessageRepository extends RepositoryBase<Partial<ConversationMessage>> {
