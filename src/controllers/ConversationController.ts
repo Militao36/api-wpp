@@ -23,6 +23,11 @@ export class ConversationController {
     return response.status(201).json(id)
   }
 
+  /**
+   * 
+   * @description Essa função vc usa para adicionar usuários/remover (deverá ser passado TODOS usuários)
+   *  mesmo se já tiver adiionado, pois ele deleta tudo e cria novamente 
+   */
   @route('/add-users')
   @POST()
   @before([(req: Request, res: Response, next: NextFunction) => {
@@ -55,9 +60,9 @@ export class ConversationController {
       }
     })
 
-    const id = await this.#conversationService.addUser(body)
+    await this.#conversationService.addUser(body)
 
-    return response.status(201).json({ id })
+    return response.status(201).json()
   }
 
   @route('/message')

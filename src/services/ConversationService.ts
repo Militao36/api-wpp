@@ -39,17 +39,17 @@ export class ConversationService {
   }
 
   public async addUser(conversationUser: ConversationUser[]) {
-    for await (const item of conversationUser) {
-      const conversationUser = await this.#conversationUsersRepository
-        .relationExists(item.idUser, item.idConversation, item.idEmpresa)
+    for (const item of conversationUser) {
+      await this.#conversationUsersRepository
+        .deleteAllRelations(item.idConversation, item.idEmpresa)
+    }
 
-      if (!conversationUser) {
-        await this.#conversationUsersRepository.save({
-          idUser: item.idUser,
-          idConversation: item.idConversation,
-          idEmpresa: item.idEmpresa
-        })
-      }
+    for await (const item of conversationUser) {
+      await this.#conversationUsersRepository.save({
+        idUser: item.idUser,
+        idConversation: item.idConversation,
+        idEmpresa: item.idEmpresa
+      })
     }
   }
 

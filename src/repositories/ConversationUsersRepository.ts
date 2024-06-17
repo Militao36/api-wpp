@@ -22,7 +22,13 @@ export class ConversationUsersRepository extends RepositoryBase<Partial<Conversa
       .select()
       .where({ idUser, idConversation, idEmpresa })
       .first()
-      
+
     return !!exists
+  }
+
+  async deleteAllRelations(idConversation: number, idEmpresa: string) {
+    await this.#database.table<ConversationUser>(this.table)
+      .delete()
+      .where({ idConversation, idEmpresa })
   }
 }
