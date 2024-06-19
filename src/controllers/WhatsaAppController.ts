@@ -4,7 +4,6 @@ import { Request, Response } from 'express'
 import { ClientsWpp } from '../wpp'
 import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
-import { Contact } from '../repositories/ContactRepository'
 
 @route('/zap')
 export class WhatsAppController {
@@ -16,29 +15,6 @@ export class WhatsAppController {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
-  }
-
-  @route('/send-message')
-  @POST()
-  async sendMessage(request: Request, response: Response) {
-    const body = request.body
-
-    // const listContactsSendSeen = await this.#whatsAppSchema.find({
-    //   from: `55${body.phone}@c.us`
-    // })
-
-    // for await (const item of listContactsSendSeen) {
-    //   await this.#clientsWpp.sendSeen(request.idEmpresa, item.from, item.messageId)
-    // }
-
-    await this.#clientsWpp.sendMessage(request.idEmpresa, {
-      chatId: body.phone,
-      message: body.message
-    })
-
-    // Promise.all(listContactsSendSeen.map(e => this.#whatsAppSchema.deleteOne({ _id: e._id })))
-
-    return response.status(200).json({})
   }
 
   @route('/health')
