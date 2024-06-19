@@ -13,7 +13,7 @@ export class ConversationService {
   #contactService: ContactService
   #clientsWpp: ClientsWpp
 
-  constructor({ contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor ({ contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
@@ -21,7 +21,7 @@ export class ConversationService {
     this.#clientsWpp = clientsWpp
   }
 
-  public async save(conversation: Conversation): Promise<number> {
+  public async save (conversation: Conversation): Promise<number> {
     const conversationId = await this.#conversationRepository.save({
       idContact: conversation.idContact,
       idEmpresa: conversation.idEmpresa
@@ -38,7 +38,7 @@ export class ConversationService {
     return conversationId
   }
 
-  public async addUser(conversationUser: ConversationUser[]) {
+  public async addUser (conversationUser: ConversationUser[]) {
     for (const item of conversationUser) {
       await this.#conversationUsersRepository
         .deleteAllRelations(item.idConversation, item.idEmpresa)
@@ -53,7 +53,7 @@ export class ConversationService {
     }
   }
 
-  public async message(conversationMessage: Partial<ConversationMessage & { fileName: string, mimetype: string }>) {
+  public async message (conversationMessage: Partial<ConversationMessage & { fileName: string, mimetype: string }>) {
     const conversation = await this.#conversationRepository
       .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
 
@@ -64,14 +64,14 @@ export class ConversationService {
 
     let isMessageSend = null
 
-    if (!conversationMessage.hasMedia)
-      isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
+    if (!conversationMessage.hasMedia) {
+ isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
         chatId: contact.phone,
         message: conversationMessage.message
       })
+}
 
     if (conversationMessage.hasMedia) {
-
       if (
         !conversationMessage?.mimetype ||
         !conversationMessage?.file
@@ -87,7 +87,6 @@ export class ConversationService {
         fileName: conversationMessage.fileName
       })
     }
-
 
     if (isMessageSend !== true) {
       throw new BadRequestExeption('Erro ao enviar mensagem')
@@ -109,14 +108,14 @@ export class ConversationService {
     return id
   }
 
-  public async findAll(idEmpresa: string, idUser: number): Promise<Conversation[]> {
+  public async findAll (idEmpresa: string, idUser: number): Promise<Conversation[]> {
     const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser)
     return conversations
   }
 
-  public async listMessages(idEmpresa: string, idConversation: number) {
+  public async listMessages (idEmpresa: string, idConversation: number, page: number) {
     const messages = await this.#conversationMessageRepository
-      .findMessagesByIdConversation(idEmpresa, idConversation)
+      .findMessagesByIdConversation(idEmpresa, idConversation, page)
 
     await this.#conversationRepository
       .update({ isRead: true }, idConversation, idEmpresa)
@@ -124,13 +123,13 @@ export class ConversationService {
     return messages
   }
 
-  public async updateLastMessage(idConversation: number, idEmpresa: string, lastMessage: string) {
+  public async updateLastMessage (idConversation: number, idEmpresa: string, lastMessage: string) {
     await this.#conversationRepository.update({
       lastMessage
     }, idConversation, idEmpresa)
   }
 
-  public async findConversationByContactNotFinished(idEmpresa: string, idContact: number) {
+  public async findConversationByContactNotFinished (idEmpresa: string, idContact: number) {
     return this.#conversationRepository
       .findConversationByContactNotFinished(idEmpresa, idContact)
   }

@@ -27,7 +27,7 @@ async function seedSector (knex: Knex) {
 }
 
 async function seedUserSector (knex: Knex) {
-  await knex('user_sector').del()
+  // await knex('user_sector').del()
 
   const data = [
     ({ id: 1, idEmpresa: '1', idUser: 1, idSector: 1 }),
@@ -43,10 +43,10 @@ async function seedContacts (knex: Knex) {
   await knex('contacts').del()
 
   const data = [
-    ({ id: 1, idEmpresa: '1', name: 'name 1', phone: '31996508625', cellPhone: '31996508625', email: 'teste@gmail.com' }),
-    ({ id: 2, idEmpresa: '1', name: 'name 2', phone: '31996508625', cellPhone: '31996508625', email: 'teste@gmail.com' }),
-    ({ id: 3, idEmpresa: '1', name: 'name 3', phone: '31996508625', cellPhone: '31996508625', email: 'teste@gmail.com' }),
-    ({ id: 4, idEmpresa: '1', name: 'name 4', phone: '31996508625', cellPhone: '31996508625', email: 'teste@gmail.com' })
+    ({ id: 1, idEmpresa: '1', name: 'name 1', phone: '31996508625', email: 'teste@gmail.com' }),
+    ({ id: 2, idEmpresa: '1', name: 'name 2', phone: '31996508625', email: 'teste@gmail.com' }),
+    ({ id: 3, idEmpresa: '1', name: 'name 3', phone: '31996508625', email: 'teste@gmail.com' }),
+    ({ id: 4, idEmpresa: '1', name: 'name 4', phone: '31996508625', email: 'teste@gmail.com' })
   ]
 
   await knex('contacts').insert(data)
@@ -81,12 +81,17 @@ async function seedConversationsUsers (knex: Knex) {
 async function seedConversationsUsersMessages (knex: Knex) {
   await knex('conversation_message').del()
 
-  const data = [
-    ({ id: 1, idEmpresa: '1', idUser: 1, idConversation: 1, message: 'menagem teste' }),
-    ({ id: 2, idEmpresa: '1', idUser: 2, idConversation: 2, message: 'menagem teste' }),
-    ({ id: 3, idEmpresa: '1', idUser: 3, idConversation: 3, message: 'menagem teste' }),
-    ({ id: 4, idEmpresa: '1', idUser: 4, idConversation: 4, message: 'menagem teste' })
-  ]
+  const data = Array.from({ length: 200 }, (_, idx) => {
+    const batchNumber = Math.floor(idx / 50)
+
+    return {
+      id: idx + 1,
+      idEmpresa: (batchNumber + 1).toString(),
+      idUser: batchNumber + 1,
+      idConversation: batchNumber + 1,
+      message: `mensagem teste ${idx}`
+    }
+  })
 
   await knex('conversation_message').insert(data)
 }
