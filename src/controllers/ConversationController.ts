@@ -91,7 +91,6 @@ export class ConversationController {
     const idUser = request.idUser
 
     const data = await this.#conversationService.findAll(idEmpresa, idUser)
-
     return response.status(200).json(data)
   }
 
