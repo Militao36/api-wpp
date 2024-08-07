@@ -73,7 +73,7 @@ export class ConversationController {
     const id = await this.#conversationService.message({
       idEmpresa,
       idConversation: request.body.idConversation,
-      idUser: request.body.idUser,
+      idUser: request.idUser,
       message: request.body.message,
       hasMedia: request?.body?.hasMedia,
       file: request?.body?.file,

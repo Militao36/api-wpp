@@ -70,10 +70,15 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    if (!eventsNamesValids.includes(body.event) || body.payload.from.includes('@g.us')) {
+
+    if (
+      !eventsNamesValids.includes(body.event) ||
+      !body.payload.from.includes('@c.us') ||
+      body.payload.fromMe
+    ) {
       return response.status(200).send()
     }
-    const phoneNumber = body.payload.from.replace('@c.us', '') as string
+    const phoneNumber = (body.payload.from.replace('@c.us', '') as string).substring(2)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
     let idContact = null
@@ -100,8 +105,16 @@ export class WhatsAppController {
         isRead: true
       })
     } else {
-      idConversation = conversation[0].id
+      idConversation = conversation.id
     }
+
+
+    // dois b.o
+
+    // 1 - O url da midia vem localhost:3000 alterar
+    // 2 - o payload quando vem zerado a ultima mensagem qual vai ser?}
+    // 3 - Salvar messageId para responder
+    // 4 - Quando eu querer uma mensagem especificado eu vou buscar pelo ID da mensagem do za, e pegar as 10 mensagens antes e 9 depois, e buscar o ultimo registro, e fazer um de para pelo id da mensagem pesquisada e do ultimo, para eu saber como irei páginar, e quantas páginas terá
 
     await this.#conversationService.updateLastMessage(
       idConversation,
@@ -109,11 +122,14 @@ export class WhatsAppController {
       body.payload.body
     )
 
-    await this.#conversationService.message({
-      idConversation,
+    await this.#conversationService.addMessage(
       idEmpresa,
-      message: body.payload.body
-    })
+      idConversation,
+      null,
+      body.payload.body,
+      body.payload.hasMedia,
+      body.payload?.media?.url
+    )
 
     return response.status(200).send()
   }
