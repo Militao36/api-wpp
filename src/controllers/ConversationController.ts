@@ -8,12 +8,12 @@ import { ConversationService } from '../services/ConversationService'
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  constructor ({ conversationService }) {
+  constructor({ conversationService }) {
     this.#conversationService = conversationService
   }
 
   @POST()
-  async save (request: Request, response: Response) {
+  async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.save({
@@ -49,7 +49,7 @@ export class ConversationController {
       return next()
     }
   }])
-  async addUser (request: Request, response: Response) {
+  async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const body = request.body.ids.map((e: any): Partial<ConversationUser> => {
@@ -67,7 +67,7 @@ export class ConversationController {
 
   @route('/message')
   @POST()
-  async message (request: Request, response: Response) {
+  async message(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#conversationService.message({
@@ -86,17 +86,18 @@ export class ConversationController {
 
   @GET()
   @route('/')
-  async findAll (request: Request, response: Response) {
+  async findAll(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
     const idUser = request.idUser
+    const messageId = request.query.messageId as string
 
-    const data = await this.#conversationService.findAll(idEmpresa, idUser)
+    const data = await this.#conversationService.findAll(idEmpresa, idUser, { messageId })
     return response.status(200).json(data)
   }
 
   @route('/list-messages/:idConversation')
   @GET()
-  async listMessages (request: Request, response: Response) {
+  async listMessages(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
     const { page } = request.query
 

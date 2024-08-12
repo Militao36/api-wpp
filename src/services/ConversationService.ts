@@ -1,8 +1,8 @@
-import { Contact } from '../repositories/ContactRepository'
 import { ConversationMessage, ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
 import { Conversation, ConversationRepository } from '../repositories/ConversationRepository'
 import { ConversationUser, ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 import { BadRequestExeption } from '../util/exceptions/BadRequest'
+import { MessageID } from '../util/utils'
 import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
 
@@ -88,7 +88,7 @@ export class ConversationService {
       })
     }
 
-    if (isMessageSend !== true) {
+    if (!isMessageSend) {
       throw new BadRequestExeption('Erro ao enviar mensagem')
     }
 
@@ -96,7 +96,8 @@ export class ConversationService {
       idEmpresa: conversationMessage.idEmpresa,
       idConversation: conversationMessage.idConversation,
       idUser: conversationMessage.idUser,
-      message: conversationMessage.message
+      message: conversationMessage.message,
+      messageId: isMessageSend?.id ?? MessageID()
     })
 
     await this.updateLastMessage(
@@ -108,14 +109,15 @@ export class ConversationService {
     return id
   }
 
-  public async addMessage(idEmpresa: string, idConversation: number, idUser: number, message: string, hasMedia: boolean, url: string) {
+  public async addMessage(idEmpresa: string, idConversation: number, idUser: number, message: string, messageId: string, hasMedia: boolean, url: string) {
     await this.#conversationMessageRepository.save({
       idEmpresa: idEmpresa,
       idConversation: idConversation,
       idUser: idUser,
       message: hasMedia ? null : message,
+      messageId,
       hasMedia: hasMedia,
-      file: hasMedia ? url : ''
+      file: hasMedia ? url : '',
     })
 
     await this.updateLastMessage(
@@ -125,8 +127,8 @@ export class ConversationService {
     )
   }
 
-  public async findAll(idEmpresa: string, idUser: number): Promise<Conversation[]> {
-    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser)
+  public async findAll(idEmpresa: string, idUser: number, filter?: { messageId?: string }): Promise<Conversation[]> {
+    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser,filter)
     return conversations
   }
 

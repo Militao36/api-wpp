@@ -207,7 +207,7 @@ export class ClientsWpp {
       const response = await axios.request(config)
 
       if (response?.status === 201) {
-        return true
+        return response.data
       }
 
       throw new BadRequestExeption('Erro ao enviar mensagem, entre em contato com o suporte.')
@@ -252,7 +252,7 @@ export class ClientsWpp {
       const response = await axios.request(config)
 
       if (response?.status === 201) {
-        return true
+        return response.data
       }
 
       throw new BadRequestExeption('Erro ao enviar mensagem, entre em contato com o suporte.')

@@ -9,6 +9,7 @@ export type ConversationMessage = {
   idConversation: number
   idUser: number
   message: string
+  messageId: string
   user: User
   conversation: Conversation
   hasMedia: boolean
@@ -17,12 +18,12 @@ export type ConversationMessage = {
 
 export class ConversationMessageRepository extends RepositoryBase<Partial<ConversationMessage>> {
   #database: Knex
-  constructor ({ database }) {
+  constructor({ database }) {
     super('conversation_message', database)
     this.#database = database
   }
 
-  async findMessagesByIdConversation (idEmpresa: string, idConversation: number, page = 30): Promise<ConversationMessage[]> {
+  async findMessagesByIdConversation(idEmpresa: string, idConversation: number, page = 30): Promise<ConversationMessage[]> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa })
@@ -33,7 +34,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     return messagesConverstion
   }
 
-  async findByLatestMessageIdConversation (idEmpresa: string, idConversation: number, idUser: number): Promise<ConversationMessage> {
+  async findByLatestMessageIdConversation(idEmpresa: string, idConversation: number, idUser: number): Promise<ConversationMessage> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa, idUser })

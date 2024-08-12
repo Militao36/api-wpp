@@ -112,9 +112,9 @@ export class WhatsAppController {
     // dois b.o
 
     // 1 - O url da midia vem localhost:3000 alterar
-    // 2 - o payload quando vem zerado a ultima mensagem qual vai ser?}
-    // 3 - Salvar messageId para responder
-    // 4 - Quando eu querer uma mensagem especificado eu vou buscar pelo ID da mensagem do za, e pegar as 10 mensagens antes e 9 depois, e buscar o ultimo registro, e fazer um de para pelo id da mensagem pesquisada e do ultimo, para eu saber como irei páginar, e quantas páginas terá
+    // 2 - o payload quando vem zerado a ultima mensagem qual vai ser?} - Gerei um id (uuid-RANDONUUID)
+    // 3 - Salvar messageId para responder (OK)
+    // 4 - Quando eu querer uma mensagem especificado eu vou buscar pelo ID da mensagem do zap, e pegar as 10 mensagens antes e 9 depois, e buscar o ultimo registro, e fazer um de para pelo id da mensagem pesquisada e do ultimo, para eu saber como irei páginar, e quantas páginas terá
 
     await this.#conversationService.updateLastMessage(
       idConversation,
@@ -127,6 +127,7 @@ export class WhatsAppController {
       idConversation,
       null,
       body.payload.body,
+      body.payload.id,
       body.payload.hasMedia,
       body.payload?.media?.url
     )
