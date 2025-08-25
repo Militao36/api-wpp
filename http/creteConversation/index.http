@@ -4,8 +4,8 @@ POST http://localhost:3000/conversations
 Content-Type: application/json
 
 {
-  "idContact":1,
-  "users": [{"id":1}]
+  "idContact": "abf6b40e-b56d-42be-b70f-6200e9a71628",
+  "users": [{"id":"f2c9c99c-1802-4138-b84d-c4814b2f0cb0"}]
 }
 
 ### Buscar conversas 
@@ -25,10 +25,17 @@ POST http://localhost:3000/conversations/message
 Content-Type: application/json
 
 {
-  "idConversation": 2,
-  "idUser": 1,
-  "message": "Bom dia"
+  "idConversation": "8df9f083-8bd9-4844-899d-860dcb26473f",
+  "idUser": "f2c9c99c-1802-4138-b84d-c4814b2f0cb0",
+  "message": "Testando muitas conversas?"
 }
 
 ### Buscar mensagens conversas 
 GET http://localhost:3000/conversations/list-messages?filter[idConversation]=10
+
+
+### lista mensagens com base no contatoId
+GET http://localhost:3000/conversations/list-messages/abf6b40e-b56d-42be-b70f-6200e9a71628
+
+### transfe conversa para outro usuario
+POST http://localhost:3000/conversations/transfer/ea5b4c8c-fa84-433c-aece-8e9c2138409b/1539b4d6-0341-4a9d-9b75-df95e527e10a?trasnferMessages=false

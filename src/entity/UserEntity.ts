@@ -16,6 +16,5 @@ export class UserEntity extends Entity {
     this.username = user.username
     this.password = user.password
     this.isMaster = user.isMaster
-    this.sectors = user.sectors
   }
 } 

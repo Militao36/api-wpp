@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable(TABLE, (table) => {
     table.uuid('id').primary()
     table.uuid('idEmpresa').notNullable()
-    table.string('idUser').references('id').inTable('users').unsigned()
-    table.string('idSector').references('id').inTable('sectors').unsigned()
+    table.string('idUser').references('id').inTable('users')
+    table.string('idSector').references('id').inTable('sectors')
     table.dateTime('createdAt').notNullable().defaultTo(knex.fn.now())
     table.dateTime('updatedAt').notNullable().defaultTo(knex.fn.now())
   })

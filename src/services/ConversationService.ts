@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import { ConversationEntity } from '../entity/ConversationEntity'
 import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 import { ConversationUserEntity } from '../entity/ConversationUserEntity'
@@ -33,11 +34,11 @@ export class ConversationService {
     await this.#conversationRepository.save(conversationData)
 
     for await (const item of (conversation?.users ?? [])) {
-      await this.#conversationUsersRepository.save({
+      await this.#conversationUsersRepository.save(new ConversationUserEntity({
         idUser: item.id,
         idConversation: conversationData.id!,
         idEmpresa: conversation.idEmpresa
-      })
+      }))
     }
 
     return conversationData.id!
@@ -70,10 +71,12 @@ export class ConversationService {
     let isMessageSend = null
 
     if (!conversationMessage.hasMedia) {
-      isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
-        chatId: contact.phone,
-        message: conversationMessage.message
-      })
+      // isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
+      //   chatId: contact.phone,
+      //   message: conversationMessage.message
+      // })
+
+      isMessageSend = true
     }
 
     if (conversationMessage.hasMedia) {
@@ -101,15 +104,7 @@ export class ConversationService {
 
     const conversationMessageData = new ConversationMessageEntity(conversationMessage)
 
-    await this.#conversationMessageRepository.save(new ConversationMessageEntity({
-      idEmpresa: conversationMessageData.idEmpresa,
-      idConversation: conversationMessageData.idConversation,
-      idUser: conversationMessageData.idUser,
-      message: conversationMessageData.message,
-      messageId: isMessageSend?.id ?? MessageID(),
-      file: conversationMessageData.file,
-      hasMedia: conversationMessageData.hasMedia,
-    }))
+    await this.#conversationMessageRepository.save(conversationMessageData)
 
     await this.updateLastMessage(
       conversationMessage.idConversation,
@@ -168,7 +163,7 @@ export class ConversationService {
     const conversation = await this.findById(conversationId, idEmpresa)
 
     if (!trasnferMessges) {
-      conversation.finishedAt = new Date().toISOString()
+      conversation.finishedAt = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
       conversation.isRead = true
 
       await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)

@@ -14,7 +14,6 @@ export class ConversationMessageEntity extends Entity {
   // conversation: Conversation
   constructor(data: Partial<ConversationMessageEntity> = {}, id?: string) {
     super(data, id)
-    this.id = data.id
     this.idEmpresa = data.idEmpresa
     this.idConversation = data.idConversation
     this.idUser = data.idUser
