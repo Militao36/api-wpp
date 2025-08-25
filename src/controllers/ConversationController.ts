@@ -95,14 +95,30 @@ export class ConversationController {
     return response.status(200).json(data)
   }
 
-  @route('/list-messages/:idConversation')
+  @POST()
+  @route('/transfer/:idUser/:idConversation')
+  async transferForUser(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+    const idUser = request.idUser
+    const idUserTransfer = request.params.idUser
+    const idConversation = request.params.idConversation
+    const trasnferMessages = request.query.trasnferMessages as string
+
+    const data = await this.#conversationService.transfer(idEmpresa, idUser, idUserTransfer, idConversation, trasnferMessages === 'true')
+
+    return response.status(200).json(data)
+  }
+
+  @route('/list-messages/:idContact')
   @GET()
   async listMessages(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
+    const idUser = request.idUser
+
     const { page } = request.query
 
     const data = await this.#conversationService
-      .listMessages(idEmpresa, request?.params?.idConversation, Number(page))
+      .listMessages(idEmpresa, idUser, request?.params?.idContact, Number(page))
 
     return response.status(200).json(data)
   }

@@ -13,4 +13,10 @@ export class UserService {
     await this.#userRepository.save(userData)
     return userData.id!
   }
+
+  public async findById(id: string, idEmpresa: string): Promise<UserEntity> {
+    const user = await this.#userRepository.findById(id, idEmpresa)
+    if (!user) throw new Error('User not found')
+    return user
+  }
 }

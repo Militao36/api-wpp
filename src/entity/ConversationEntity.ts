@@ -13,7 +13,7 @@ export class ConversationEntity extends Entity {
 
   users?: UserEntity[]
   contact?: ContactEntity
-  conversation?: ConversationEntity
+  previusConversation?: ConversationEntity
   messages?: ConversationMessageEntity[]
 
   constructor(conversation: Omit<ConversationEntity, 'id'>, id?: string) {

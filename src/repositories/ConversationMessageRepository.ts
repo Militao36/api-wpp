@@ -20,6 +20,25 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     return messagesConverstion
   }
 
+  async findAllPaginationWithConversationIdUser(idEmpresa: string, idContact: string, idUser: string, page = 30): Promise<ConversationMessageEntity[]> {
+    const query = this.#database.table(this.table)
+      .select<ConversationMessageEntity[]>()
+      .innerJoin('conversation', 'conversation.id', 'conversation_message.idConversation')
+      .where('conversation.idContact', '=', idContact)
+
+    if (idContact) {
+      query
+        .innerJoin('conversation_user', 'conversation_user.idConversation', 'conversation_message.idConversation')
+        .andWhere('conversation_message.idUser', '=', idUser)
+    }
+
+    return await query
+      .andWhere('conversation_message.idEmpresa', '=', idEmpresa)
+      .orderBy('conversation_message.createdAt', 'desc')
+      .limit(30)
+      .offset((parseInt(`${page}`) - 1) * 30)
+  }
+
   async findByLatestMessageIdConversation(idEmpresa: string, idConversation: string, idUser: string): Promise<ConversationMessageEntity> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()

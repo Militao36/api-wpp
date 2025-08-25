@@ -1,6 +1,7 @@
 import { Knex } from 'knex'
 import { RepositoryBase } from './base/RepositoryBase'
 import { ConversationEntity } from '../entity/ConversationEntity'
+import { DateTime } from 'luxon'
 
 export type FilterConversationRepository = {
   limit?: number
@@ -23,7 +24,7 @@ export type FilterConversationRepository = {
   }
 }
 
-export class ConversationRepository extends RepositoryBase<Partial<ConversationEntity>> {
+export class ConversationRepository extends RepositoryBase<ConversationEntity> {
   #database: Knex
   constructor({ database }) {
     super('conversations', database)
@@ -43,8 +44,9 @@ export class ConversationRepository extends RepositoryBase<Partial<ConversationE
     filter?: {
       messageId?: string,
       limit?: number,
-      idGraterThan?: number,
-      idLessThan?: number
+      createdAtGraterThan?: string,
+      createdAtLessThan?: string
+      page?: number
     }
   ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
@@ -53,30 +55,35 @@ export class ConversationRepository extends RepositoryBase<Partial<ConversationE
       .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .where('conversation_users.idUser', '=', idUser)
-      .limit(filter.limit ?? 20)
+      .limit(filter.limit || 20)
+      .offset((filter?.page - 1) * filter.page || 20)
 
-
-    if (filter.idGraterThan) {
-      data.where('id', '>', filter.idGraterThan)
+    if (filter.createdAtGraterThan) {
+      data.where('createdAt', '>', filter.createdAtGraterThan)
     }
 
-    if (filter.idLessThan) {
-      data.where('id', '<', filter.idLessThan)
+    if (filter.createdAtLessThan) {
+      data.where('createdAt', '<', filter.createdAtLessThan)
     }
-
 
     if (filter.messageId) {
-      const aux = await data.where('messageId', '=', filter.messageId).first() as ConversationEntity
+      const conversation = await data.where('messageId', '=', filter.messageId).first() as ConversationEntity
 
-      const afterId = (+aux.id) - 10
-      const beforeId = aux.id + 9
+      const conversationDate = DateTime.fromJSDate(conversation.createdAt as any).toSQLDate()
 
-      const registersAfters = await this.findAllConversationByUser(idEmpresa, idUser, { limit: 10, idGraterThan: afterId })
-      const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, { limit: 9, idLessThan: +beforeId })
+      const registersAfters = await this.findAllConversationByUser(idEmpresa, idUser, {
+        limit: 10,
+        createdAtGraterThan: conversationDate
+      })
+
+      const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, {
+        limit: 9,
+        createdAtLessThan: conversationDate
+      })
 
       return [
         ...registerBefores,
-        aux,
+        conversation,
         ...registersAfters
       ]
     }

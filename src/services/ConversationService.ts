@@ -8,20 +8,23 @@ import { BadRequestExeption } from '../util/exceptions/BadRequest'
 import { MessageID } from '../util/utils'
 import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
+import { UserService } from './UserService'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
   #conversationUsersRepository: ConversationUsersRepository
   #conversationMessageRepository: ConversationMessageRepository
+  #userService: UserService
   #contactService: ContactService
   #clientsWpp: ClientsWpp
 
-  constructor({ contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor({ userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
     this.#contactService = contactService
     this.#clientsWpp = clientsWpp
+    this.#userService = userService
   }
 
   public async save(conversation: ConversationEntity): Promise<string> {
@@ -137,17 +140,87 @@ export class ConversationService {
     )
   }
 
-  public async findAll(idEmpresa: string, idUser: string, filter?: { messageId?: string }): Promise<ConversationEntity[]> {
+  public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
     const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser, filter)
+
     return conversations
   }
 
-  public async listMessages(idEmpresa: string, idConversation: string, page: number) {
-    const messages = await this.#conversationMessageRepository
-      .findMessagesByIdConversation(idEmpresa, idConversation, page)
+  async findById(id: string, idEmpresa: string): Promise<ConversationEntity> {
+    const conversation = await this.#conversationRepository.findById(id, idEmpresa)
 
-    await this.#conversationRepository
-      .update({ isRead: true }, idConversation, idEmpresa)
+    if (!conversation) {
+      throw new BadRequestExeption('Conversa não encontrada')
+    }
+
+    return conversation as ConversationEntity
+  }
+
+  public async transfer(idEmpresa: string, idUserLogged: string, idUserTransfer: string, conversationId: string, trasnferMessges: boolean): Promise<void> {
+    const userLogged = await this.#userService.findById(idUserLogged, idEmpresa)
+
+    if (!userLogged.isMaster) {
+      throw new BadRequestExeption('Usuário sem permissão para transferir conversa')
+    }
+
+    await this.#userService.findById(idUserTransfer, idEmpresa)
+
+    const conversation = await this.findById(conversationId, idEmpresa)
+
+    if (!trasnferMessges) {
+      conversation.finishedAt = new Date().toISOString()
+      conversation.isRead = true
+
+      await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
+
+      // cria uma nova conversa com aquele usuario
+      const idConversation = await this.save({
+        idContact: conversation.idContact,
+        idEmpresa,
+        isRead: false,
+      })
+
+      await this.addUser([
+        new ConversationUserEntity({
+          idUser: idUserTransfer,
+          idConversation,
+          idEmpresa
+        })
+      ])
+
+      return
+    }
+
+    const oldUsers = await this.#conversationUsersRepository.findByConversation(conversation.id, idEmpresa)
+
+    const conversationsUsers = oldUsers.map(e => {
+      return new ConversationUserEntity({
+        idUser: e.idUser,
+        idConversation: conversation.id!,
+        idEmpresa
+      })
+    })
+
+    conversationsUsers.push(new ConversationUserEntity({
+      idUser: idUserTransfer,
+      idConversation: conversation.id!,
+      idEmpresa
+    }))
+
+
+    await this.addUser(conversationsUsers)
+  }
+
+  public async listMessages(idEmpresa: string, idUser: string, idContact: string, page: number) {
+    const user = await this.#userService.findById(idUser, idEmpresa)
+
+    const messages = await this.#conversationMessageRepository
+      .findAllPaginationWithConversationIdUser(
+        idEmpresa,
+        idContact,
+        (user.isMaster ? null : idUser),
+        page
+      )
 
     return messages
   }
