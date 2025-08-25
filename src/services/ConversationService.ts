@@ -27,10 +27,7 @@ export class ConversationService {
   public async save(conversation: ConversationEntity): Promise<string> {
     const conversationData = new ConversationEntity(conversation)
 
-    await this.#conversationRepository.save({
-      idContact: conversationData.idContact,
-      idEmpresa: conversationData.idEmpresa
-    })
+    await this.#conversationRepository.save(conversationData)
 
     for await (const item of (conversation?.users ?? [])) {
       await this.#conversationUsersRepository.save({
@@ -50,11 +47,11 @@ export class ConversationService {
     }
 
     for await (const item of conversationUser) {
-      await this.#conversationUsersRepository.save({
+      await this.#conversationUsersRepository.save(new ConversationUserEntity({
         idUser: item.idUser,
         idConversation: item.idConversation,
         idEmpresa: item.idEmpresa
-      })
+      }))
     }
   }
 
@@ -91,6 +88,8 @@ export class ConversationService {
         mimetype: conversationMessage.mimetype,
         fileName: conversationMessage.fileName
       })
+
+      // faz o upload da imagem para o servidor e pega o link
     }
 
     if (!isMessageSend) {
@@ -99,13 +98,15 @@ export class ConversationService {
 
     const conversationMessageData = new ConversationMessageEntity(conversationMessage)
 
-    await this.#conversationMessageRepository.save({
+    await this.#conversationMessageRepository.save(new ConversationMessageEntity({
       idEmpresa: conversationMessageData.idEmpresa,
       idConversation: conversationMessageData.idConversation,
       idUser: conversationMessageData.idUser,
       message: conversationMessageData.message,
-      messageId: isMessageSend?.id ?? MessageID()
-    })
+      messageId: isMessageSend?.id ?? MessageID(),
+      file: conversationMessageData.file,
+      hasMedia: conversationMessageData.hasMedia,
+    }))
 
     await this.updateLastMessage(
       conversationMessage.idConversation,
@@ -117,7 +118,7 @@ export class ConversationService {
   }
 
   public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string) {
-    await this.#conversationMessageRepository.save({
+    const conversationData = new ConversationMessageEntity({
       idEmpresa: idEmpresa,
       idConversation: idConversation,
       idUser: idUser,
@@ -126,6 +127,8 @@ export class ConversationService {
       hasMedia: hasMedia,
       file: hasMedia ? url : '',
     })
+
+    await this.#conversationMessageRepository.save(conversationData)
 
     await this.updateLastMessage(
       idConversation,

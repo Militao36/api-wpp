@@ -53,11 +53,11 @@ export class ConversationController {
     const idEmpresa = request.idEmpresa
 
     const body = request.body.ids.map((e: any): Partial<ConversationUserEntity> => {
-      return {
+      return new ConversationUserEntity({
         idUser: e,
         idConversation: request.body.idConversation,
         idEmpresa
-      }
+      })
     })
 
     await this.#conversationService.addUser(body)
