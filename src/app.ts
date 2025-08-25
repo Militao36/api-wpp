@@ -15,7 +15,7 @@ app.disable('x-powered-by')
 
 app.use((req, res, next) => {
   req.idEmpresa = '1'
-  req.idUser = 1
+  req.idUser = '1'
   return next()
 })
 

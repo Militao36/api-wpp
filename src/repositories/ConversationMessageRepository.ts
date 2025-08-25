@@ -1,29 +1,15 @@
 import { Knex } from 'knex'
-import { User } from './UserRepository'
 import { RepositoryBase } from './base/RepositoryBase'
-import { Conversation } from './ConversationRepository'
+import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 
-export type ConversationMessage = {
-  id: number
-  idEmpresa: string
-  idConversation: number
-  idUser: number
-  message: string
-  messageId: string
-  user: User
-  conversation: Conversation
-  hasMedia: boolean
-  file: string
-}
-
-export class ConversationMessageRepository extends RepositoryBase<Partial<ConversationMessage>> {
+export class ConversationMessageRepository extends RepositoryBase<Partial<ConversationMessageEntity>> {
   #database: Knex
   constructor({ database }) {
     super('conversation_message', database)
     this.#database = database
   }
 
-  async findMessagesByIdConversation(idEmpresa: string, idConversation: number, page = 30): Promise<ConversationMessage[]> {
+  async findMessagesByIdConversation(idEmpresa: string, idConversation: string, page = 30): Promise<ConversationMessageEntity[]> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa })
@@ -34,7 +20,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     return messagesConverstion
   }
 
-  async findByLatestMessageIdConversation(idEmpresa: string, idConversation: number, idUser: number): Promise<ConversationMessage> {
+  async findByLatestMessageIdConversation(idEmpresa: string, idConversation: string, idUser: string): Promise<ConversationMessageEntity> {
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa, idUser })

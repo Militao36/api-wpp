@@ -1,8 +1,6 @@
 import { Knex } from 'knex'
-import { Contact } from './ContactRepository'
-import { User } from './UserRepository'
 import { RepositoryBase } from './base/RepositoryBase'
-import { ConversationMessage } from './ConversationMessageRepository'
+import { ConversationEntity } from '../entity/ConversationEntity'
 
 export type FilterConversationRepository = {
   limit?: number
@@ -25,28 +23,14 @@ export type FilterConversationRepository = {
   }
 }
 
-export type Conversation = {
-  id?: number
-  idEmpresa?: string
-  idContact?: number
-  idPreviousConversation?: number
-  finishedAt?: string
-  isRead: boolean
-  lastMessage?: string
-  users?: User[]
-  contact?: Contact
-  conversation?: Conversation
-  messages?: ConversationMessage[]
-}
-
-export class ConversationRepository extends RepositoryBase<Partial<Conversation>> {
+export class ConversationRepository extends RepositoryBase<Partial<ConversationEntity>> {
   #database: Knex
   constructor({ database }) {
     super('conversations', database)
     this.#database = database
   }
 
-  async findConversationByContactNotFinished(idEmpresa: string, idContact: number): Promise<Conversation> {
+  async findConversationByContactNotFinished(idEmpresa: string, idContact: string): Promise<ConversationEntity> {
     return this.#database.table(this.table)
       .select()
       .where({ idEmpresa, idContact, finishedAt: null })
@@ -55,14 +39,14 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
 
   async findAllConversationByUser(
     idEmpresa: string,
-    idUser: number,
+    idUser: string,
     filter?: {
       messageId?: string,
       limit?: number,
       idGraterThan?: number,
       idLessThan?: number
     }
-  ): Promise<Conversation[]> {
+  ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
       .select(['conversations.*', 'contacts.name'])
       .where('conversations.idEmpresa', '=', idEmpresa)
@@ -82,14 +66,13 @@ export class ConversationRepository extends RepositoryBase<Partial<Conversation>
 
 
     if (filter.messageId) {
-      const aux = (await data.where('messageId', '=', filter.messageId).first()) as Conversation
+      const aux = await data.where('messageId', '=', filter.messageId).first() as ConversationEntity
 
-      const afterId = aux.id - 10
+      const afterId = (+aux.id) - 10
       const beforeId = aux.id + 9
 
       const registersAfters = await this.findAllConversationByUser(idEmpresa, idUser, { limit: 10, idGraterThan: afterId })
-      const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, { limit: 9, idLessThan: beforeId })
-
+      const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, { limit: 9, idLessThan: +beforeId })
 
       return [
         ...registerBefores,

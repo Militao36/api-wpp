@@ -2,21 +2,9 @@
 import { Knex } from "knex";
 
 import { RepositoryBase } from "./base/RepositoryBase";
-import { Sector } from "./SectorRepository";
-import { User } from "./UserRepository";
+import { UserSectorEntity } from "../entity/UserSectorEntity";
 
-export type UserSector = {
-  id: number
-  idEmpresa: string
-  idUser: number
-  idSector: number
-
-  sectors?: Sector
-  users?: User
-}
-
-
-export class UserSectorRepository extends RepositoryBase<Partial<UserSector>> {
+export class UserSectorRepository extends RepositoryBase<Partial<UserSectorEntity>> {
   #database: Knex
   constructor({ database }) {
     super('user_sector', database)

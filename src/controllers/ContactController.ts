@@ -35,7 +35,7 @@ export class ContactController {
     const idEmpresa = request.idEmpresa
     const { id } = request.params
 
-    const contacts = await this.#contactService.findById(idEmpresa, Number(id))
+    const contacts = await this.#contactService.findById(idEmpresa, id)
     return response.status(200).json(contacts)
   }
 }

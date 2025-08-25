@@ -2,8 +2,8 @@ import { GET, POST, before, route } from 'awilix-express'
 import { NextFunction, Request, Response } from 'express'
 import Joi from 'joi'
 
-import { ConversationUser } from '../repositories/ConversationUsersRepository'
 import { ConversationService } from '../services/ConversationService'
+import { ConversationUserEntity } from '../entity/ConversationUserEntity'
 
 @route('/conversations')
 export class ConversationController {
@@ -52,7 +52,7 @@ export class ConversationController {
   async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const body = request.body.ids.map((e: any): Partial<ConversationUser> => {
+    const body = request.body.ids.map((e: any): Partial<ConversationUserEntity> => {
       return {
         idUser: e,
         idConversation: request.body.idConversation,
@@ -102,7 +102,7 @@ export class ConversationController {
     const { page } = request.query
 
     const data = await this.#conversationService
-      .listMessages(idEmpresa, Number(request?.params?.idConversation), Number(page))
+      .listMessages(idEmpresa, request?.params?.idConversation, Number(page))
 
     return response.status(200).json(data)
   }

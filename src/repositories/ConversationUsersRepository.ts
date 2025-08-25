@@ -1,33 +1,30 @@
 import { Knex } from "knex";
 
 import { RepositoryBase } from "./base/RepositoryBase";
+import { ConversationUserEntity } from "../entity/ConversationUserEntity";
 
-
-export type ConversationUser = {
-  id: number
-  idEmpresa: string
-  idUser: number
-  idConversation: number
-}
-
-export class ConversationUsersRepository extends RepositoryBase<Partial<ConversationUser>> {
+export class ConversationUsersRepository extends RepositoryBase<Partial<ConversationUserEntity>> {
   #database: Knex
   constructor({ database }) {
     super('conversation_users', database)
     this.#database = database
   }
 
-  async relationExists(idUser: number, idConversation: number, idEmpresa: string) {
-    const exists = await this.#database.table<ConversationUser>(this.table)
+  async relationExists(idUser: string, idConversation: string, idEmpresa: string) {
+    const exists = await this.#database.table<ConversationUserEntity>(this.table)
       .select()
-      .where({ idUser, idConversation, idEmpresa })
+      .where({
+        idUser,
+        idConversation,
+        idEmpresa
+      })
       .first()
 
     return !!exists
   }
 
-  async deleteAllRelations(idConversation: number, idEmpresa: string) {
-    await this.#database.table<ConversationUser>(this.table)
+  async deleteAllRelations(idConversation: string, idEmpresa: string) {
+    await this.#database.table<ConversationUserEntity>(this.table)
       .delete()
       .where({ idConversation, idEmpresa })
   }

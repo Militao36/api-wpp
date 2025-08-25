@@ -4,7 +4,7 @@ const TABLE = 'users'
 
 export async function up (knex: Knex): Promise<void> {
   return knex.schema.createTable(TABLE, (table) => {
-    table.increments('id')
+    table.uuid('id').primary()
     table.uuid('idEmpresa').notNullable()
     table.string('name', 100).defaultTo(null)
     table.string('username', 100).unique().notNullable()

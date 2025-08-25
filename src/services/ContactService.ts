@@ -1,4 +1,5 @@
-import { Contact, ContactRepository } from '../repositories/ContactRepository'
+import { ContactEntity } from "../entity/ContactEntity"
+import { ContactRepository } from "../repositories/ContactRepository"
 
 export class ContactService {
   #contactRepository: ContactRepository
@@ -6,16 +7,19 @@ export class ContactService {
     this.#contactRepository = contactRepository
   }
 
-  public async save(contact: Contact): Promise<number> {
-    const id = await this.#contactRepository.save(contact)
-    return id
+  public async save(contact: ContactEntity): Promise<string> {
+    const contactData = new ContactEntity(contact)
+    
+    await this.#contactRepository.save(contactData)
+
+    return contactData.id!
   }
 
   public async findByPhone(idEmpresa: string, phone: string) {
     return this.#contactRepository.findByPhone(idEmpresa, phone)
   }
 
-  public async findById(idEmpresa: string, id: number) {
+  public async findById(idEmpresa: string, id: string) {
     return this.#contactRepository.findById(id, idEmpresa)
   }
 
