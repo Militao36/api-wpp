@@ -63,7 +63,6 @@ export class WhatsAppController {
         )
         
       }
-      // await Promise.all(contacts.map(c => this.#contactService.save(c)))
 
       return response.status(201).json({ imported: contacts.length })
     } catch (err) {
