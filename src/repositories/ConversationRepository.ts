@@ -44,6 +44,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     filter?: {
       messageId?: string,
       limit?: number,
+      finished?: string,
       createdAtGraterThan?: string,
       createdAtLessThan?: string
       page?: number
@@ -55,8 +56,8 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .where('conversation_users.idUser', '=', idUser)
-      .limit(filter.limit || 20)
-      .offset((filter?.page - 1) * filter.page || 20)
+      .limit((filter.limit || 20))
+      .offset(((filter?.page || 1) - 1) * (filter.page || 20))
 
     if (filter.createdAtGraterThan) {
       data.where('createdAt', '>', filter.createdAtGraterThan)
@@ -86,6 +87,14 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
         conversation,
         ...registersAfters
       ]
+    }
+
+    if (filter.finished) {
+      if (filter.finished === 'true') {
+        data.whereNotNull('conversations.finishedAt')
+      } else {
+        data.whereNull('conversations.finishedAt')
+      }
     }
 
     return await data

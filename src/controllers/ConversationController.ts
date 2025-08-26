@@ -89,9 +89,9 @@ export class ConversationController {
   async findAll(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
     const idUser = request.idUser
-    const messageId = request.query.messageId as string
+    const { messageId, filter } = request.query as { messageId?: string, filter?: Record<string, string> }
 
-    const data = await this.#conversationService.findAll(idEmpresa, idUser, { messageId })
+    const data = await this.#conversationService.findAll(idEmpresa, idUser, { messageId, ...filter })
     return response.status(200).json(data)
   }
 

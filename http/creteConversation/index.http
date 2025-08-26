@@ -31,8 +31,7 @@ Content-Type: application/json
 }
 
 ### Buscar mensagens conversas 
-GET http://localhost:3000/conversations/list-messages?filter[idConversation]=10
-
+GET http://localhost:3000/conversations?filter[finished]=true
 
 ### lista mensagens com base no contatoId
 GET http://localhost:3000/conversations/list-messages/abf6b40e-b56d-42be-b70f-6200e9a71628
