@@ -17,9 +17,9 @@ export class ContactRepository extends RepositoryBase<Partial<ContactEntity>> {
       .first()
   }
 
-  async findAll(idEmpresa: string): Promise<Pick<ContactEntity, "name" | "phone" | "id">[]> {
+  async findAll(idEmpresa: string): Promise<ContactEntity[]> {
     const data = this.#database.table(this.table)
-      .select(["name", "phone", "id"])
+      .select('*')
       .where('idEmpresa', '=', idEmpresa)
 
     return await data

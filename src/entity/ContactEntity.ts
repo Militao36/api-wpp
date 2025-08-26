@@ -16,15 +16,15 @@ export class ContactEntity extends Entity {
   constructor(data: Omit<ContactEntity, 'id'>, id?: string) {
     super(data, id)
     this.idEmpresa = data.idEmpresa
-    this.name = data.idEmpresa
-    this.phone = data.idEmpresa
-    this.email = data.idEmpresa
-    this.gender = data.idEmpresa
-    this.address = data.idEmpresa
-    this.complement = data.idEmpresa
-    this.city = data.idEmpresa
-    this.state = data.idEmpresa
-    this.postalCode = data.idEmpresa
-    this.nation = data.idEmpresa
+    this.name = data.name
+    this.phone = data.phone
+    this.email = data.email
+    this.gender = data.gender
+    this.address = data.address
+    this.complement = data.complement
+    this.city = data.city
+    this.state = data.state
+    this.postalCode = data.postalCode
+    this.nation = data.nation
   }
 }
