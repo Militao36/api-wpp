@@ -176,6 +176,26 @@ export class ClientsWpp {
     return 'Desconectado'
   }
 
+  async getContacts(idEmpresa: string) {
+    // /api/contacts/all?
+    const config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${this.url}/api/contacts/all?session=${idEmpresa}`,
+      headers: {
+        Authorization: `Basic ${this.token}`
+      }
+    }
+
+    const response = await axios.request(config)
+
+    if (response?.status === 401) {
+      throw new BadRequestExeption('Whatsapp desconectado')
+    }
+
+    return response.data as any[]
+  }
+
   async sendMessage(idEmpresa: string, data: { chatId: string, message: string }) {
     const health = await this.health(idEmpresa)
 
