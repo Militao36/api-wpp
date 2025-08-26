@@ -14,12 +14,14 @@ import { ConversationMessageRepository } from './repositories/ConversationMessag
 import { ClientsWpp } from './wpp'
 import { SyncContacts } from './queue'
 import { AwsService } from './services/AwsService'
+import { clientRedis } from './util/config/redis'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
     logger: asClass(Logger).singleton(),
     database: asValue(database),
     clientsWpp: asClass(ClientsWpp).singleton(),
+    redis: asValue(clientRedis),
     //services
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),

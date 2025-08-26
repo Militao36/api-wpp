@@ -7,6 +7,8 @@ import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
 import { ContactEntity } from '../entity/ContactEntity'
 import { SyncContacts } from '../queue'
+import { RedisClientType } from 'redis'
+import { DateTime } from 'luxon'
 
 @route('/zap')
 export class WhatsAppController {
@@ -14,12 +16,14 @@ export class WhatsAppController {
   #conversationService: ConversationService
   #contactService: ContactService
   #syncContacts: typeof SyncContacts
+  #clientRedis: RedisClientType
 
-  constructor({ clientsWpp, syncContacts, conversationService, contactService }) {
+  constructor({ clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
     this.#syncContacts = syncContacts
+    this.#clientRedis = clientRedis
   }
 
   @route('/health')
@@ -38,7 +42,27 @@ export class WhatsAppController {
   @POST()
   async syncContacts(request: Request, response: Response) {
     try {
+      const sync = await this.#clientRedis.get(`sync-contacts-${request.idEmpresa}`)
+
+      if (sync) {
+        return response.status(200).json({ message: 'Aguarde, sincronização em andamento' })
+      }
+
+      const lastSync = await this.#clientRedis.get(`last-sync-contacts-${request.idEmpresa}`) as string
+
+      if (lastSync) {
+        const lastSyncDate = DateTime.fromISO(lastSync)
+        const now = DateTime.local()
+        const diffDays = now.diff(lastSyncDate, 'days').days
+
+        if (diffDays < 1) {
+          return response.status(200).json({ message: 'Sincronização realizada a menos de 24 horas' })
+        }
+      }
+
       const result = await this.#clientsWpp.getContacts(request.idEmpresa)
+
+      await this.#clientRedis.set(`sync-contacts-${request.idEmpresa}`, 'true')
 
       const contacts = result.filter(e => !!e.pushname).filter(e => e.name !== '447876137368').map(c => {
         return new ContactEntity({
@@ -50,7 +74,12 @@ export class WhatsAppController {
 
       const chucks = _.chunk(contacts, 20)
 
+      let count = 0
       for (const chuck of chucks) {
+        if (count === chucks.length - 1) {
+          await this.#clientRedis.del(`sync-contacts-${request.idEmpresa}`)
+        }
+
         await this.#syncContacts.add(
           { contacts: chuck },
           {
@@ -63,7 +92,10 @@ export class WhatsAppController {
           }
         )
 
+        count++;
       }
+
+      await this.#clientRedis.set(`last-sync-contacts-${request.idEmpresa}`, DateTime.local().toISO())
 
       return response.status(201).json({ imported: contacts.length })
     } catch (err) {
