@@ -26,7 +26,13 @@ export class ClientsWpp {
               'message'
             ]
           }
-        ]
+        ],
+        "noweb": {
+          "store": {
+            "enabled": true,
+            "fullSync": false
+          }
+        }
       }
     })
 

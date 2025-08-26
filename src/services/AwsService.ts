@@ -5,6 +5,7 @@ export class AwsService {
   private s3Client: S3
 
   constructor() {
+    console.log(process.env.DIGITAL_ACCESS_KEY_ID, process.env.DIGITAL_SECRET_ACCESS_KEY)
     this.s3Client = new S3({
       region: 'us-east-1',
       credentials: {
@@ -24,12 +25,12 @@ export class AwsService {
       Bucket: process.env.BUCKET_NAME,
       Key: key,
       Body: fileContent,
-      ACL: 'public-read'
+      ACL: 'public-read',
     }))
 
     return {
       ...result,
-      url: `${process.env.S3_URL}/${key}`
+      url: `${process.env.DIGITAL_SPACES_URL}/${key}`
     }
   }
 }

@@ -40,11 +40,11 @@ export class WhatsAppController {
     try {
       const result = await this.#clientsWpp.getContacts(request.idEmpresa)
 
-      const contacts = result.filter(e => e.jid).map(c => {
+      const contacts = result.filter(e => !!e.pushname).filter(e => e.name !== '447876137368').map(c => {
         return new ContactEntity({
           idEmpresa: request.idEmpresa,
           name: c.name || c.pushname || 'Sem nome',
-          phone: c.jid.replace(/\D/g, '')
+          phone: c.id.replace(/\D/g, '')
         })
       })
 
@@ -58,10 +58,11 @@ export class WhatsAppController {
             backoff: {
               type: 'exponential',
               delay: 5000
-            }
+            },
+            removeOnComplete: true,
           }
         )
-        
+
       }
 
       return response.status(201).json({ imported: contacts.length })

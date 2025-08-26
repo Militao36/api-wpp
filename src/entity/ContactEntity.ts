@@ -28,7 +28,7 @@ export class ContactEntity extends Entity {
     this.state = data.state
     this.postalCode = data.postalCode
     this.nation = data.nation
-    this.urlProfile = data.idEmpresa
+    this.urlProfile = data.urlProfile
     this.isManual = data.isManual ?? false
   }
 }
