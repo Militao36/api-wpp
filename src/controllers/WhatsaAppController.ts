@@ -4,6 +4,7 @@ import { Request, Response } from 'express'
 import { ClientsWpp } from '../wpp'
 import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
+import { ContactEntity } from '../entity/ContactEntity'
 
 @route('/zap')
 export class WhatsAppController {
@@ -24,6 +25,28 @@ export class WhatsAppController {
       const result = await this.#clientsWpp.health(request.idEmpresa)
 
       return response.status(200).send(result)
+    } catch (err) {
+      return response.status(200).send('Desconectado')
+    }
+  }
+
+  @route('/sync/contacts')
+  @POST()
+  async syncContacts(request: Request, response: Response) {
+    try {
+      const result = await this.#clientsWpp.getContacts(request.idEmpresa)
+
+      const contacts = result.filter(e => e.jid).map(c => {
+        return new ContactEntity({
+          idEmpresa: request.idEmpresa,
+          name: c.name || c.pushname || 'Sem nome',
+          phone: c.jid.replace(/\D/g, '')
+        })
+      })
+
+      await Promise.all(contacts.map(c => this.#contactService.save(c)))
+
+      return response.status(201).json({ imported: contacts.length })
     } catch (err) {
       return response.status(200).send('Desconectado')
     }
@@ -69,7 +92,6 @@ export class WhatsAppController {
     const eventsNamesValids = ['message']
     const body = request.body as any
     const idEmpresa = body.session
-
 
     if (
       !eventsNamesValids.includes(body.event) ||
