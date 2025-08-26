@@ -1,4 +1,4 @@
-import { GET, POST, route } from 'awilix-express'
+import { GET, POST, PUT, route } from 'awilix-express'
 import { Request, Response } from 'express'
 
 import { ContactService } from '../services/ContactService'
@@ -24,6 +24,7 @@ export class ContactController {
   }
 
   @route('/:id')
+  @PUT()
   async update(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
     const { id } = request.params
