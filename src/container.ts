@@ -21,7 +21,7 @@ const definition = {
     logger: asClass(Logger).singleton(),
     database: asValue(database),
     clientsWpp: asClass(ClientsWpp).singleton(),
-    redis: asValue(clientRedis),
+    clientRedis: asValue(clientRedis),
     //services
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),
