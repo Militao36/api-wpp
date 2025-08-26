@@ -12,6 +12,8 @@ export class ContactEntity extends Entity {
   state?: string
   postalCode?: string
   nation?: string
+  urlProfile?: string
+  isManual?: boolean
 
   constructor(data: Omit<ContactEntity, 'id'>, id?: string) {
     super(data, id)
@@ -26,5 +28,7 @@ export class ContactEntity extends Entity {
     this.state = data.state
     this.postalCode = data.postalCode
     this.nation = data.nation
+    this.urlProfile = data.idEmpresa
+    this.isManual = data.isManual ?? false
   }
 }

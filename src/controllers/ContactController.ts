@@ -6,23 +6,39 @@ import { ContactService } from '../services/ContactService'
 @route('/contacts')
 export class ContactController {
   #contactService: ContactService
-  constructor ({ contactService }) {
+  constructor({ contactService }) {
     this.#contactService = contactService
   }
 
   @POST()
-  async save (request: Request, response: Response) {
+  async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#contactService.save({
       ...request.body,
-      idEmpresa
+      idEmpresa,
+      isManual: true
     })
+
     return response.status(201).json({ id })
   }
 
+  @route('/:id')
+  async update(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+    const { id } = request.params
+
+    await this.#contactService.update(id, idEmpresa, {
+      ...request.body,
+      idEmpresa,
+      isManual: true
+    })
+    
+    return response.status(204).send()
+  }
+
   @GET()
-  async findAll (request: Request, response: Response) {
+  async findAll(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const contacts = await this.#contactService.findAll(idEmpresa)
@@ -31,7 +47,7 @@ export class ContactController {
 
   @route('/:id')
   @GET()
-  async findById (request: Request, response: Response) {
+  async findById(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
     const { id } = request.params
 

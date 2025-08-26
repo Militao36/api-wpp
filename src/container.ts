@@ -12,6 +12,8 @@ import { Logger } from './util/Logger'
 import { ConversationUsersRepository } from './repositories/ConversationUsersRepository'
 import { ConversationMessageRepository } from './repositories/ConversationMessageRepository'
 import { ClientsWpp } from './wpp'
+import { SyncContacts } from './queue'
+import { AwsService } from './services/AwsService'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
@@ -22,13 +24,16 @@ const definition = {
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),
     conversationService: asClass(ConversationService).singleton(),
-    
+    awsService: asClass(AwsService).singleton(),
+
     //repository
     userRepository: asClass(UserRepository).singleton(),
     contactRepository: asClass(ContactRepository).singleton(),
     conversationRepository: asClass(ConversationRepository).singleton(),
     conversationUsersRepository: asClass(ConversationUsersRepository).singleton(),
     conversationMessageRepository: asClass(ConversationMessageRepository).singleton(),
+    // queue filas
+    syncContacts: asValue(SyncContacts)
 }
 
 const container = createContainer({

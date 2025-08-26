@@ -196,6 +196,25 @@ export class ClientsWpp {
     return response.data as any[]
   }
 
+  async getUrlProfileByContact(idEmpresa: string, chatId: string) {
+    const config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${this.url}/api/contacts/profile-picture?contactId=${chatId.replace(/\D/g, '')}@c.us&refresh=false&session=${idEmpresa}`,
+      headers: {
+        Authorization: `Basic ${this.token}`
+      }
+    }
+
+    const response = await axios.request(config)
+
+    if (response?.status === 401) {
+      throw new BadRequestExeption('Whatsapp desconectado')
+    }
+
+    return response.data.profilePictureURL as string
+  }
+
   async sendMessage(idEmpresa: string, data: { chatId: string, message: string }) {
     const health = await this.health(idEmpresa)
 

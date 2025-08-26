@@ -1,21 +1,25 @@
 import { GET, POST, route } from 'awilix-express'
 import { Request, Response } from 'express'
+import _ from 'lodash'
 
 import { ClientsWpp } from '../wpp'
 import { ConversationService } from '../services/ConversationService'
 import { ContactService } from '../services/ContactService'
 import { ContactEntity } from '../entity/ContactEntity'
+import { SyncContacts } from '../queue'
 
 @route('/zap')
 export class WhatsAppController {
   #clientsWpp: ClientsWpp
   #conversationService: ConversationService
   #contactService: ContactService
+  #syncContacts: typeof SyncContacts
 
-  constructor({ clientsWpp, conversationService, contactService }) {
+  constructor({ clientsWpp, syncContacts, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
+    this.#syncContacts = syncContacts
   }
 
   @route('/health')
@@ -44,7 +48,22 @@ export class WhatsAppController {
         })
       })
 
-      await Promise.all(contacts.map(c => this.#contactService.save(c)))
+      const chucks = _.chunk(contacts, 20)
+
+      for (const chuck of chucks) {
+        await this.#syncContacts.add(
+          { contacts: chuck },
+          {
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 5000
+            }
+          }
+        )
+        
+      }
+      // await Promise.all(contacts.map(c => this.#contactService.save(c)))
 
       return response.status(201).json({ imported: contacts.length })
     } catch (err) {
