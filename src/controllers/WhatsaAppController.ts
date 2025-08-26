@@ -79,7 +79,7 @@ export class WhatsAppController {
     return response.status(200).json({})
   }
 
-  @route('/health/:id')
+  @route('/disconnect')
   @GET()
   async disconnect(request: Request, response: Response) {
     await this.#clientsWpp.stop(request.idEmpresa)
