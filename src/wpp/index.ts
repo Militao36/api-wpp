@@ -243,7 +243,7 @@ export class ClientsWpp {
           Authorization: `Basic ${this.token}`
         },
         data: {
-          chatId: `55${data.chatId.replace(/\(/ig, '').replace(/\)/ig, '').replace(/-/ig, '').replace(/\(/ig, '')}@c.us`,
+          chatId: `55${data.chatId}@c.us`,
           text: data.message,
           session: idEmpresa
         }
@@ -283,7 +283,7 @@ export class ClientsWpp {
           Authorization: `Basic ${this.token}`
         },
         data: {
-          chatId: `55${data.chatId.replace(/\(/ig, '').replace(/\)/ig, '').replace(/-/ig, '').replace(/\(/ig, '')}@c.us`,
+          chatId: `55${data.chatId}@c.us`,
           session: idEmpresa,
           caption: data.caption,
           file: {
