@@ -78,7 +78,7 @@ export class ConversationService {
     let chatId = null
 
     try {
-      chatId = (await this.#clientsWpp.numberExists(conversationMessage.idEmpresa, contact.phone)).substring(2)
+      chatId = await this.formatChatId(conversationMessage.idEmpresa, contact.phone)
     } catch (error) {
       chatId = contact.phone.replace(/^(\d{2})9(\d{8})$/, '$1$2')
     }
