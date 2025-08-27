@@ -33,4 +33,22 @@ export class AwsService {
       url: `${process.env.DIGITAL_SPACES_URL}/${key}`
     }
   }
+
+  async uploadFileBase64(base64: string, fileName: string, folderBucket: string = '') {
+    const buffer = Buffer.from(base64, 'base64')
+
+    const key = folderBucket ? `${folderBucket}/${fileName}` : fileName
+
+    const result = await this.s3Client.send(new PutObjectCommand({
+      Bucket: process.env.BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ACL: 'public-read',
+    }))
+
+    return {
+      ...result,
+      url: `${process.env.DIGITAL_SPACES_URL}/${key}`
+    }
+  }
 }

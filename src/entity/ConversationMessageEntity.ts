@@ -6,7 +6,6 @@ export class ConversationMessageEntity extends Entity {
   idUser: string
   message: string
   messageId: string
-
   hasMedia: boolean
   file: string
 

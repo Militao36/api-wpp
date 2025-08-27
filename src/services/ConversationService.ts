@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon'
+import { randomUUID } from 'crypto'
 import { ConversationEntity } from '../entity/ConversationEntity'
 import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 import { ConversationUserEntity } from '../entity/ConversationUserEntity'
@@ -10,6 +11,7 @@ import { MessageID } from '../util/utils'
 import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
 import { UserService } from './UserService'
+import { AwsService } from './AwsService'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -18,14 +20,16 @@ export class ConversationService {
   #userService: UserService
   #contactService: ContactService
   #clientsWpp: ClientsWpp
+  #awsService: AwsService
 
-  constructor({ userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor({ awsService, userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
     this.#contactService = contactService
     this.#clientsWpp = clientsWpp
     this.#userService = userService
+    this.#awsService = awsService
   }
 
   public async save(conversation: ConversationEntity): Promise<string> {
@@ -59,9 +63,8 @@ export class ConversationService {
     }
   }
 
-  public async message(conversationMessage: Partial<ConversationMessageEntity & { fileName: string, mimetype: string }>) {
-    const conversation = await this.#conversationRepository
-      .findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
+  public async message(conversationMessage: Partial<ConversationMessageEntity & { fileName: string, mimetype: string, idContact: string }>): Promise<string> {
+    const conversation = await this.findOrCreateConversation(conversationMessage.idEmpresa, conversationMessage.idContact!, conversationMessage.idUser!)
 
     const contact = await this.#contactService.findById(
       conversationMessage.idEmpresa,
@@ -71,12 +74,10 @@ export class ConversationService {
     let isMessageSend = null
 
     if (!conversationMessage.hasMedia) {
-      // isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
-      //   chatId: contact.phone,
-      //   message: conversationMessage.message
-      // })
-
-      isMessageSend = true
+      isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
+        chatId: contact.phone,
+        message: conversationMessage.message
+      })
     }
 
     if (conversationMessage.hasMedia) {
@@ -95,7 +96,11 @@ export class ConversationService {
         fileName: conversationMessage.fileName
       })
 
-      // faz o upload da imagem para o servidor e pega o link
+      await this.#awsService.uploadFileBase64(
+        conversationMessage.file,
+        `${randomUUID()}.${conversationMessage.fileName.split('.').pop()}`,
+        'chat-media'
+      )
     }
 
     if (!isMessageSend) {
@@ -230,5 +235,27 @@ export class ConversationService {
   public async findConversationByContactNotFinished(idEmpresa: string, idContact: string) {
     return this.#conversationRepository
       .findConversationByContactNotFinished(idEmpresa, idContact)
+  }
+
+  private async findOrCreateConversation(idEmpresa: string, idContact: string, idUser: string) {
+    let conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
+
+    if (!conversation) {
+      const idConversation = await this.save({
+        idEmpresa,
+        idContact,
+        isRead: false,
+        users: [
+          new ConversationUserEntity({
+            idUser,
+            idEmpresa,
+          })
+        ]
+      })
+
+      conversation = await this.findById(idConversation, idEmpresa)
+    }
+
+    return conversation
   }
 }

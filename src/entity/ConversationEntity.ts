@@ -11,7 +11,7 @@ export class ConversationEntity extends Entity {
   isRead: boolean
   lastMessage?: string
 
-  users?: UserEntity[]
+  users?: Partial<UserEntity>[]
   contact?: ContactEntity
   previusConversation?: ConversationEntity
   messages?: ConversationMessageEntity[]
