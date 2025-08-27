@@ -2,37 +2,22 @@ import { GET, POST, PUT, route } from 'awilix-express'
 import { Request, Response } from 'express'
 
 import { ContactService } from '../services/ContactService'
-import { ClientsWpp } from '../wpp'
 
 @route('/contacts')
 export class ContactController {
   #contactService: ContactService
-  #clientsWpp: ClientsWpp
-
-  constructor({ contactService, clientsWpp }) {
+  constructor({ contactService }) {
     this.#contactService = contactService
-    this.#clientsWpp = clientsWpp
   }
 
   @POST()
   async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    if (!request.body.phone) {
-      return response.status(422).json({ message: 'Phone is required' })
-    }
-
-    const phone = await this.#clientsWpp.numberExists(request.body.phone, idEmpresa)
-
-    if (!phone) {
-      return response.status(422).json({ message: 'Phone not exists in whatsapp' })
-    }
-    
     const id = await this.#contactService.save({
       ...request.body,
       idEmpresa,
-      isManual: true,
-      phone,
+      isManual: true
     })
 
     return response.status(201).json({ id })
@@ -49,7 +34,7 @@ export class ContactController {
       idEmpresa,
       isManual: true
     })
-
+    
     return response.status(204).send()
   }
 

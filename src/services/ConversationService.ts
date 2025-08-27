@@ -75,10 +75,17 @@ export class ConversationService {
     conversationMessage.idConversation = conversation.id!
 
     let isMessageSend = null
+    let chatId = null
+
+    try {
+      chatId = await this.#clientsWpp.numberExists(conversationMessage.idEmpresa, contact.phone)
+    } catch (error) {
+      chatId = contact.phone.replace(/^(\d{2})9(\d{8})$/, '$1$2')
+    }
 
     if (!conversationMessage.hasMedia) {
       isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
-        chatId: contact.phone,
+        chatId,
         message: conversationMessage.message
       })
 
@@ -96,7 +103,7 @@ export class ConversationService {
       }
 
       isMessageSend = await this.#clientsWpp.sendMessageImage(contact.idEmpresa, {
-        chatId: contact.phone,
+        chatId,
         caption: conversationMessage.message,
         base64: conversationMessage.file,
         mimetype: conversationMessage.mimetype,
