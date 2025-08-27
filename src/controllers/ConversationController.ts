@@ -4,12 +4,16 @@ import Joi from 'joi'
 
 import { ConversationService } from '../services/ConversationService'
 import { ConversationUserEntity } from '../entity/ConversationUserEntity'
+import { ClientsWpp } from '../wpp'
 
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  constructor({ conversationService }) {
+  #clientsWpp: ClientsWpp
+
+  constructor({ conversationService, clientsWpp }) {
     this.#conversationService = conversationService
+    this.#clientsWpp = clientsWpp
   }
 
   @POST()
@@ -18,7 +22,8 @@ export class ConversationController {
 
     const id = await this.#conversationService.save({
       ...request.body,
-      idEmpresa
+      idEmpresa,
+      
     })
     return response.status(201).json({ id })
   }
