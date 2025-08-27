@@ -51,7 +51,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     }
   ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
-      .select(['conversations.*', 'contacts.name', 'contacts.urlProfile'])
+      .select(['conversations.*', 'contacts.name', 'contacts.urlProfile', 'contacts.id as idContact'])
       .where('conversations.idEmpresa', '=', idEmpresa)
       .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
