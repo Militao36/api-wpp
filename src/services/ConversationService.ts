@@ -71,6 +71,8 @@ export class ConversationService {
       conversation.idContact
     )
 
+    conversationMessage.idConversation = conversation.id!
+
     let isMessageSend = null
 
     if (!conversationMessage.hasMedia) {
