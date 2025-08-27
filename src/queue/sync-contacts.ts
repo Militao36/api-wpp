@@ -27,8 +27,20 @@ SyncContacts.process(async (job) => {
     for await (const contact of data.contacts) {
       const urlProfile = await clientsWpp.getUrlProfileByContact(contact.idEmpresa, contact.phone)
 
-      const fileName = `${randomUUID()}.jpg`
+      const fileName = `${contact.id}-profile.jpg`
       const upload = await awsService.uploadFile(urlProfile, fileName, process.env.BUCKET_NAME)
+
+      const exists = await contactService.findByPhone(contact.idEmpresa, contact.phone)
+
+      if (exists) {
+        await contactService.update(exists.id, contact.idEmpresa, {
+          ...exists,
+          urlProfile: upload?.url || null,
+          isManual: false,
+          name: contact.name || exists.name,
+        })
+        continue
+      }
 
       await contactService.save({
         ...contact,
