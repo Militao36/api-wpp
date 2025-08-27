@@ -277,6 +277,6 @@ export class ConversationService {
   private async formatChatId(nameConnection: string, chatId: string) {
     const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)
 
-    return _chatId.substring(2)
+    return _chatId.substring(2).replace('@c.us', '')
   }
 }
