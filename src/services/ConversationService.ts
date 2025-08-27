@@ -255,14 +255,9 @@ export class ConversationService {
         idContact,
         isRead: false,
         users: [
-          new UserEntity({
-            idEmpresa,
-            isMaster: false,
-            name: 'Sistema',
-            password: '',
-            username: MessageID(),
-            sectors: []
-          }, idUser)
+          {
+            id: idUser,
+          }
         ]
       })
 
