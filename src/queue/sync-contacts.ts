@@ -42,10 +42,17 @@ SyncContacts.process(async (job) => {
         continue
       }
 
+      const chatId = await clientsWpp.numberExists(contact.idEmpresa, contact.phone)
+
+      if (chatId) {
+        continue;
+      }
+      
       await contactService.save({
         ...contact,
         urlProfile: upload?.url || null,
-        isManual: false
+        isManual: false,
+        phone: chatId
       })
 
       console.log('Contato salvo', contact.phone)

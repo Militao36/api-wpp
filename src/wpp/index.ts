@@ -321,6 +321,29 @@ export class ClientsWpp {
     return response.data as any[]
   }
 
+   public async numberExists(nameConnection: string, number: string): Promise<string | null> {
+    try {
+      const config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: `${this.url}/api/contacts/check-exists?phone=${number}&session=${nameConnection}`,
+        headers: {
+          Authorization: `Basic ${this.token}`
+        }
+      }
+
+      const response = await axios.request(config)
+
+      if (response.data.numberExists === true) {
+        return response.data.chatId
+      }
+
+      return null
+    } catch (error) {
+      return null
+    }
+  }
+
   private async startTyping(idEmpresa: string, chatId: string) {
     const config = {
       method: 'post',

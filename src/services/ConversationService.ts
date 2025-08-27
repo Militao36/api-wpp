@@ -266,4 +266,10 @@ export class ConversationService {
 
     return conversation
   }
+
+  private async formatChatId(nameConnection: string, chatId: string) {
+    const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)
+
+    return _chatId.substring(2)
+  }
 }
