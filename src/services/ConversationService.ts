@@ -12,6 +12,7 @@ import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
 import { UserService } from './UserService'
 import { AwsService } from './AwsService'
+import { UserEntity } from '../entity/UserEntity'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -254,10 +255,14 @@ export class ConversationService {
         idContact,
         isRead: false,
         users: [
-          new ConversationUserEntity({
-            idUser,
+          new UserEntity({
             idEmpresa,
-          })
+            isMaster: false,
+            name: 'Sistema',
+            password: '',
+            username: MessageID(),
+            sectors: []
+          }, idUser)
         ]
       })
 
