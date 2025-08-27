@@ -78,7 +78,8 @@ export class ConversationController {
       hasMedia: request?.body?.hasMedia,
       file: request?.body?.file,
       fileName: request?.body?.fileName,
-      mimetype: request?.body?.mimetype
+      mimetype: request?.body?.mimetype,
+      idContact: request?.body?.idContact
     })
 
     return response.status(201).json({ id })

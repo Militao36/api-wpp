@@ -78,6 +78,10 @@ export class ConversationService {
         chatId: contact.phone,
         message: conversationMessage.message
       })
+
+      conversationMessage.file = ''
+      conversationMessage.mimetype = ''
+      conversationMessage.fileName = ''
     }
 
     if (conversationMessage.hasMedia) {
@@ -96,11 +100,13 @@ export class ConversationService {
         fileName: conversationMessage.fileName
       })
 
-      await this.#awsService.uploadFileBase64(
+      const { url } = await this.#awsService.uploadFileBase64(
         conversationMessage.file,
         `${randomUUID()}.${conversationMessage.fileName.split('.').pop()}`,
         'chat-media'
       )
+
+      conversationMessage.file = url
     }
 
     if (!isMessageSend) {
