@@ -15,7 +15,7 @@ app.disable('x-powered-by')
 
 app.use((req, res, next) => {
   req.idEmpresa = '1'
-  req.idUser = 'f2c9c99c-1802-4138-b84d-c4814b2f0cb0'
+  req.idUser = process.env.ID_USER
   return next()
 })
 
