@@ -27,6 +27,6 @@ export class UserController {
 
     const users = await this.#userService.list(idEmpresa)
 
-    return response.status(201).json(users)
+    return response.status(200).json(users)
   }
 }
