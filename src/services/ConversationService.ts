@@ -22,9 +22,8 @@ export class ConversationService {
   #contactService: ContactService
   #clientsWpp: ClientsWpp
   #awsService: AwsService
-  #emitEventSocket: (id: string, event: TypesEventSocket, data: any) => Promise<void>
 
-  constructor({ awsService, emitEventSocket, userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor({ awsService, userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
@@ -32,7 +31,6 @@ export class ConversationService {
     this.#clientsWpp = clientsWpp
     this.#userService = userService
     this.#awsService = awsService
-    this.#emitEventSocket = emitEventSocket
   }
 
   public async save(conversation: ConversationEntity): Promise<string> {
@@ -324,7 +322,8 @@ export class ConversationService {
         socket.join(idConversation);
 
         socket.emit("add-user-conversation", {
-          user: await this.#userService.findById(idUser, idEmpresa)
+          user: await this.#userService.findById(idUser, idEmpresa),
+          conversation: await this.findById(idConversation, idEmpresa)
         });
       }
     }
@@ -336,8 +335,8 @@ export class ConversationService {
     for await (const socket of sockets) {
       if (socket.data.iduser === idUser) {
 
-        socket.join(idConversation);
-        // TODO - remover ele da conversa e da sala ver cmoo faz isso
+        socket.leave(idConversation);
+
         socket.emit("remove-user-conversation", {
           user: await this.#userService.findById(idUser, idEmpresa)
         });
