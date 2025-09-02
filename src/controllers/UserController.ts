@@ -6,12 +6,12 @@ import { UserService } from '../services/UserService'
 @route('/users')
 export class UserController {
   #userService: UserService
-  constructor ({ userService }) {
+  constructor({ userService }) {
     this.#userService = userService
   }
 
   @POST()
-  async save (request: Request, response: Response) {
+  async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
     const id = await this.#userService.save({
@@ -19,5 +19,14 @@ export class UserController {
       idEmpresa
     })
     return response.status(201).json({ id })
+  }
+
+  @GET()
+  async list(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+
+    const users = await this.#userService.list(idEmpresa)
+
+    return response.status(201).json(users)
   }
 }

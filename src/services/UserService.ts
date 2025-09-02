@@ -19,4 +19,10 @@ export class UserService {
     if (!user) throw new Error('User not found')
     return user
   }
+
+  public async list(idEmpresa: string): Promise<UserEntity[]> {
+    const users = await this.#userRepository.findAll(idEmpresa)
+
+    return users
+  }
 }
