@@ -28,7 +28,7 @@ export class ConversationUsersRepository extends RepositoryBase<Partial<Conversa
       .select<ConversationUserEntity[]>()
       .where({ idConversation, idEmpresa })
       .orderBy('createdAt', 'desc')
-      
+
     return users
   }
 
@@ -45,5 +45,11 @@ export class ConversationUsersRepository extends RepositoryBase<Partial<Conversa
     await this.#database.table<ConversationUserEntity>(this.table)
       .delete()
       .where({ idConversation, idEmpresa })
+  }
+
+  async removeUser(idConversation: string, idUser: string, idEmpresa: string) {
+    await this.#database.table<ConversationUserEntity>(this.table)
+      .delete()
+      .where({ idConversation, idUser, idEmpresa })
   }
 }

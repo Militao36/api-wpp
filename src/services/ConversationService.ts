@@ -7,12 +7,12 @@ import { ConversationMessageRepository } from '../repositories/ConversationMessa
 import { ConversationRepository } from '../repositories/ConversationRepository'
 import { ConversationUsersRepository } from '../repositories/ConversationUsersRepository'
 import { BadRequestExeption } from '../util/exceptions/BadRequest'
-import { MessageID } from '../util/utils'
 import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
 import { UserService } from './UserService'
 import { AwsService } from './AwsService'
-import { UserEntity } from '../entity/UserEntity'
+import type { TypesEventSocket } from '../socket-io/socketManager'
+import { io } from '../server'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -22,8 +22,9 @@ export class ConversationService {
   #contactService: ContactService
   #clientsWpp: ClientsWpp
   #awsService: AwsService
+  #emitEventSocket: (id: string, event: TypesEventSocket, data: any) => Promise<void>
 
-  constructor({ awsService, userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
+  constructor({ awsService, emitEventSocket, userService, contactService, clientsWpp, conversationRepository, conversationUsersRepository, conversationMessageRepository }) {
     this.#conversationRepository = conversationRepository
     this.#conversationUsersRepository = conversationUsersRepository
     this.#conversationMessageRepository = conversationMessageRepository
@@ -31,6 +32,7 @@ export class ConversationService {
     this.#clientsWpp = clientsWpp
     this.#userService = userService
     this.#awsService = awsService
+    this.#emitEventSocket = emitEventSocket
   }
 
   public async save(conversation: ConversationEntity): Promise<string> {
@@ -49,19 +51,42 @@ export class ConversationService {
     return conversationData.id!
   }
 
-  public async addUser(conversationUser: ConversationUserEntity[]) {
-    for (const item of conversationUser) {
-      await this.#conversationUsersRepository
-        .deleteAllRelations(item.idConversation, item.idEmpresa)
+  public async addUser(conversationUser: ConversationUserEntity) {
+    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationUser.idConversation, conversationUser.idEmpresa)
+
+    if (conversationUsers.find(e => e.idUser === conversationUser.idUser)) {
+      return
     }
 
-    for await (const item of conversationUser) {
-      await this.#conversationUsersRepository.save(new ConversationUserEntity({
-        idUser: item.idUser,
-        idConversation: item.idConversation,
-        idEmpresa: item.idEmpresa
-      }))
+    await this.#conversationUsersRepository.save(new ConversationUserEntity({
+      idUser: conversationUser.idUser,
+      idConversation: conversationUser.idConversation,
+      idEmpresa: conversationUser.idEmpresa
+    }))
+
+    await this.emitAddNewUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
+  }
+
+  public async removeUser(conversationUser: ConversationUserEntity) {
+    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationUser.idConversation, conversationUser.idEmpresa)
+
+    if (!conversationUsers.find(e => e.idUser === conversationUser.idUser)) {
+      return
     }
+
+    if (conversationUsers.length <= 1) {
+      throw new BadRequestExeption('Não é possível remover o único usuário da conversa')
+    }
+
+    const user = await this.#userService.findById(conversationUser.idUser, conversationUser.idEmpresa)
+
+    if (user.isMaster) {
+      throw new BadRequestExeption('Usuário master não pode ser removido da conversa')
+    }
+
+    await this.#conversationUsersRepository.removeUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
+
+    await this.emitRemoveUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
   }
 
   public async message(conversationMessage: Partial<ConversationMessageEntity & { fileName: string, mimetype: string, idContact: string }>): Promise<string> {
@@ -75,13 +100,7 @@ export class ConversationService {
     conversationMessage.idConversation = conversation.id!
 
     let isMessageSend = null
-    let chatId = null
-
-    try {
-      chatId = await this.formatChatId(conversationMessage.idEmpresa, contact.phone)
-    } catch (error) {
-      chatId = contact.phone.replace(/^(\d{2})9(\d{8})$/, '$1$2')
-    }
+    let chatId = await this.formatChatId(conversationMessage.idEmpresa, contact.phone)
 
     if (!conversationMessage.hasMedia) {
       isMessageSend = await this.#clientsWpp.sendMessage(contact.idEmpresa, {
@@ -132,6 +151,13 @@ export class ConversationService {
       conversationMessage.idEmpresa,
       conversationMessage.message
     )
+
+    await this.updateRead(
+      conversationMessage.idConversation,
+      conversationMessage.idEmpresa
+    )
+
+    await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa)
 
     return conversationMessageData.id!
   }
@@ -190,41 +216,22 @@ export class ConversationService {
       await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
 
       // cria uma nova conversa com aquele usuario
-      const idConversation = await this.save({
-        idContact: conversation.idContact,
-        idEmpresa,
-        isRead: false,
-      })
+      const { id } = await this.findOrCreateConversation(idEmpresa, conversation.idContact, idUserTransfer)
 
-      await this.addUser([
-        new ConversationUserEntity({
-          idUser: idUserTransfer,
-          idConversation,
-          idEmpresa
-        })
-      ])
+      await this.addUser({
+        idUser: idUserTransfer,
+        idConversation: id,
+        idEmpresa
+      })
 
       return
     }
 
-    const oldUsers = await this.#conversationUsersRepository.findByConversation(conversation.id, idEmpresa)
-
-    const conversationsUsers = oldUsers.map(e => {
-      return new ConversationUserEntity({
-        idUser: e.idUser,
-        idConversation: conversation.id!,
-        idEmpresa
-      })
-    })
-
-    conversationsUsers.push(new ConversationUserEntity({
+    await this.addUser({
       idUser: idUserTransfer,
       idConversation: conversation.id!,
       idEmpresa
-    }))
-
-
-    await this.addUser(conversationsUsers)
+    })
   }
 
   public async listMessages(idEmpresa: string, idUser: string, idContact: string, page: number) {
@@ -245,6 +252,12 @@ export class ConversationService {
     await this.#conversationRepository.update({
       lastMessage,
       isRead: false
+    }, idConversation, idEmpresa)
+  }
+
+  public async updateRead(idConversation: string, idEmpresa: string) {
+    await this.#conversationRepository.update({
+      isRead: true
     }, idConversation, idEmpresa)
   }
 
@@ -269,14 +282,72 @@ export class ConversationService {
       })
 
       conversation = await this.findById(idConversation, idEmpresa)
+
+      await this.emitiNewConversation(idConversation, idUser, idEmpresa)
     }
 
     return conversation
   }
 
   private async formatChatId(nameConnection: string, chatId: string) {
-    const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)
+    try {
+      const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)
 
-    return _chatId.substring(2).replace('@c.us', '')
+      return _chatId.substring(2).replace('@c.us', '')
+
+    } catch (error) {
+      return chatId.replace(/^(\d{2})9(\d{8})$/, '$1$2')
+    }
+  }
+
+  private async emitiNewConversation(idConversation: string, idUser: string, idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    for await (const socket of sockets) {
+      if (socket.data.iduser === idUser) {
+
+        socket.join(idConversation);
+
+        socket.emit("new-conversation", {
+          conversation: await this.findById(idConversation, idEmpresa)
+        });
+      }
+    }
+  }
+
+  private async emitAddNewUser(idConversation: string, idUser: string, idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    for await (const socket of sockets) {
+      if (socket.data.iduser === idUser) {
+
+        socket.join(idConversation);
+
+        socket.emit("add-user-conversation", {
+          user: await this.#userService.findById(idUser, idEmpresa)
+        });
+      }
+    }
+  }
+
+  private async emitRemoveUser(idConversation: string, idUser: string, idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    for await (const socket of sockets) {
+      if (socket.data.iduser === idUser) {
+
+        socket.join(idConversation);
+        // TODO - remover ele da conversa e da sala ver cmoo faz isso
+        socket.emit("remove-user-conversation", {
+          user: await this.#userService.findById(idUser, idEmpresa)
+        });
+      }
+    }
+  }
+
+  private async emitConversation(idConversation: string, id: string, idEmpresa: string) {
+    io.to(idConversation).emit('new-message', {
+      message: await this.#conversationMessageRepository.findById(id, idEmpresa),
+    })
   }
 }

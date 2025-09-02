@@ -42,7 +42,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     idEmpresa: string,
     idUser: string,
     filter?: {
-      messageId?: string,
+      // messageId?: string,
       limit?: number,
       finished?: string,
       createdAtGraterThan?: string,
@@ -67,27 +67,27 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       data.where('createdAt', '<', filter.createdAtLessThan)
     }
 
-    if (filter.messageId) {
-      const conversation = await data.where('messageId', '=', filter.messageId).first() as ConversationEntity
+    // if (filter.messageId) {
+    //   const conversation = await data.where('messageId', '=', filter.messageId).first() as ConversationEntity
 
-      const conversationDate = DateTime.fromJSDate(conversation.createdAt as any).toSQLDate()
+    //   const conversationDate = DateTime.fromJSDate(conversation.createdAt as any).toSQLDate()
 
-      const registersAfters = await this.findAllConversationByUser(idEmpresa, idUser, {
-        limit: 10,
-        createdAtGraterThan: conversationDate
-      })
+    //   const registersAfters = await this.findAllConversationByUser(idEmpresa, idUser, {
+    //     limit: 10,
+    //     createdAtGraterThan: conversationDate
+    //   })
 
-      const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, {
-        limit: 9,
-        createdAtLessThan: conversationDate
-      })
+    //   const registerBefores = await this.findAllConversationByUser(idEmpresa, idUser, {
+    //     limit: 9,
+    //     createdAtLessThan: conversationDate
+    //   })
 
-      return [
-        ...registerBefores,
-        conversation,
-        ...registersAfters
-      ]
-    }
+    //   return [
+    //     ...registerBefores,
+    //     conversation,
+    //     ...registersAfters
+    //   ]
+    // }
 
     if (filter.finished) {
       if (filter.finished === 'true') {

@@ -23,49 +23,35 @@ export class ConversationController {
     const id = await this.#conversationService.save({
       ...request.body,
       idEmpresa,
-      
+
     })
     return response.status(201).json({ id })
   }
 
-  /**
-   *
-   * @description Essa função vc usa para adicionar usuários/remover (deverá ser passado TODOS usuários)
-   *  mesmo se já tiver adiionado, pois ele deleta tudo e cria novamente
-   */
-  @route('/add-users')
+  @route('/add-user')
   @POST()
-  @before([(req: Request, res: Response, next: NextFunction) => {
-    const schema = Joi.object({
-      ids: Joi.array().items(Joi.number().required()).required(),
-      idConversation: Joi.number().required()
-    })
-
-    const { error } = schema.validate(req.body, {
-      allowUnknown: true
-    })
-
-    if (error?.details?.length > 0) {
-      return res.status(422).json({
-        message: 'Schema validation',
-        error
-      })
-    } else {
-      return next()
-    }
-  }])
   async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const body = request.body.ids.map((e: any): Partial<ConversationUserEntity> => {
-      return new ConversationUserEntity({
-        idUser: e,
-        idConversation: request.body.idConversation,
-        idEmpresa
-      })
+    await this.#conversationService.addUser({
+      idEmpresa,
+      idConversation: request.body.idConversation,
+      idUser: request.body.iduser
     })
 
-    await this.#conversationService.addUser(body)
+    return response.status(201).json()
+  }
+
+  @route('/remove-user')
+  @POST()
+  async removeUser(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+
+    await this.#conversationService.removeUser({
+      idEmpresa,
+      idConversation: request.body.idConversation,
+      idUser: request.body.iduser
+    })
 
     return response.status(201).json()
   }
