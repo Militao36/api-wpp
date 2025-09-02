@@ -1,16 +1,31 @@
 import { ContactEntity } from "../entity/ContactEntity"
+import { SyncContacts } from "../queue"
 import { ContactRepository } from "../repositories/ContactRepository"
+import { ClientsWpp } from "../wpp"
 
 export class ContactService {
   #contactRepository: ContactRepository
-  constructor({ contactRepository }) {
+  #clientsWpp: ClientsWpp
+  #syncContacts: typeof SyncContacts
+
+
+  constructor({ contactRepository, syncContacts, clientsWpp }) {
     this.#contactRepository = contactRepository
+    this.#clientsWpp = clientsWpp
+    this.#syncContacts = syncContacts
   }
 
   public async save(contact: ContactEntity): Promise<string> {
     const contactData = new ContactEntity(contact)
 
     await this.#contactRepository.save(contactData)
+
+    await this.#syncContacts.add({
+      contacts: [{
+        ...contactData,
+        phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
+      }]
+    })
 
     return contactData.id!
   }
@@ -29,6 +44,13 @@ export class ContactService {
     }
 
     await this.#contactRepository.update(contactData, id, idEmpresa)
+
+    await this.#syncContacts.add({
+      contacts: [{
+        ...contactData,
+        phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
+      }]
+    })
   }
 
   public async findByPhone(idEmpresa: string, phone: string) {
@@ -41,5 +63,9 @@ export class ContactService {
 
   public async findAll(idEmpresa: string) {
     return this.#contactRepository.findAll(idEmpresa)
+  }
+
+  private async getProfilePicUrl(idEmpresa: string, phone: string) {
+    return this.#clientsWpp.getUrlProfileByContact(idEmpresa, phone)
   }
 }

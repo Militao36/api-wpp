@@ -264,7 +264,7 @@ export class ConversationService {
       .findConversationByContactNotFinished(idEmpresa, idContact)
   }
 
-  private async findOrCreateConversation(idEmpresa: string, idContact: string, idUser: string) {
+  async findOrCreateConversation(idEmpresa: string, idContact: string, idUser: string) {
     let conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
 
     if (!conversation) {
@@ -337,11 +337,18 @@ export class ConversationService {
 
         socket.leave(idConversation);
 
-        socket.emit("remove-user-conversation", {
-          user: await this.#userService.findById(idUser, idEmpresa)
+        socket.emit("removido", {
+          user: await this.#userService.findById(idUser, idEmpresa),
+          conversation: await this.findById(idConversation, idEmpresa)
         });
       }
     }
+
+    io.to(idConversation).emit('remove-user-conversation', {
+      user: await this.#userService.findById(idUser, idEmpresa),
+      conversation: await this.findById(idConversation, idEmpresa)
+    })
+
   }
 
   private async emitConversation(idConversation: string, id: string, idEmpresa: string) {
