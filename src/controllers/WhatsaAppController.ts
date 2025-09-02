@@ -9,6 +9,7 @@ import { ContactEntity } from '../entity/ContactEntity'
 import { SyncContacts } from '../queue'
 import { RedisClientType } from 'redis'
 import { DateTime } from 'luxon'
+import { UserService } from '../services/UserService'
 
 @route('/zap')
 export class WhatsAppController {
@@ -17,13 +18,15 @@ export class WhatsAppController {
   #contactService: ContactService
   #syncContacts: typeof SyncContacts
   #clientRedis: RedisClientType
+  #userService: UserService
 
-  constructor({ clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
+  constructor({ userService, clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
     this.#syncContacts = syncContacts
     this.#clientRedis = clientRedis
+    this.#userService = userService
   }
 
   @route('/health')
@@ -151,10 +154,17 @@ export class WhatsAppController {
     ) {
       return response.status(200).send()
     }
+
+    const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa);
+
+    if (!users?.length) {
+      return response.status(400).json({ message: 'Usuários master não encontrado' })
+    }
+
     const phoneNumber = (body.payload.from.replace('@c.us', '') as string).substring(2)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
-    let idContact = null
+    let idContact = contact?.id
 
     if (!contact) {
       const data = body.payload._data
@@ -163,8 +173,6 @@ export class WhatsAppController {
         name: data.pushName,
         phone: phoneNumber
       })
-    } else {
-      idContact = contact.id
     }
 
     const conversation = await this.#conversationService.findConversationByContactNotFinished(idEmpresa, idContact)
@@ -181,9 +189,15 @@ export class WhatsAppController {
       idConversation = conversation.id
     }
 
+    for await (const user of users) {
+      await this.#conversationService.addUser({
+        idConversation,
+        idEmpresa,
+        idUser: user.id!
+      })
+    }
 
     // dois b.o
-
     // 1 - O url da midia vem localhost:3000 alterar
     // 2 - o payload quando vem zerado a ultima mensagem qual vai ser?} - Gerei um id (uuid-RANDONUUID)
     // 3 - Salvar messageId para responder (OK)

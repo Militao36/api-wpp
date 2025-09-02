@@ -22,7 +22,11 @@ export class UserService {
 
   public async list(idEmpresa: string): Promise<UserEntity[]> {
     const users = await this.#userRepository.findAll(idEmpresa)
+    return users
+  }
 
+  public async findMasterUsersByIdEmpresa(idEmpresa: string): Promise<UserEntity[]> {
+    const users = await this.#userRepository.findMasterUsersByIdEmpresa(idEmpresa)
     return users
   }
 }

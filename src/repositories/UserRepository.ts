@@ -10,4 +10,9 @@ export class UserRepository extends RepositoryBase<UserEntity> {
     super('users', database)
     this.#database = database
   }
+
+  async findMasterUsersByIdEmpresa(idEmpresa: string): Promise<UserEntity[]> {
+    const users = await this.#database('users').where({ idEmpresa }).andWhere('isMaster', '=', true).select('*')
+    return users
+  }
 }
