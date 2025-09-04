@@ -23,9 +23,12 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
   async findAllPaginationWithConversationIdUser(idEmpresa: string, idContact: string, idUser: string, page = 30): Promise<ConversationMessageEntity[]> {
     const query = this.#database.table(this.table)
       .select<ConversationMessageEntity[]>(
-        "conversation_message.*"
+        "conversation_message.*",
+        "users.name",
+        "users.isMaster"
       )
       .innerJoin('conversations', 'conversations.id', 'conversation_message.idConversation')
+      .leftJoin('users', 'users.id', `${this.table}.idUser`)
       .where('conversations.idContact', '=', idContact)
 
     if (idUser) {
