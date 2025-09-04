@@ -33,11 +33,19 @@ export class ConversationController {
   async addUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    await this.#conversationService.addUser({
-      idEmpresa,
-      idConversation: request.body.idConversation,
-      idUser: request.body.iduser
-    })
+    const { ids } = request.body
+
+    if (Array.isArray(ids)) {
+      return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
+    }
+
+    for await (const idUser of ids) {
+      await this.#conversationService.addUser({
+        idEmpresa,
+        idConversation: request.body.idConversation,
+        idUser: idUser
+      })
+    }
 
     return response.status(201).json()
   }
@@ -47,11 +55,19 @@ export class ConversationController {
   async removeUser(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    await this.#conversationService.removeUser({
-      idEmpresa,
-      idConversation: request.body.idConversation,
-      idUser: request.body.iduser
-    })
+    const { ids } = request.body
+
+    if (Array.isArray(ids)) {
+      return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
+    }
+
+    for await (const idUser of ids) {
+      await this.#conversationService.removeUser({
+        idEmpresa,
+        idConversation: request.body.idConversation,
+        idUser: idUser
+      })
+    }
 
     return response.status(201).json()
   }
