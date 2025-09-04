@@ -35,7 +35,7 @@ export class ConversationController {
 
     const { ids } = request.body
 
-    if (Array.isArray(ids)) {
+    if (!Array.isArray(ids)) {
       return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
     }
 
@@ -57,7 +57,7 @@ export class ConversationController {
 
     const { ids } = request.body
 
-    if (Array.isArray(ids)) {
+    if (!Array.isArray(ids)) {
       return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
     }
 
