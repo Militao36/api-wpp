@@ -2,6 +2,7 @@ import { Knex } from "knex";
 
 import { RepositoryBase } from "./base/RepositoryBase";
 import { ConversationUserEntity } from "../entity/ConversationUserEntity";
+import { UserEntity } from "../entity/UserEntity";
 
 export class ConversationUsersRepository extends RepositoryBase<Partial<ConversationUserEntity>> {
   #database: Knex
@@ -23,14 +24,20 @@ export class ConversationUsersRepository extends RepositoryBase<Partial<Conversa
     return !!exists
   }
 
-  async findByConversation(idConversation: string, idEmpresa: string) {
-    const users = await this.#database.table(this.table)
-      .select<ConversationUserEntity[]>()
-      .where({ idConversation, idEmpresa })
-      .orderBy('createdAt', 'desc')
+  async findByConversation(idConversation: string, idEmpresa: string, includes: { users?: boolean } = {}) {
+    const query = this.#database.table(this.table)
+      .select<(ConversationUserEntity & UserEntity)[]>()
+      .where({ idConversation, 'conversation_users.idEmpresa': idEmpresa })
+      .orderBy('conversation_users.createdAt', 'desc')
 
-    return users
+    if (includes.users) {
+      query
+        .innerJoin('users', 'users.id', 'conversation_users.idUser')
+    }
+
+    return await query
   }
+
 
   async findByUser(idUser: string, idEmpresa: string) {
     const conversations = await this.#database.table(this.table)

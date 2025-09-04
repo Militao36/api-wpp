@@ -243,7 +243,23 @@ export class ConversationService {
         page
       )
 
-    return messages
+    const conversation = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, idContact)
+
+    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversation.id, idEmpresa, { users: true })
+
+    return {
+      messages,
+      users: conversationUsers.map(e => {
+        return {
+          id: e.id,
+          idConversation: e.idConversation,
+          idUser: e.idUser,
+          name: e.name,
+          username: e.username,
+          isMaster: e.isMaster
+        }
+      })
+    }
   }
 
   public async updateLastMessage(idConversation: string, idEmpresa: string, lastMessage: string) {
