@@ -183,9 +183,30 @@ export class ConversationService {
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
+    const data = []
     const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser, filter)
+    
+    for await (const conversation of conversations) {
+      const conversationNotFisnihed = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, conversation.idContact)
 
-    return conversations
+      const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationNotFisnihed.id, idEmpresa, { users: true })
+
+      data.push({
+        ...conversation,
+        users: conversationUsers.map(e => {
+          return {
+            id: e.id,
+            idConversation: e.idConversation,
+            idUser: e.idUser,
+            name: e.name,
+            username: e.username,
+            isMaster: e.isMaster
+          }
+        })
+      })
+    }
+
+    return data
   }
 
   async findById(id: string, idEmpresa: string): Promise<ConversationEntity> {
@@ -245,23 +266,7 @@ export class ConversationService {
         page
       )
 
-    const conversation = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, idContact)
-
-    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversation.id, idEmpresa, { users: true })
-
-    return {
-      messages,
-      users: conversationUsers.map(e => {
-        return {
-          id: e.id,
-          idConversation: e.idConversation,
-          idUser: e.idUser,
-          name: e.name,
-          username: e.username,
-          isMaster: e.isMaster
-        }
-      })
-    }
+    return messages
   }
 
   public async updateLastMessage(idConversation: string, idEmpresa: string, lastMessage: string) {
