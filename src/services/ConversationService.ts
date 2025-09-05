@@ -44,6 +44,8 @@ export class ConversationService {
         idConversation: conversationData.id!,
         idEmpresa: conversation.idEmpresa
       }))
+
+      await this.emitiNewConversation(conversationData.id!, item.id!, conversation.idEmpresa)
     }
 
     return conversationData.id!
@@ -325,7 +327,7 @@ export class ConversationService {
     }
   }
 
-  private async emitiNewConversation(idConversation: string, idUser: string, idEmpresa: string) {
+  async emitiNewConversation(idConversation: string, idUser: string, idEmpresa: string) {
     const sockets = await io.fetchSockets();
 
     for await (const socket of sockets) {

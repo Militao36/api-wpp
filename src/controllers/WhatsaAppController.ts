@@ -183,18 +183,16 @@ export class WhatsAppController {
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,
-        isRead: true
+        isRead: true,
+        users: users.map(user => {
+          return {
+            idEmpresa,
+            idUser: user.id!
+          }
+        })
       })
     } else {
       idConversation = conversation.id
-    }
-
-    for await (const user of users) {
-      await this.#conversationService.addUser({
-        idConversation,
-        idEmpresa,
-        idUser: user.id!
-      })
     }
 
     // dois b.o
