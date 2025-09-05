@@ -56,6 +56,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .where('conversation_users.idUser', '=', idUser)
+      .orderBy('conversations.updatedAt', 'desc')
       .limit((filter?.limit || 20))
       .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
 
