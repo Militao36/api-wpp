@@ -185,7 +185,7 @@ export class ConversationService {
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
     const data = []
     const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser, filter)
-    
+
     for await (const conversation of conversations) {
       const conversationNotFisnihed = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, conversation.idContact)
 
@@ -257,6 +257,10 @@ export class ConversationService {
 
   public async listMessages(idEmpresa: string, idUser: string, idContact: string, page: number) {
     const user = await this.#userService.findById(idUser, idEmpresa)
+
+    const conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
+
+    await this.#conversationRepository.update({ isRead: true }, conversation.id, idEmpresa)
 
     const messages = await this.#conversationMessageRepository
       .findAllPaginationWithConversationIdUser(
