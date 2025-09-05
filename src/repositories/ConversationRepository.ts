@@ -56,14 +56,14 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .where('conversation_users.idUser', '=', idUser)
-      .limit((filter.limit || 20))
-      .offset(((filter?.page || 1) - 1) * (filter.page || 20))
+      .limit((filter?.limit || 20))
+      .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
 
-    if (filter.createdAtGraterThan) {
+    if (filter?.createdAtGraterThan) {
       data.where('createdAt', '>', filter.createdAtGraterThan)
     }
 
-    if (filter.createdAtLessThan) {
+    if (filter?.createdAtLessThan) {
       data.where('createdAt', '<', filter.createdAtLessThan)
     }
 
@@ -89,7 +89,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     //   ]
     // }
 
-    if (filter.finished) {
+    if (filter?.finished) {
       if (filter.finished === 'true') {
         data.whereNotNull('conversations.finishedAt')
       } else {

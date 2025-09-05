@@ -21,7 +21,7 @@ export class ClientsWpp {
         proxy: null,
         webhooks: [
           {
-            url: `https://6dc8da1cc14b.ngrok-free.app/zap?token=${idEmpresa}`,
+            url: `https://b48e70aa1839.ngrok-free.app/zap?token=${idEmpresa}`,
             events: [
               'message'
             ]
