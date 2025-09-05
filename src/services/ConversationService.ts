@@ -178,6 +178,8 @@ export class ConversationService {
       idEmpresa,
       message
     )
+
+    await this.emitConversation(idConversation, conversationData.id!, idEmpresa)
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
