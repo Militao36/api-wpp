@@ -51,6 +51,34 @@ export class ConversationService {
     return conversationData.id!
   }
 
+
+  public async removeAndAddUsers(conversationUser: ConversationUserEntity[]) {
+    const usersConverstion = await this.#conversationUsersRepository.findByConversation(conversationUser[0].idConversation, conversationUser[0].idEmpresa)
+
+    const idsUsersNew = conversationUser.map(e => e.idUser)
+
+    const usersToRemove = usersConverstion.filter(e => !idsUsersNew.includes(e.idUser) && !e.isMaster)
+
+    for (const item of usersToRemove) {
+      await this.#conversationUsersRepository.delete(item.id, item.idEmpresa)
+      await this.emitRemoveNewUser(item.idConversation, item.idUser, item.idEmpresa)
+    }
+
+    const idsUsersOld = usersConverstion.map(e => e.idUser)
+
+    const usersToAdd = conversationUser.filter(e => !idsUsersOld.includes(e.idUser))
+
+    for await (const item of usersToAdd) {
+      await this.#conversationUsersRepository.save(new ConversationUserEntity({
+        idUser: item.idUser,
+        idConversation: item.idConversation,
+        idEmpresa: item.idEmpresa
+      }))
+
+      await this.emitAddNewUser(item.idConversation, item.idUser, item.idEmpresa)
+    }
+  }
+
   public async addUser(conversationUser: ConversationUserEntity) {
     const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationUser.idConversation, conversationUser.idEmpresa)
 
@@ -351,6 +379,22 @@ export class ConversationService {
         socket.join(idConversation);
 
         socket.emit("add-user-conversation", {
+          user: await this.#userService.findById(idUser, idEmpresa),
+          conversation: await this.findById(idConversation, idEmpresa)
+        });
+      }
+    }
+  }
+
+  private async emitRemoveNewUser(idConversation: string, idUser: string, idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    for await (const socket of sockets) {
+      if (socket.data.iduser === idUser) {
+
+        socket.join(idConversation);
+
+        socket.emit("remove-user-conversation", {
           user: await this.#userService.findById(idUser, idEmpresa),
           conversation: await this.findById(idConversation, idEmpresa)
         });

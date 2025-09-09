@@ -28,46 +28,39 @@ export class ConversationController {
     return response.status(201).json({ id })
   }
 
-  @route('/add-user')
+  @route('/add-users')
   @POST()
-  async addUser(request: Request, response: Response) {
+  @before([(req: Request, res: Response, next: NextFunction) => {
+    const schema = Joi.object({
+      ids: Joi.array().items(Joi.number().required()).required(),
+      idConversation: Joi.number().required()
+    })
+
+    const { error } = schema.validate(req.body, {
+      allowUnknown: true
+    })
+
+    if (error?.details?.length > 0) {
+      return res.status(422).json({
+        message: 'Schema validation',
+        error
+      })
+    } else {
+      return next()
+    }
+  }])
+  async removeAndAddUsers(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const { ids } = request.body
-
-    if (!Array.isArray(ids)) {
-      return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
-    }
-
-    for await (const idUser of ids) {
-      await this.#conversationService.addUser({
-        idEmpresa,
+    const body = request.body.ids.map((e: any): Partial<ConversationUserEntity> => {
+      return new ConversationUserEntity({
+        idUser: e,
         idConversation: request.body.idConversation,
-        idUser: idUser
+        idEmpresa
       })
-    }
+    })
 
-    return response.status(201).json()
-  }
-
-  @route('/remove-user')
-  @POST()
-  async removeUser(request: Request, response: Response) {
-    const idEmpresa = request.idEmpresa
-
-    const { ids } = request.body
-
-    if (!Array.isArray(ids)) {
-      return response.status(400).json({ message: 'Deve ser enviado uma lista de usuarios' })
-    }
-
-    for await (const idUser of ids) {
-      await this.#conversationService.removeUser({
-        idEmpresa,
-        idConversation: request.body.idConversation,
-        idUser: idUser
-      })
-    }
+    await this.#conversationService.removeAndAddUsers(body)
 
     return response.status(201).json()
   }
