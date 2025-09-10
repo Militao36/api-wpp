@@ -32,8 +32,8 @@ export class ConversationController {
   @POST()
   @before([(req: Request, res: Response, next: NextFunction) => {
     const schema = Joi.object({
-      ids: Joi.array().items(Joi.number().required()).required(),
-      idConversation: Joi.number().required()
+      ids: Joi.array().items(Joi.string().required()).required(),
+      idConversation: Joi.string().required()
     })
 
     const { error } = schema.validate(req.body, {
