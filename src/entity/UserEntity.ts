@@ -7,7 +7,9 @@ export class UserEntity extends Entity {
   username: string
   password: string
   isMaster: boolean
-  sectors: SectorEntity[]
+
+  // auxiliares
+  sectors?: SectorEntity[]
 
   constructor(user: Omit<UserEntity, 'id'>, id?: string) {
     super(user, id)

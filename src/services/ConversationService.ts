@@ -13,6 +13,7 @@ import { UserService } from './UserService'
 import { AwsService } from './AwsService'
 import type { TypesEventSocket } from '../socket-io/socketManager'
 import { io } from '../server'
+import { UserEntity } from '../entity/UserEntity'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -52,8 +53,8 @@ export class ConversationService {
   }
 
 
-  public async removeAndAddUsers(conversationUser: ConversationUserEntity[]) {
-    const usersConverstion = await this.#conversationUsersRepository.findByConversation(conversationUser[0].idConversation, conversationUser[0].idEmpresa)
+  public async removeAndAddUsers(idUserLogged: string, idEmpresa: string, conversationUser: ConversationUserEntity[]) {
+    const usersConverstion = await this.#conversationUsersRepository.findByConversation(conversationUser[0].idConversation, idEmpresa)
 
     const idsUsersNew = conversationUser.map(e => e.idUser)
 
@@ -61,7 +62,6 @@ export class ConversationService {
 
     for (const item of usersToRemove) {
       await this.#conversationUsersRepository.delete(item.id, item.idEmpresa)
-      await this.emitRemoveNewUser(item.idConversation, item.idUser, item.idEmpresa)
     }
 
     const idsUsersOld = usersConverstion.map(e => e.idUser)
@@ -74,25 +74,9 @@ export class ConversationService {
         idConversation: item.idConversation,
         idEmpresa: item.idEmpresa
       }))
-
-      await this.emitAddNewUser(item.idConversation, item.idUser, item.idEmpresa)
-    }
-  }
-
-  public async addUser(conversationUser: ConversationUserEntity) {
-    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationUser.idConversation, conversationUser.idEmpresa)
-
-    if (conversationUsers.find(e => e.idUser === conversationUser.idUser)) {
-      return
     }
 
-    await this.#conversationUsersRepository.save(new ConversationUserEntity({
-      idUser: conversationUser.idUser,
-      idConversation: conversationUser.idConversation,
-      idEmpresa: conversationUser.idEmpresa
-    }))
-
-    await this.emitAddNewUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
+    await this.addAndRemoveUsers(conversationUser[0].idConversation, idUserLogged, idEmpresa)
   }
 
   public async removeUser(conversationUser: ConversationUserEntity) {
@@ -272,20 +256,24 @@ export class ConversationService {
       // cria uma nova conversa com aquele usuario
       const { id } = await this.findOrCreateConversation(idEmpresa, conversation.idContact, idUserTransfer)
 
-      await this.addUser({
-        idUser: idUserTransfer,
-        idConversation: id,
-        idEmpresa
-      })
+      await this.removeAndAddUsers(idUserLogged, idEmpresa, [
+        {
+          idUser: idUserTransfer,
+          idConversation: id,
+          idEmpresa
+        }
+      ])
 
       return
     }
 
-    await this.addUser({
-      idUser: idUserTransfer,
-      idConversation: conversation.id!,
-      idEmpresa
-    })
+    await this.removeAndAddUsers(idUserLogged, idEmpresa, [
+      {
+        idUser: idUserTransfer,
+        idConversation: conversation.id!,
+        idEmpresa
+      }
+    ])
   }
 
   public async listMessages(idEmpresa: string, idUser: string, idContact: string, page: number) {
@@ -373,33 +361,29 @@ export class ConversationService {
     }
   }
 
-  private async emitAddNewUser(idConversation: string, idUser: string, idEmpresa: string) {
+  private async addAndRemoveUsers(idConversation: string, idUserLogged: string, idEmpresa: string) {
     const sockets = await io.fetchSockets();
 
     for await (const socket of sockets) {
-      if (socket.data.iduser === idUser) {
+      if (socket.data.iduser === idUserLogged) {
 
         socket.join(idConversation);
+
+        const conversationUser = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
+
+        const users = conversationUser.map(e => {
+          return new UserEntity({
+            name: e.name,
+            username: e.username,
+            isMaster: e.isMaster,
+            idEmpresa,
+            password: undefined,
+            sectors: []
+          }, e.id)
+        })
 
         socket.emit("add-user-conversation", {
-          user: await this.#userService.findById(idUser, idEmpresa),
-          conversation: await this.findById(idConversation, idEmpresa)
-        });
-      }
-    }
-  }
-
-  private async emitRemoveNewUser(idConversation: string, idUser: string, idEmpresa: string) {
-    const sockets = await io.fetchSockets();
-
-    for await (const socket of sockets) {
-      if (socket.data.iduser === idUser) {
-
-        socket.join(idConversation);
-
-        socket.emit("remove-user-conversation", {
-          user: await this.#userService.findById(idUser, idEmpresa),
-          conversation: await this.findById(idConversation, idEmpresa)
+          users,
         });
       }
     }

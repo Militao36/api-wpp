@@ -60,7 +60,11 @@ export class ConversationController {
       })
     })
 
-    await this.#conversationService.removeAndAddUsers(body)
+    if (body.length === 0) {
+      return response.status(400).json({ message: 'No users to add' })
+    }
+
+    await this.#conversationService.removeAndAddUsers(request.idUser, idEmpresa, body)
 
     return response.status(201).json()
   }
