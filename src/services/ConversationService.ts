@@ -117,7 +117,10 @@ export class ConversationService {
     await this.emitRemoveUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
   }
 
-  public async message(conversationMessage: Partial<ConversationMessageEntity & { fileName: string, mimetype: string, idContact: string }>): Promise<string> {
+  public async message(
+    conversationMessage: Partial<ConversationMessageEntity &
+    { fileName: string, mimetype: string, idContact: string }>
+  ): Promise<ConversationMessageEntity> {
     const conversation = await this.findOrCreateConversation(conversationMessage.idEmpresa, conversationMessage.idContact!, conversationMessage.idUser!)
 
     const contact = await this.#contactService.findById(
@@ -187,7 +190,7 @@ export class ConversationService {
 
     await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa, conversationMessage.idUser)
 
-    return conversationMessageData.id!
+    return conversationMessageData
   }
 
   public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string) {

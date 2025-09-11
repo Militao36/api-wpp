@@ -70,7 +70,7 @@ export class ConversationController {
   async message(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
 
-    const id = await this.#conversationService.message({
+    const message = await this.#conversationService.message({
       idEmpresa,
       idConversation: request.body.idConversation,
       idUser: request.idUser,
@@ -82,7 +82,7 @@ export class ConversationController {
       idContact: request?.body?.idContact
     })
 
-    return response.status(201).json({ id })
+    return response.status(201).json(message)
   }
 
   @GET()
