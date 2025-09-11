@@ -152,7 +152,11 @@ export class ConversationService {
 
     await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa, conversationMessage.idUser)
 
-    return conversationMessageData
+    return {
+      ...conversationMessageData,
+      createdAt: DateTime.fromSQL(conversationMessageData.createdAt!).toISO(),
+      updatedAt: DateTime.fromSQL(conversationMessageData.updatedAt!).toISO(),
+    }
   }
 
   public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string) {
@@ -356,7 +360,6 @@ export class ConversationService {
             isMaster: e.isMaster,
             idEmpresa,
             password: undefined,
-            sectors: []
           }, e.id)
         })
 
