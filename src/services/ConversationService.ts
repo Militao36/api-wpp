@@ -185,7 +185,7 @@ export class ConversationService {
       conversationMessage.idEmpresa
     )
 
-    await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa)
+    await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa, conversationMessage.idUser)
 
     return conversationMessageData.id!
   }
@@ -209,7 +209,7 @@ export class ConversationService {
       message
     )
 
-    await this.emitConversation(idConversation, conversationData.id!, idEmpresa)
+    await this.emitConversation(idConversation, conversationData.id!, idEmpresa, idUser)
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
@@ -424,9 +424,15 @@ export class ConversationService {
 
   }
 
-  private async emitConversation(idConversation: string, id: string, idEmpresa: string) {
-    io.to(idConversation).emit('new-message', {
-      message: await this.#conversationMessageRepository.findById(id, idEmpresa),
-    })
+  private async emitConversation(idConversation: string, id: string, idEmpresa: string, idUser?: string) {
+    const sockets = await io.fetchSockets();
+
+    for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
+      if (socket.data.iduser !== idUser) {
+        socket.emit('new-message', {
+          message: await this.#conversationMessageRepository.findById(id, idEmpresa),
+        });
+      }
+    }
   }
 }
