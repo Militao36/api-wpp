@@ -350,7 +350,7 @@ export class ConversationService {
     const sockets = await io.fetchSockets();
 
     for await (const socket of sockets) {
-      if (socket.data.iduser === idUser) {
+      if (socket.data.idUser === idUser) {
 
         socket.join(idConversation);
 
@@ -365,7 +365,7 @@ export class ConversationService {
     const sockets = await io.fetchSockets();
 
     for await (const socket of sockets) {
-      if (socket.data.iduser === idUserLogged) {
+      if (socket.data.idUser === idUserLogged) {
 
         socket.join(idConversation);
 
@@ -383,7 +383,24 @@ export class ConversationService {
         })
 
         socket.emit("add-user-conversation", {
-          users,
+          user: await this.#userService.findById(idUserLogged, idEmpresa),
+          conversation: await this.findById(idConversation, idEmpresa)
+        });
+      }
+    }
+  }
+
+  private async emitRemoveNewUser(idConversation: string, idUser: string, idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    for await (const socket of sockets) {
+      if (socket.data.iduser === idUser) {
+
+        socket.join(idConversation);
+
+        socket.emit("remove-user-conversation", {
+          user: await this.#userService.findById(idUser, idEmpresa),
+          conversation: await this.findById(idConversation, idEmpresa)
         });
       }
     }
@@ -393,7 +410,7 @@ export class ConversationService {
     const sockets = await io.fetchSockets();
 
     for await (const socket of sockets) {
-      if (socket.data.iduser === idUser) {
+      if (socket.data.idUser === idUser) {
 
         socket.leave(idConversation);
 
@@ -415,7 +432,7 @@ export class ConversationService {
     const sockets = await io.fetchSockets();
 
     for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
-      if (socket.data.iduser !== idUser) {
+      if (socket.data.idUser !== idUser) {
         socket.emit('new-message', {
           message: await this.#conversationMessageRepository.findById(id, idEmpresa),
         });
