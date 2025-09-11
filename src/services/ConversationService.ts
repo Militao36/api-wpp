@@ -347,7 +347,7 @@ export class ConversationService {
 
         socket.join(idConversation);
 
-        const conversationUser = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
+        const conversationUser = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa, { users: true })
 
         const users = conversationUser.map(e => {
           return new UserEntity({
