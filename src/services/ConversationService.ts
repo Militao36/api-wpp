@@ -79,28 +79,6 @@ export class ConversationService {
     await this.addAndRemoveUsers(conversationUser[0].idConversation, idUserLogged, idEmpresa)
   }
 
-  public async removeUser(conversationUser: ConversationUserEntity) {
-    const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationUser.idConversation, conversationUser.idEmpresa)
-
-    if (!conversationUsers.find(e => e.idUser === conversationUser.idUser)) {
-      return
-    }
-
-    if (conversationUsers.length <= 1) {
-      throw new BadRequestExeption('Não é possível remover o único usuário da conversa')
-    }
-
-    const user = await this.#userService.findById(conversationUser.idUser, conversationUser.idEmpresa)
-
-    if (user.isMaster) {
-      throw new BadRequestExeption('Usuário master não pode ser removido da conversa')
-    }
-
-    await this.#conversationUsersRepository.removeUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
-
-    await this.emitRemoveUser(conversationUser.idConversation, conversationUser.idUser, conversationUser.idEmpresa)
-  }
-
   public async message(
     conversationMessage: Partial<ConversationMessageEntity &
     { fileName: string, mimetype: string, idContact: string }>
@@ -383,49 +361,11 @@ export class ConversationService {
         })
 
         socket.emit("add-user-conversation", {
-          user: await this.#userService.findById(idUserLogged, idEmpresa),
+          users,
           conversation: await this.findById(idConversation, idEmpresa)
         });
       }
     }
-  }
-
-  private async emitRemoveNewUser(idConversation: string, idUser: string, idEmpresa: string) {
-    const sockets = await io.fetchSockets();
-
-    for await (const socket of sockets) {
-      if (socket.data.iduser === idUser) {
-
-        socket.join(idConversation);
-
-        socket.emit("remove-user-conversation", {
-          user: await this.#userService.findById(idUser, idEmpresa),
-          conversation: await this.findById(idConversation, idEmpresa)
-        });
-      }
-    }
-  }
-
-  private async emitRemoveUser(idConversation: string, idUser: string, idEmpresa: string) {
-    const sockets = await io.fetchSockets();
-
-    for await (const socket of sockets) {
-      if (socket.data.idUser === idUser) {
-
-        socket.leave(idConversation);
-
-        socket.emit("removido", {
-          user: await this.#userService.findById(idUser, idEmpresa),
-          conversation: await this.findById(idConversation, idEmpresa)
-        });
-      }
-    }
-
-    io.to(idConversation).emit('remove-user-conversation', {
-      user: await this.#userService.findById(idUser, idEmpresa),
-      conversation: await this.findById(idConversation, idEmpresa)
-    })
-
   }
 
   private async emitConversation(idConversation: string, id: string, idEmpresa: string, idUser?: string) {
