@@ -1,16 +1,46 @@
+import crypto from 'crypto'
+import jwt from 'jsonwebtoken'
 import { UserEntity } from "../entity/UserEntity"
 import { UserRepository } from "../repositories/UserRepository"
+import { Authentication } from '../util/middlewares/auth'
 
 export class UserService {
   #userRepository: UserRepository
-  constructor({ userRepository }) {
+  #authentication: Authentication
+  constructor({ userRepository, authentication }) {
     this.#userRepository = userRepository
+    this.#authentication = authentication
+  }
+
+  public async auth(userName: string, password: string, idEmpresa: string): Promise<{ user: UserEntity, token: string }> {
+    const user = await this.#userRepository.findByUserName(userName, idEmpresa)
+
+    if (!user) throw new Error('User not found')
+
+    const passwordHash = this.geneteratePasswordHash(password)
+
+    if (user.password !== passwordHash) {
+      throw new Error('Invalid password')
+    }
+
+    const token = this.#authentication.generateToken({
+      idEmpresa,
+      id: user.id,
+      isMaster: user.isMaster,
+      name: user.name,
+      username: user.username,
+    })
+
+    return { user, token }
   }
 
   public async save(user: UserEntity): Promise<string> {
     const userData = new UserEntity(user)
 
-    await this.#userRepository.save(userData)
+    await this.#userRepository.save({
+      ...userData,
+      password: this.geneteratePasswordHash(userData.password!)
+    })
     return userData.id!
   }
 
@@ -28,5 +58,15 @@ export class UserService {
   public async findMasterUsersByIdEmpresa(idEmpresa: string): Promise<UserEntity[]> {
     const users = await this.#userRepository.findMasterUsersByIdEmpresa(idEmpresa)
     return users
+  }
+
+  private generateToken(idEmpresa: string, args: object = {}) {
+    return jwt.sign({ idEmpresa, ...args }, process.env.SECRET_JWT, {
+      expiresIn: 86400 * 30
+    })
+  }
+
+  private geneteratePasswordHash(password: string) {
+    return crypto.createHash('md5').update(password!).digest('hex')
   }
 }

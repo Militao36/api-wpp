@@ -5,6 +5,7 @@ import { errorHandler } from './util/middlewares/errorHandler'
 import cors from 'cors'
 
 import container from './container'
+import { Authentication } from './util/middlewares/auth'
 
 const app = express()
 
@@ -13,11 +14,7 @@ app.use(cors())
 
 app.disable('x-powered-by')
 
-app.use((req, res, next) => {
-  req.idEmpresa = '1'
-  req.idUser = process.env.ID_USER
-  return next()
-})
+app.use(new Authentication().verify)
 
 // middlewares
 app.use(scopePerRequest(container))

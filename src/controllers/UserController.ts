@@ -10,6 +10,22 @@ export class UserController {
     this.#userService = userService
   }
 
+  @route('/auth')
+  @POST()
+  async auth(request: Request, response: Response) {
+    const { userName, password } = request.body
+    const idEmpresa = request.idEmpresa
+
+    const { user, token } = await this.#userService.auth(
+      userName,
+      password,
+      idEmpresa
+    )
+
+    return response.status(200).json({ user, token })
+  }
+
+  @route('/register')
   @POST()
   async save(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
@@ -18,6 +34,7 @@ export class UserController {
       ...request.body,
       idEmpresa
     })
+    
     return response.status(201).json({ id })
   }
 

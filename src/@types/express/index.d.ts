@@ -6,6 +6,9 @@ declare global {
     interface Request {
       idEmpresa?: string
       idUser?: string
+      isMaster?: boolean
+      username?: string
+      name?: string
       edge?: Edge
     }
   }

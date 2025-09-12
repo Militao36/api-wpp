@@ -15,6 +15,7 @@ import { ClientsWpp } from './wpp'
 import { SyncContacts } from './queue'
 import { AwsService } from './services/AwsService'
 import { clientRedis } from './util/config/redis'
+import { Authentication } from './util/middlewares/auth'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
@@ -22,6 +23,7 @@ const definition = {
     database: asValue(database),
     clientsWpp: asClass(ClientsWpp).singleton(),
     clientRedis: asValue(clientRedis),
+    authentication: asClass(Authentication).singleton(),
     //services
     userService: asClass(UserService).singleton(),
     contactService: asClass(ContactService).singleton(),
