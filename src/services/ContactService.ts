@@ -61,8 +61,8 @@ export class ContactService {
     return this.#contactRepository.findById(id, idEmpresa)
   }
 
-  public async findAll(idEmpresa: string) {
-    return this.#contactRepository.findAll(idEmpresa)
+  public async findAll(idEmpresa: string, qs: Record<string, any> = {}) {
+    return this.#contactRepository.findAllContacts(idEmpresa, qs)
   }
 
   private async getProfilePicUrl(idEmpresa: string, phone: string) {

@@ -12,8 +12,8 @@ export class UserService {
     this.#authentication = authentication
   }
 
-  public async auth(userName: string, password: string, idEmpresa: string): Promise<{ user: UserEntity, token: string }> {
-    const user = await this.#userRepository.findByUserName(userName, idEmpresa)
+  public async auth(userName: string, password: string): Promise<{ user: Partial<UserEntity>, token: string }> {
+    const user = await this.#userRepository.findByUserName(userName,)
 
     if (!user) throw new Error('User not found')
 
@@ -24,14 +24,22 @@ export class UserService {
     }
 
     const token = this.#authentication.generateToken({
-      idEmpresa,
+      idEmpresa: user.idEmpresa,
       id: user.id,
       isMaster: user.isMaster,
       name: user.name,
       username: user.username,
     })
 
-    return { user, token }
+    return {
+      user: {
+        id: user.id,
+        isMaster: Boolean(user.isMaster),
+        name: user.name,
+        username: user.username,
+      },
+      token
+    }
   }
 
   public async save(user: UserEntity): Promise<string> {

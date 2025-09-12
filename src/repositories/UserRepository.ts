@@ -16,8 +16,8 @@ export class UserRepository extends RepositoryBase<UserEntity> {
     return users
   }
 
-  async findByUserName(username: string, idEmpresa: string): Promise<UserEntity | undefined> {
-    const user = await this.#database('users').where({ username, idEmpresa }).first()
+  async findByUserName(username: string): Promise<UserEntity | undefined> {
+    const user = await this.#database('users').where({ username }).first()
     return user
   }
 }

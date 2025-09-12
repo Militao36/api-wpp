@@ -14,12 +14,10 @@ export class UserController {
   @POST()
   async auth(request: Request, response: Response) {
     const { userName, password } = request.body
-    const idEmpresa = request.idEmpresa
 
     const { user, token } = await this.#userService.auth(
       userName,
       password,
-      idEmpresa
     )
 
     return response.status(200).json({ user, token })
@@ -34,7 +32,7 @@ export class UserController {
       ...request.body,
       idEmpresa
     })
-    
+
     return response.status(201).json({ id })
   }
 

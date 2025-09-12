@@ -310,7 +310,7 @@ export class ClientsWpp {
     const config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${this.url}/api/messages?chatId=${chatId}&downloadMedia=false&limit=10&session=${idEmpresa}`,
+      url: `${this.url}/api/${idEmpresa}/chats/${chatId}/messages?downloadMedia=false&limit=20`,
       headers: {
         Authorization: `Basic ${this.token}`
       }

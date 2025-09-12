@@ -17,10 +17,12 @@ export class ContactRepository extends RepositoryBase<Partial<ContactEntity>> {
       .first()
   }
 
-  async findAll(idEmpresa: string): Promise<ContactEntity[]> {
+  async findAllContacts(idEmpresa: string, qs: Record<string, any>): Promise<ContactEntity[]> {
     const data = this.#database.table(this.table)
       .select('*')
       .where('idEmpresa', '=', idEmpresa)
+      .limit((qs?.limit || 20))
+      .offset(((qs?.page || 1) - 1) * (qs?.page || 20))
 
     return await data
   }

@@ -6,35 +6,27 @@ import { ConversationService } from '../services/ConversationService'
 
 export function authSocket(io: Server) {
   io.use((socket, next) => {
+    const auth = socket.handshake.headers.authorization
 
-    socket.data = {
-      ...socket.data,
-      idEmpresa: '1',
-      idUser: process.env.ID_USER
+    if (!auth) {
+      return next(new Error('Token de autenticação não fornecido'))
     }
 
-    next()
-    // const auth = socket.handshake.headers.authorization
+    const token = auth.split(' ')[1]
 
-    // if (!auth) {
-    //   return next(new Error('Token de autenticação não fornecido'))
-    // }
+    jwt.verify(token, process.env.SECRET_JWT, async (err, decoded: any) => {
+      if (err) {
+        return next(new Error('Falha na autenticação do token'))
+      }
 
-    // const token = auth.split(' ')[1]
+      socket.data = {
+        ...socket.data,
+        idEmpresa: decoded.idEmpresa,
+        idUser: decoded.id
+      }
 
-    // jwt.verify(token, process.env.SECRET_JWT, async (err, decoded: any) => {
-    //   if (err) {
-    //     return next(new Error('Falha na autenticação do token'))
-    //   }
-
-    //   socket.data = {
-    //     ...socket.data,
-    //     idEmpresa: '1',
-    //     idUser: process.env.ID_USER
-    //   }
-
-    //   next()
-    // })
+      next()
+    })
   })
 }
 
