@@ -20,12 +20,12 @@ export class ContactService {
 
     await this.#contactRepository.save(contactData)
 
-    await this.#syncContacts.add({
-      contacts: [{
-        ...contactData,
-        phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
-      }]
-    })
+    // await this.#syncContacts.add({
+    //   contacts: [{
+    //     ...contactData,
+    //     phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
+    //   }]
+    // })
 
     return contactData.id!
   }
