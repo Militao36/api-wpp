@@ -55,13 +55,12 @@ SyncContacts.process(async (job) => {
       const exists = await contactService.findByPhone(contact.idEmpresa, phone)
 
       if (exists) {
-        await contactRepository.update({
+        await contactService.update(exists.id, contact.idEmpresa, {
           ...exists,
           urlProfile: urlProfile || null,
           isManual: false,
           name: contact.name || exists.name,
-        }, exists.id, contact.idEmpresa)
-        
+        })
         continue
       }
 
