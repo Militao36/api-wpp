@@ -1,9 +1,9 @@
-POST http://localhost:3007/users
+POST http://localhost:3000/users
 Content-Type: application/json
 
 {
   "name": "Matheus M Militão",
-  "username": "militao234",
+  "username": "matheus",
   "password": "1234"
 }
 
@@ -21,12 +21,23 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3007/users/register
+POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "name": "Bernardo Militão",
-  "username": "bernardo3434",
+  "name": "Matheus Militão",
+  "username": "matheus",
   "password": "1234"
+}
+
+
+#### auth user
+
+POST http://localhost:3000/users/auth
+Content-Type: application/json
+
+{
+  "userName": "militao",
+  "password": "123456"
 }
 

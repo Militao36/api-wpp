@@ -4,16 +4,13 @@ import Joi from 'joi'
 
 import { ConversationService } from '../services/ConversationService'
 import { ConversationUserEntity } from '../entity/ConversationUserEntity'
-import { ClientsWpp } from '../wpp'
 
 @route('/conversations')
 export class ConversationController {
   #conversationService: ConversationService
-  #clientsWpp: ClientsWpp
 
-  constructor({ conversationService, clientsWpp }) {
+  constructor({ conversationService }) {
     this.#conversationService = conversationService
-    this.#clientsWpp = clientsWpp
   }
 
   @POST()
@@ -124,6 +121,17 @@ export class ConversationController {
 
     const data = await this.#conversationService
       .listMessages(idEmpresa, idUser, request?.params?.idContact, Number(page))
+
+    return response.status(200).json(data)
+  }
+
+  @POST()
+  @route('/finish/:idContact')
+  async finishConversation(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+    const idContact = request.params.idContact
+
+    const data = await this.#conversationService.finishConversation(idEmpresa, idContact)
 
     return response.status(200).json(data)
   }

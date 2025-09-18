@@ -13,7 +13,7 @@ export class UserService {
   }
 
   public async auth(userName: string, password: string): Promise<{ user: Partial<UserEntity>, token: string }> {
-    const user = await this.#userRepository.findByUserName(userName,)
+    const user = await this.#userRepository.findByUserName(userName)
 
     if (!user) throw new Error('User not found')
 

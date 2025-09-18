@@ -18,14 +18,25 @@ export class ContactService {
   public async save(contact: ContactEntity): Promise<string> {
     const contactData = new ContactEntity(contact)
 
-    await this.#contactRepository.save(contactData)
+    const chatId = await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)
 
-    // await this.#syncContacts.add({
-    //   contacts: [{
-    //     ...contactData,
-    //     phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
-    //   }]
-    // })
+    if (!chatId) {
+      throw new Error('Número de telefone inválido, não tem wpp cadastrado')
+    }
+
+    const phone = chatId.replace('@c.us', '')
+
+    await this.#contactRepository.save({
+      ...contactData,
+      phone,
+    })
+
+    await this.#syncContacts.add({
+      contacts: [{
+        ...contactData,
+        phone,
+      }]
+    })
 
     return contactData.id!
   }
@@ -39,18 +50,7 @@ export class ContactService {
       throw new Error('Contato não encontrado')
     }
 
-    if (!contactExists.isManual) {
-      throw new Error('Contato não pode ser editado pelo painel, apenas pelo celular')
-    }
-
     await this.#contactRepository.update(contactData, id, idEmpresa)
-
-    await this.#syncContacts.add({
-      contacts: [{
-        ...contactData,
-        phone: (await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)) || contactData.phone
-      }]
-    })
   }
 
   public async findByPhone(idEmpresa: string, phone: string) {

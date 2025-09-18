@@ -317,6 +317,18 @@ export class ConversationService {
     return conversation
   }
 
+  async finishConversation(idEmpresa: string, idContact: string) {
+    const conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
+
+    if (!conversation) {
+      throw new BadRequestExeption('Conversa não encontrada')
+    }
+
+    conversation.finishedAt = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
+
+    await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
+  }
+
   private async formatChatId(nameConnection: string, chatId: string) {
     try {
       const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)

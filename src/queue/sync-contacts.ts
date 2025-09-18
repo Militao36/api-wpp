@@ -11,6 +11,7 @@ import { UserService } from '../services/UserService'
 import { ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
 import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 import { DateTime } from 'luxon'
+import { ContactRepository } from '../repositories/ContactRepository'
 
 export const SyncContacts = new Queue('queue-sync-contacts', {
   redis: {
@@ -27,6 +28,7 @@ SyncContacts.process(async (job) => {
 
     const conversationService = container.resolve<ConversationService>('conversationService')
     const contactService = container.resolve<ContactService>('contactService')
+    const contactRepository = container.resolve<ContactRepository>('contactRepository')
     const userService = container.resolve<UserService>('userService')
     const clientsWpp = container.resolve<ClientsWpp>('clientsWpp')
     const awsService = container.resolve<AwsService>('awsService')
@@ -42,31 +44,37 @@ SyncContacts.process(async (job) => {
 
       // const fileName = `${contact.id}-profile.jpg`
       // const upload = await awsService.uploadFile(urlProfile, fileName, process.env.BUCKET_NAME)
-
-      const exists = await contactService.findByPhone(contact.idEmpresa, contact.phone)
-
-      if (exists) {
-        await contactService.update(exists.id, contact.idEmpresa, {
-          ...exists,
-          urlProfile: urlProfile || null,
-          isManual: false,
-          name: contact.name || exists.name,
-        })
-        continue
-      }
-
       const chatId = await clientsWpp.numberExists(contact.idEmpresa, contact.phone)
 
       if (!chatId) {
         continue;
       }
 
-      const idContact = await contactService.save({
+      const phone = chatId.replace('@c.us', '')
+
+      const exists = await contactService.findByPhone(contact.idEmpresa, phone)
+
+      if (exists) {
+        await contactRepository.update({
+          ...exists,
+          urlProfile: urlProfile || null,
+          isManual: false,
+          name: contact.name || exists.name,
+        }, exists.id, contact.idEmpresa)
+        
+        continue
+      }
+
+      const newContact = new ContactEntity({
         ...contact,
         urlProfile: urlProfile || null,
         isManual: false,
         phone: chatId.replace('@c.us', ''),
       })
+
+      const idContact = newContact.id!
+
+      await contactRepository.save(newContact)
 
       const userMaster = await userService.findMasterUsersByIdEmpresa(contact.idEmpresa)
       const messagesByChatId = await clientsWpp.getMessagesByChatId(contact.idEmpresa, chatId)
