@@ -53,7 +53,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     const data = this.#database.table(this.table)
       .select(['conversations.*', 'contacts.name', 'contacts.urlProfile', 'contacts.id as idContact'])
       .where('conversations.idEmpresa', '=', idEmpresa)
-
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .orderBy('conversations.updatedAt', 'desc')
       .limit((filter?.limit || 20))
