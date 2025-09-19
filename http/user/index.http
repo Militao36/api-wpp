@@ -27,7 +27,8 @@ Content-Type: application/json
 {
   "name": "Matheus Militão",
   "username": "matheus",
-  "password": "1234"
+  "password": "1234",
+  "idEmpresa": "9555c67f-86bd-4b50-b9fb-90f07a87531b"
 }
 
 

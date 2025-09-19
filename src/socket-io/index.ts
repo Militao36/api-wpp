@@ -32,23 +32,27 @@ export function authSocket(io: Server) {
 
 export function startSocket(io: Server) {
   io.on('connection', async (socket) => {
-    const { idEmpresa, idUser } = socket.data
+    try {
+      const { idEmpresa, idUser } = socket.data
 
-    const conversations = await container.resolve<ConversationService>('conversationService').findAll(
-      idEmpresa,
-      idUser,
-    )
+      const conversations = await container.resolve<ConversationService>('conversationService').findAll(
+        idEmpresa,
+        idUser,
+      )
 
-    conversations.forEach((conversation) => {
-      socket.join(conversation.id)
-    })
+      conversations.forEach((conversation) => {
+        socket.join(conversation.id)
+      })
 
-    socket.emit('preload-conversations', {
-      conversations,
-    })
+      socket.emit('preload-conversations', {
+        conversations,
+      })
 
-    socket.on('disconnect', (socket) => {
-      console.log('Client disconnected', socket)
-    })
+      socket.on('disconnect', (socket) => {
+        console.log('Client disconnected', socket)
+      })
+    } catch (error) {
+      console.error('Error on socket connection:', error)
+    }
   })
 }

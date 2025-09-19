@@ -140,7 +140,7 @@ export class WhatsAppController {
     return response.status(200).send(Buffer.from(result, 'binary').toString('base64'))
   }
 
-  @route('/')
+  @route('/webhook')
   @POST()
   async webhoook(request: Request, response: Response) {
     const eventsNamesValids = ['message']
@@ -155,13 +155,7 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa);
-
-    if (!users?.length) {
-      return response.status(400).json({ message: 'Usuários master não encontrado' })
-    }
-
-    const phoneNumber = (body.payload.from.replace('@c.us', '') as string).substring(2)
+    const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, body.payload.from)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
     let idContact = contact?.id
@@ -180,19 +174,63 @@ export class WhatsAppController {
     let idConversation = null
 
     if (!conversation) {
+      // todo colocar trx
+      let user = await this.#userService.findByUserBot(idEmpresa);
+
+      if (!user) {
+        const idUser = await this.#userService.save({
+          name: `Bot - ${idEmpresa}`,
+          username: idEmpresa,
+          password: Math.random().toString(36).slice(-8),
+          isMaster: false,
+          idEmpresa
+        })
+
+        user = await this.#userService.findById(idUser, idEmpresa)
+      }
+
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,
         isRead: true,
-        users: users.map(user => {
-          return {
+        step: 'initial',
+        users: [
+          {
             idEmpresa,
-            idUser: user.id!
+            id: user.id!
           }
-        })
+        ]
       })
+
+      await this.#clientsWpp.startBot(idEmpresa, body, idConversation)
     } else {
       idConversation = conversation.id
+
+      const usersInConversation = await this.#conversationService.listUsersInConversation(idConversation!, idEmpresa)
+
+      const hasUserBotInConversation = usersInConversation.find(u => u.username === u.idEmpresa)
+
+      if (hasUserBotInConversation) {
+        if (!['1', '2', '3'].includes(body.payload.body) && conversation.step === 'initial') {
+          await this.#clientsWpp.sendMessage(idEmpresa, {
+            chatId: phoneNumber,
+            message: 'Por favor escolha uma das opções (1, 2 ou 3) para prosseguir com o atendimento.'
+          })
+        } else {
+          if (conversation.step === 'initial') {
+            await this.#conversationService.update(idConversation!, idEmpresa, {
+              step: 'perguntaSetor',
+            })
+          }
+          else if (conversation.step === 'perguntaSetor') {
+            await this.#conversationService.update(idConversation!, idEmpresa, {
+              step: 'aguardandoAtendimento',
+            })
+          }
+
+          await this.#clientsWpp.startBot(idEmpresa, body, idConversation)
+        }
+      }
     }
 
     // dois b.o

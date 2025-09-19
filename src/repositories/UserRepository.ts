@@ -16,6 +16,11 @@ export class UserRepository extends RepositoryBase<UserEntity> {
     return users
   }
 
+  async findByUserBot(idEmpresa: string): Promise<UserEntity | null> {
+    const user = await this.#database('users').where({ idEmpresa }).andWhere('username', '=', idEmpresa).first()
+    return user
+  }
+
   async findByUserName(username: string): Promise<UserEntity | undefined> {
     const user = await this.#database('users').where({ username }).first()
     return user

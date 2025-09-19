@@ -17,9 +17,10 @@ export class Authentication {
     const excludes = [
       '/users/auth',
       '/users/register',
+      '/zap/webhook'
     ]
 
-    if (excludes.includes(req.url)) {
+    if (excludes.includes(req.url.split('?')[0])) {
       return next();
     }
 

@@ -10,6 +10,7 @@ export class ConversationEntity extends Entity {
   finishedAt?: string
   isRead: boolean
   lastMessage?: string
+  step?: string
 
   users?: Partial<UserEntity>[]
   contact?: ContactEntity
@@ -24,5 +25,6 @@ export class ConversationEntity extends Entity {
     this.finishedAt = conversation.finishedAt
     this.isRead = conversation.isRead ?? false
     this.lastMessage = conversation.lastMessage
+    this.step = conversation.step
   }
 }

@@ -30,7 +30,7 @@ export class UserController {
 
     const id = await this.#userService.save({
       ...request.body,
-      idEmpresa
+      idEmpresa: request.body.idEmpresa || idEmpresa,
     })
 
     return response.status(201).json({ id })

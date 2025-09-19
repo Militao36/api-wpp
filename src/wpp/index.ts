@@ -6,8 +6,8 @@ export class ClientsWpp {
   private readonly url: string
 
   constructor() {
-    this.token = 'YWRtaW46amlnUUNPUWpTVklwR0hHY0tDbGZheFFJdkV3dUlXeUt4cnROQVM='
-    this.url = 'https://mysql-wpp.jbvwrb.easypanel.host'
+    this.token = process.env.WPP_TOKEN || ''
+    this.url = process.env.WPP_URL || ''
   }
 
   public async start(idEmpresa: string) {
@@ -21,7 +21,7 @@ export class ClientsWpp {
         proxy: null,
         webhooks: [
           {
-            url: `https://9ef3491c7d13.ngrok-free.app/zap?token=${idEmpresa}`,
+            url: `https://1a392da02b7f.ngrok-free.app/zap/webhook?idEmpresa=${idEmpresa}`,
             events: [
               'message'
             ]
@@ -42,7 +42,8 @@ export class ClientsWpp {
       url: `${this.url}/api/sessions/start`,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       },
       data
     }
@@ -64,7 +65,8 @@ export class ClientsWpp {
         responseType: 'arraybuffer',
         url: `${this.url}/api/${idEmpresa}/auth/qr`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         }
       }
 
@@ -99,7 +101,8 @@ export class ClientsWpp {
         maxBodyLength: Infinity,
         url: `${this.url}/api/sendSeen`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         },
         data: {
           chatId: `55${chatId}@c.us`,
@@ -121,7 +124,8 @@ export class ClientsWpp {
         maxBodyLength: Infinity,
         url: `${this.url}/api/sessions/stop`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         },
         data: {
           name: idEmpresa,
@@ -151,7 +155,8 @@ export class ClientsWpp {
       maxBodyLength: Infinity,
       url: `${this.url}/api/sessions`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       }
     }
 
@@ -189,7 +194,8 @@ export class ClientsWpp {
       maxBodyLength: Infinity,
       url: `${this.url}/api/contacts/all?session=${idEmpresa}`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       }
     }
 
@@ -208,7 +214,8 @@ export class ClientsWpp {
       maxBodyLength: Infinity,
       url: `${this.url}/api/contacts/profile-picture?contactId=${chatId.replace(/\D/g, '')}@c.us&refresh=false&session=${idEmpresa}`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       }
     }
 
@@ -240,7 +247,8 @@ export class ClientsWpp {
         maxBodyLength: Infinity,
         url: `${this.url}/api/sendText`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         },
         data: {
           chatId: `55${data.chatId}@c.us`,
@@ -280,7 +288,8 @@ export class ClientsWpp {
         maxBodyLength: Infinity,
         url: `${this.url}/api/sendImage`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         },
         data: {
           chatId: `55${data.chatId}@c.us`,
@@ -312,7 +321,8 @@ export class ClientsWpp {
       maxBodyLength: Infinity,
       url: `${this.url}/api/${idEmpresa}/chats/${chatId}/messages?downloadMedia=false&limit=20`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       }
     }
 
@@ -321,14 +331,15 @@ export class ClientsWpp {
     return response.data as any[]
   }
 
-   public async numberExists(nameConnection: string, number: string): Promise<string | null> {
+  public async numberExists(nameConnection: string, number: string): Promise<string | null> {
     try {
       const config = {
         method: 'get',
         maxBodyLength: Infinity,
         url: `${this.url}/api/contacts/check-exists?phone=${number}&session=${nameConnection}`,
         headers: {
-          Authorization: `Basic ${this.token}`
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
         }
       }
 
@@ -344,13 +355,22 @@ export class ClientsWpp {
     }
   }
 
+  public async startBot(idEmpresa: string, body: Record<string, any>, idConversation: string) {
+    await axios.post(process.env.N8N_BOT, {
+      wpp: body,
+      idConversation,
+      idEmpresa
+    })
+  }
+
   private async startTyping(idEmpresa: string, chatId: string) {
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${this.url}/api/startTyping`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       },
       data: {
         chatId: `55${chatId}@c.us`,
@@ -368,7 +388,8 @@ export class ClientsWpp {
       maxBodyLength: Infinity,
       url: `${this.url}/api/stopTyping`,
       headers: {
-        Authorization: `Basic ${this.token}`
+        Authorization: `Basic ${this.token}`,
+        "X-Api-Key": process.env.WPP_KEY
       },
       data: {
         chatId: `55${chatId}@c.us`,

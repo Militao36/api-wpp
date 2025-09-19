@@ -54,6 +54,12 @@ export class ConversationService {
 
 
   public async removeAndAddUsers(idUserLogged: string, idEmpresa: string, conversationUser: ConversationUserEntity[]) {
+    const conversation = await this.findById(conversationUser[0].idConversation, idEmpresa)
+
+    if (conversation.step) {
+      throw new BadRequestExeption('Conversa em atendimento automático, não é possível alterar os usuários da conversa. Favor transferir a conversa para outro usuário.')
+    }
+
     const usersConverstion = await this.#conversationUsersRepository.findByConversation(conversationUser[0].idConversation, idEmpresa)
 
     const idsUsersNew = conversationUser.map(e => e.idUser)
@@ -84,6 +90,13 @@ export class ConversationService {
     { fileName: string, mimetype: string, idContact: string }>
   ): Promise<ConversationMessageEntity> {
     const conversation = await this.findOrCreateConversation(conversationMessage.idEmpresa, conversationMessage.idContact!, conversationMessage.idUser!)
+
+    if (conversation.step) {
+      await this.update(conversation.id!, conversation.idEmpresa, { step: null })
+      conversation.step = null;
+
+      await this.removeAndAddUsers(conversation.id!, conversationMessage.idUser!, [])
+    }
 
     const contact = await this.#contactService.findById(
       conversationMessage.idEmpresa,
@@ -182,30 +195,36 @@ export class ConversationService {
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
-    const data = []
-    const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, idUser, filter)
+    try {
+      const data = []
+      const user = await this.#userService.findById(idUser, idEmpresa)
 
-    for await (const conversation of conversations) {
-      const conversationNotFisnihed = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, conversation.idContact)
+      const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, user.isMaster ? null : idUser, filter)
 
-      const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationNotFisnihed.id, idEmpresa, { users: true })
+      for await (const conversation of conversations) {
+        const conversationNotFisnihed = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, conversation.idContact)
 
-      data.push({
-        ...conversation,
-        users: conversationUsers.map(e => {
-          return {
-            id: e.id,
-            idConversation: e.idConversation,
-            idUser: e.idUser,
-            name: e.name,
-            username: e.username,
-            isMaster: e.isMaster
-          }
+        const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationNotFisnihed.id, idEmpresa, { users: true })
+
+        data.push({
+          ...conversation,
+          users: conversationUsers.map(e => {
+            return {
+              id: e.id,
+              idConversation: e.idConversation,
+              idUser: e.idUser,
+              name: e.name,
+              username: e.username,
+              isMaster: e.isMaster
+            }
+          })
         })
-      })
-    }
+      }
 
-    return data
+      return data
+    } catch (error) {
+      return []
+    }
   }
 
   async findById(id: string, idEmpresa: string): Promise<ConversationEntity> {
@@ -228,6 +247,12 @@ export class ConversationService {
     await this.#userService.findById(idUserTransfer, idEmpresa)
 
     const conversation = await this.findById(conversationId, idEmpresa)
+
+    // essa regra é para caso a conversa esteja em atendimento automático, ai forço sair do atendimento automático
+    if (conversation.step) {
+      await this.update(conversation.id!, conversation.idEmpresa, { step: null })
+      trasnferMessges = true
+    }
 
     if (!trasnferMessges) {
       conversation.finishedAt = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
@@ -283,6 +308,10 @@ export class ConversationService {
     }, idConversation, idEmpresa)
   }
 
+  public async update(idConversation: string, idEmpresa: string, data: Partial<ConversationEntity>) {
+    await this.#conversationRepository.update(data as ConversationEntity, idConversation, idEmpresa)
+  }
+
   public async updateRead(idConversation: string, idEmpresa: string) {
     await this.#conversationRepository.update({
       isRead: true
@@ -292,6 +321,10 @@ export class ConversationService {
   public async findConversationByContactNotFinished(idEmpresa: string, idContact: string) {
     return this.#conversationRepository
       .findConversationByContactNotFinished(idEmpresa, idContact)
+  }
+
+  async listUsersInConversation(idConversation: string, idEmpresa: string) {
+    return this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa, { users: true })
   }
 
   async findOrCreateConversation(idEmpresa: string, idContact: string, idUser: string) {
@@ -329,7 +362,7 @@ export class ConversationService {
     await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
   }
 
-  private async formatChatId(nameConnection: string, chatId: string) {
+  async formatChatId(nameConnection: string, chatId: string) {
     try {
       const _chatId = await this.#clientsWpp.numberExists(nameConnection, chatId)
 

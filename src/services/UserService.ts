@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto, { randomUUID } from 'crypto'
 import jwt from 'jsonwebtoken'
 import { UserEntity } from "../entity/UserEntity"
 import { UserRepository } from "../repositories/UserRepository"
@@ -43,12 +43,16 @@ export class UserService {
   }
 
   public async save(user: UserEntity): Promise<string> {
-    const userData = new UserEntity(user)
+    const userData = new UserEntity({
+      ...user,
+      idEmpresa: user.idEmpresa || randomUUID()
+    })
 
     await this.#userRepository.save({
       ...userData,
       password: this.geneteratePasswordHash(userData.password!)
     })
+    
     return userData.id!
   }
 
@@ -66,6 +70,12 @@ export class UserService {
   public async findMasterUsersByIdEmpresa(idEmpresa: string): Promise<UserEntity[]> {
     const users = await this.#userRepository.findMasterUsersByIdEmpresa(idEmpresa)
     return users
+  }
+
+  public async findByUserBot(idEmpresa:string): Promise<UserEntity | null> {
+    const user = await this.#userRepository.findByUserBot(idEmpresa)
+
+    return user
   }
 
   private generateToken(idEmpresa: string, args: object = {}) {
