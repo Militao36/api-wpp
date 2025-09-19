@@ -53,9 +53,8 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     const data = this.#database.table(this.table)
       .select(['conversations.*', 'contacts.name', 'contacts.urlProfile', 'contacts.id as idContact'])
       .where('conversations.idEmpresa', '=', idEmpresa)
-      .innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
-      .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
 
+      .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .orderBy('conversations.updatedAt', 'desc')
       .limit((filter?.limit || 20))
       .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
@@ -69,7 +68,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     }
 
     if (idUser) {
-       data.where('conversation_users.idUser', '=', idUser)
+      data.innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation').where('conversation_users.idUser', '=', idUser)
     }
 
     // if (filter.messageId) {
