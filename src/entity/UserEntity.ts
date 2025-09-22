@@ -7,9 +7,10 @@ export class UserEntity extends Entity {
   username: string
   password: string
   isMaster: boolean
+  idSector?: string
 
   // auxiliares
-  sectors?: SectorEntity[]
+  sector?: SectorEntity
 
   constructor(user: Omit<UserEntity, 'id'>, id?: string) {
     super(user, id)
@@ -18,5 +19,6 @@ export class UserEntity extends Entity {
     this.username = user.username
     this.password = user.password
     this.isMaster = user.isMaster
+    this.idSector = this.isMaster ? null : user.idSector
   }
 } 

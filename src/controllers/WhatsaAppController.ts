@@ -10,6 +10,7 @@ import { SyncContacts } from '../queue'
 import { RedisClientType } from 'redis'
 import { DateTime } from 'luxon'
 import { UserService } from '../services/UserService'
+import { BotService } from '../services/BotService'
 
 @route('/zap')
 export class WhatsAppController {
@@ -19,14 +20,16 @@ export class WhatsAppController {
   #syncContacts: typeof SyncContacts
   #clientRedis: RedisClientType
   #userService: UserService
+  #botService: BotService
 
-  constructor({ userService, clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
+  constructor({ userService, botService, clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
     this.#clientsWpp = clientsWpp
     this.#conversationService = conversationService
     this.#contactService = contactService
     this.#syncContacts = syncContacts
     this.#clientRedis = clientRedis
     this.#userService = userService
+    this.#botService = botService
   }
 
   @route('/health')
@@ -155,105 +158,7 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, body.payload.from)
-    const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
-
-    let idContact = contact?.id
-
-    if (!contact) {
-      const data = body.payload._data
-      idContact = await this.#contactService.save({
-        idEmpresa,
-        name: data.pushName,
-        phone: phoneNumber
-      })
-    }
-
-    const conversation = await this.#conversationService.findConversationByContactNotFinished(idEmpresa, idContact)
-
-    let idConversation = null
-
-    if (!conversation) {
-      // todo colocar trx
-      let user = await this.#userService.findByUserBot(idEmpresa);
-
-      if (!user) {
-        const idUser = await this.#userService.save({
-          name: `Bot - ${idEmpresa}`,
-          username: idEmpresa,
-          password: Math.random().toString(36).slice(-8),
-          isMaster: false,
-          idEmpresa
-        })
-
-        user = await this.#userService.findById(idUser, idEmpresa)
-      }
-
-      idConversation = await this.#conversationService.save({
-        idContact,
-        idEmpresa,
-        isRead: true,
-        step: 'initial',
-        users: [
-          {
-            idEmpresa,
-            id: user.id!
-          }
-        ]
-      })
-
-      await this.#clientsWpp.startBot(idEmpresa, body, idConversation)
-    } else {
-      idConversation = conversation.id
-
-      const usersInConversation = await this.#conversationService.listUsersInConversation(idConversation!, idEmpresa)
-
-      const hasUserBotInConversation = usersInConversation.find(u => u.username === u.idEmpresa)
-
-      if (hasUserBotInConversation) {
-        if (!['1', '2', '3'].includes(body.payload.body) && conversation.step === 'initial') {
-          await this.#clientsWpp.sendMessage(idEmpresa, {
-            chatId: phoneNumber,
-            message: 'Por favor escolha uma das opções (1, 2 ou 3) para prosseguir com o atendimento.'
-          })
-        } else {
-          if (conversation.step === 'initial') {
-            await this.#conversationService.update(idConversation!, idEmpresa, {
-              step: 'perguntaSetor',
-            })
-          }
-          else if (conversation.step === 'perguntaSetor') {
-            await this.#conversationService.update(idConversation!, idEmpresa, {
-              step: 'aguardandoAtendimento',
-            })
-          }
-
-          await this.#clientsWpp.startBot(idEmpresa, body, idConversation)
-        }
-      }
-    }
-
-    // dois b.o
-    // 1 - O url da midia vem localhost:3000 alterar
-    // 2 - o payload quando vem zerado a ultima mensagem qual vai ser?} - Gerei um id (uuid-RANDONUUID)
-    // 3 - Salvar messageId para responder (OK)
-    // 4 - Quando eu querer uma mensagem especificado eu vou buscar pelo ID da mensagem do zap, e pegar as 10 mensagens antes e 9 depois, e buscar o ultimo registro, e fazer um de para pelo id da mensagem pesquisada e do ultimo, para eu saber como irei páginar, e quantas páginas terá
-
-    await this.#conversationService.updateLastMessage(
-      idConversation,
-      idEmpresa,
-      body.payload.body
-    )
-
-    await this.#conversationService.addMessage(
-      idEmpresa,
-      idConversation,
-      null,
-      body.payload.body,
-      body.payload.id,
-      body.payload.hasMedia,
-      body.payload?.media?.url
-    )
+    await this.#botService.handle(idEmpresa, body)
 
     return response.status(200).send()
   }

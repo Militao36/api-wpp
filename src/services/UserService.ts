@@ -3,13 +3,18 @@ import jwt from 'jsonwebtoken'
 import { UserEntity } from "../entity/UserEntity"
 import { UserRepository } from "../repositories/UserRepository"
 import { Authentication } from '../util/middlewares/auth'
+import { SectorService } from './SectorService'
+import { SectorEntity } from '../entity/SectorEntity'
 
 export class UserService {
   #userRepository: UserRepository
   #authentication: Authentication
-  constructor({ userRepository, authentication }) {
+  #sectorService: SectorService
+
+  constructor({ sectorService, userRepository, authentication }) {
     this.#userRepository = userRepository
     this.#authentication = authentication
+    this.#sectorService = sectorService
   }
 
   public async auth(userName: string, password: string): Promise<{ user: Partial<UserEntity>, token: string }> {
@@ -43,16 +48,25 @@ export class UserService {
   }
 
   public async save(user: UserEntity): Promise<string> {
+    const idEmpresa = user.idEmpresa || randomUUID()
+
+    const idSector = await this.#sectorService.save(new SectorEntity({
+      idEmpresa,
+      name: 'Geral',
+    }))
+    
     const userData = new UserEntity({
       ...user,
-      idEmpresa: user.idEmpresa || randomUUID()
+      idEmpresa,
+      idSector,
+      isMaster: user.isMaster || true,
+      password: this.geneteratePasswordHash(user.password!),
+      name: user.name || 'Administrador',
+      username: user.username || 'admin',
     })
 
-    await this.#userRepository.save({
-      ...userData,
-      password: this.geneteratePasswordHash(userData.password!)
-    })
-    
+    await this.#userRepository.save(userData)
+
     return userData.id!
   }
 
@@ -72,7 +86,7 @@ export class UserService {
     return users
   }
 
-  public async findByUserBot(idEmpresa:string): Promise<UserEntity | null> {
+  public async findByUserBot(idEmpresa: string): Promise<UserEntity | null> {
     const user = await this.#userRepository.findByUserBot(idEmpresa)
 
     return user

@@ -1,11 +1,13 @@
 import { Entity } from "./Base/Entity"
 import { ContactEntity } from "./ContactEntity"
 import { ConversationMessageEntity } from "./ConversationMessageEntity"
+import { SectorEntity } from "./SectorEntity"
 import { UserEntity } from "./UserEntity"
 
 export class ConversationEntity extends Entity {
   idEmpresa?: string
   idContact?: string
+  idSector?: string
   idPreviousConversation?: string
   finishedAt?: string
   isRead: boolean
@@ -16,6 +18,7 @@ export class ConversationEntity extends Entity {
   contact?: ContactEntity
   previusConversation?: ConversationEntity
   messages?: ConversationMessageEntity[]
+  sector?: SectorEntity
 
   constructor(conversation: Omit<ConversationEntity, 'id'>, id?: string) {
     super(conversation, id)

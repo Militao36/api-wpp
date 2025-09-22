@@ -42,7 +42,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     idEmpresa: string,
     idUser: string,
     filter?: {
-      // messageId?: string,
       limit?: number,
       finished?: string,
       createdAtGraterThan?: string,
