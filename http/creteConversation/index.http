@@ -31,7 +31,8 @@ Content-Type: application/json
 }
 
 ### Buscar mensagens conversas 
-GET http://localhost:3000/conversations
+GET http://localhost:3002/conversations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZEVtcHJlc2EiOiI5NTU1YzY3Zi04NmJkLTRiNTAtYjlmYi05MGYwN2E4NzUzMWIiLCJpZCI6ImNiODY2NWY5LTVkMTktNDIyNi1iMGU3LTQwZjcxY2FjOTU5NSIsImlzTWFzdGVyIjoxLCJuYW1lIjoiTWF0aGV1cyBNaWxpdMOjbyIsInVzZXJuYW1lIjoibWF0aGV1cyIsImlhdCI6MTc1ODczNTAzMywiZXhwIjoxNzU4ODIxNDMzfQ.dKLbI6oUwlR8L34V-8Q_E5wKs3qJA-ycbe5tgntLKik
 
 ### lista mensagens com base no contatoId
 GET http://localhost:3000/conversations/list-messages/abf6b40e-b56d-42be-b70f-6200e9a71628

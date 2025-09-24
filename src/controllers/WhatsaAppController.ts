@@ -3,33 +3,24 @@ import { Request, Response } from 'express'
 import _ from 'lodash'
 
 import { ClientsWpp } from '../wpp'
-import { ConversationService } from '../services/ConversationService'
-import { ContactService } from '../services/ContactService'
 import { ContactEntity } from '../entity/ContactEntity'
 import { SyncContacts } from '../queue'
 import { RedisClientType } from 'redis'
 import { DateTime } from 'luxon'
-import { UserService } from '../services/UserService'
-import { BotService } from '../services/BotService'
+import { WhatsWppService } from '../services/WhatsWppService'
 
 @route('/zap')
 export class WhatsAppController {
   #clientsWpp: ClientsWpp
-  #conversationService: ConversationService
-  #contactService: ContactService
   #syncContacts: typeof SyncContacts
   #clientRedis: RedisClientType
-  #userService: UserService
-  #botService: BotService
+  #whatsWppService: WhatsWppService
 
-  constructor({ userService, botService, clientRedis, clientsWpp, syncContacts, conversationService, contactService }) {
+  constructor({ whatsWppService, clientRedis, clientsWpp, syncContacts }) {
     this.#clientsWpp = clientsWpp
-    this.#conversationService = conversationService
-    this.#contactService = contactService
     this.#syncContacts = syncContacts
     this.#clientRedis = clientRedis
-    this.#userService = userService
-    this.#botService = botService
+    this.#whatsWppService = whatsWppService
   }
 
   @route('/health')
@@ -158,8 +149,9 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    await this.#botService.handle(idEmpresa, body)
+    await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()
   }
+
 }

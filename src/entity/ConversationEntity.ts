@@ -24,6 +24,7 @@ export class ConversationEntity extends Entity {
     super(conversation, id)
     this.idEmpresa = conversation.idEmpresa
     this.idContact = conversation.idContact
+    this.idSector = conversation.idSector
     this.idPreviousConversation = conversation.idPreviousConversation
     this.finishedAt = conversation.finishedAt
     this.isRead = conversation.isRead ?? false

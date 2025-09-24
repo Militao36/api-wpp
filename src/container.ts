@@ -1,26 +1,24 @@
 import { asClass, asValue, createContainer, InjectionMode } from 'awilix'
 
-import { ConversationRepository } from './repositories/ConversationRepository'
-import { ContactRepository } from './repositories/ContactRepository'
-import { ConversationService } from './services/ConversationService'
-import { UserRepository } from './repositories/UserRepository'
-import { ContactService } from './services/ContactService'
-import { UserService } from './services/UserService'
-import { SectorService } from './services/SectorService'
-import { BotService } from './services/BotService'
-
-import { ConversationUsersRepository } from './repositories/ConversationUsersRepository'
-import { ConversationMessageRepository } from './repositories/ConversationMessageRepository'
-import { SectorRepository } from './repositories/SectorRepository'
-
-import { ClientsWpp } from './wpp'
-import { SyncContacts } from './queue'
+import { Authentication } from './util/middlewares/auth'
 import { AwsService } from './services/AwsService'
 import { clientRedis } from './util/config/redis'
-import { Authentication } from './util/middlewares/auth'
-import { database } from './util/config/database'
+import { ClientsWpp } from './wpp'
+import { ContactRepository } from './repositories/ContactRepository'
+import { ContactService } from './services/ContactService'
+import { ConversationMessageRepository } from './repositories/ConversationMessageRepository'
+import { ConversationRepository } from './repositories/ConversationRepository'
+import { ConversationService } from './services/ConversationService'
+import { ConversationUsersRepository } from './repositories/ConversationUsersRepository'
 import { CryptoHash } from './util/hash'
+import { database } from './util/config/database'
 import { Logger } from './util/Logger'
+import { SectorRepository } from './repositories/SectorRepository'
+import { SectorService } from './services/SectorService'
+import { SyncContacts } from './queue'
+import { UserRepository } from './repositories/UserRepository'
+import { UserService } from './services/UserService'
+import { WhatsWppService } from './services/WhatsWppService'
 
 const definition = {
     hash: asClass(CryptoHash).singleton(),
@@ -35,7 +33,7 @@ const definition = {
     conversationService: asClass(ConversationService).singleton(),
     awsService: asClass(AwsService).singleton(),
     sectorService: asClass(SectorService).singleton(),
-    botService: asClass(BotService).singleton(),
+    whatsWppService: asClass(WhatsWppService).singleton(),
 
     //repository
     userRepository: asClass(UserRepository).singleton(),

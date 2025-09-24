@@ -47,12 +47,14 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       createdAtGraterThan?: string,
       createdAtLessThan?: string
       page?: number
+      idSector?: string
     }
   ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
-      .select(['conversations.*', 'contacts.name', 'contacts.urlProfile', 'contacts.id as idContact'])
+      .select(['conversations.*', 'contacts.name', 'contacts.urlProfile', 'contacts.id as idContact', 'sectors.name as sectorName'])
       .where('conversations.idEmpresa', '=', idEmpresa)
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
+      .leftJoin('sectors', 'sectors.id', '=', 'conversations.idSector')
       .orderBy('conversations.updatedAt', 'desc')
       .limit((filter?.limit || 20))
       .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
@@ -67,6 +69,10 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
     if (idUser) {
       data.innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation').where('conversation_users.idUser', '=', idUser)
+    }
+
+    if (filter?.idSector) {
+      data.where('conversations.idSector', '=', filter.idSector)
     }
 
     // if (filter.messageId) {

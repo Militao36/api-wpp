@@ -1,6 +1,11 @@
 import { Entity } from "./Base/Entity"
 import { UserEntity } from "./UserEntity"
 
+
+export enum SectorsDefault {
+  geral = 'Geral'
+}
+
 export class SectorEntity extends Entity {
   idEmpresa: string
   name: string

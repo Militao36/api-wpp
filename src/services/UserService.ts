@@ -4,7 +4,7 @@ import { UserEntity } from "../entity/UserEntity"
 import { UserRepository } from "../repositories/UserRepository"
 import { Authentication } from '../util/middlewares/auth'
 import { SectorService } from './SectorService'
-import { SectorEntity } from '../entity/SectorEntity'
+import { SectorEntity, SectorsDefault } from '../entity/SectorEntity'
 
 export class UserService {
   #userRepository: UserRepository
@@ -52,7 +52,7 @@ export class UserService {
 
     const idSector = await this.#sectorService.save(new SectorEntity({
       idEmpresa,
-      name: 'Geral',
+      name: SectorsDefault.geral,
     }))
     
     const userData = new UserEntity({

@@ -34,11 +34,11 @@ Content-Type: application/json
 
 #### auth user
 
-POST http://localhost:3000/users/auth
+POST http://localhost:3002/users/auth
 Content-Type: application/json
 
 {
   "userName": "matheus",
-  "password": "123456"
+  "password": "1234"
 }
 
