@@ -12,7 +12,7 @@ export class ContactRepository extends RepositoryBase<Partial<ContactEntity>> {
 
   async findByPhone(idEmpresa: string, phone: string): Promise<ContactEntity | null> {
     return this.#database.table(this.table)
-      .select()
+      .select<ContactEntity[]>()
       .where({ phone, idEmpresa })
       .first()
   }

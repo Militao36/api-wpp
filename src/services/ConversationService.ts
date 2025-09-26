@@ -91,13 +91,6 @@ export class ConversationService {
   ): Promise<ConversationMessageEntity> {
     const conversation = await this.findOrCreateConversation(conversationMessage.idEmpresa, conversationMessage.idContact!, conversationMessage.idUser!)
 
-    if (conversation.step) {
-      await this.update(conversation.id!, conversation.idEmpresa, { step: null })
-      conversation.step = null;
-
-      await this.removeAndAddUsers(conversation.id!, conversationMessage.idUser!, [])
-    }
-
     const contact = await this.#contactService.findById(
       conversationMessage.idEmpresa,
       conversation.idContact
@@ -331,10 +324,13 @@ export class ConversationService {
     let conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
 
     if (!conversation) {
+      const user = await this.#userService.findById(idUser, idEmpresa)
+
       const idConversation = await this.save({
         idEmpresa,
         idContact,
         isRead: false,
+        idSector: user.idSector || null,
         users: [
           {
             id: idUser,
