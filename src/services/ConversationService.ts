@@ -11,9 +11,9 @@ import { ClientsWpp } from '../wpp'
 import { ContactService } from './ContactService'
 import { UserService } from './UserService'
 import { AwsService } from './AwsService'
-import type { TypesEventSocket } from '../socket-io/socketManager'
 import { io } from '../server'
 import { UserEntity } from '../entity/UserEntity'
+import _ from 'lodash'
 
 export class ConversationService {
   #conversationRepository: ConversationRepository
@@ -45,8 +45,14 @@ export class ConversationService {
         idConversation: conversationData.id!,
         idEmpresa: conversation.idEmpresa
       }))
+    }
 
-      await this.emitiNewConversation(conversationData.id!, item.id!, conversation.idEmpresa)
+    if (conversation.users.length) {
+      await this.emitConversationByUser(conversationData.id!, conversation.idEmpresa, conversation.users)
+    }
+
+    if (!conversation?.users?.length) {
+      await this.emitConversationByUser(conversationData.id!, conversation.idEmpresa)
     }
 
     return conversationData.id!
@@ -155,8 +161,6 @@ export class ConversationService {
       conversationMessage.idEmpresa
     )
 
-    await this.emitConversation(conversationMessage.idConversation, conversationMessageData.id!, conversationMessage.idEmpresa, conversationMessage.idUser)
-
     return {
       ...conversationMessageData,
       createdAt: DateTime.fromSQL(conversationMessageData.createdAt!).toISO(),
@@ -183,7 +187,7 @@ export class ConversationService {
       message
     )
 
-    await this.emitConversation(idConversation, conversationData.id!, idEmpresa, idUser)
+    await this.emitNewMessage(idConversation, conversationData.id!, idEmpresa, idUser)
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {
@@ -296,7 +300,7 @@ export class ConversationService {
   public async updateLastMessage(idConversation: string, idEmpresa: string, lastMessage: string) {
     await this.#conversationRepository.update({
       lastMessage,
-    isRead: true,
+      isRead: true,
     }, idConversation, idEmpresa)
   }
 
@@ -338,8 +342,6 @@ export class ConversationService {
       })
 
       conversation = await this.findById(idConversation, idEmpresa)
-
-      await this.emitiNewConversation(idConversation, idUser, idEmpresa)
     }
 
     return conversation
@@ -368,12 +370,16 @@ export class ConversationService {
     }
   }
 
-  async emitiNewConversation(idConversation: string, idUser: string, idEmpresa: string) {
-    const sockets = await io.fetchSockets();
+  // sockets emitters
+
+  private async emitConversationByUser(idConversation: string, idEmpresa: string, usersIncludes: Partial<UserEntity>[] = []) {
+    const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
+    const sockets = await this.getSocketByEmpresa(idEmpresa)
+
+    const allUsers = _.uniqBy([...users, ...usersIncludes], 'id')
 
     for await (const socket of sockets) {
-      if (socket.data.idUser === idUser) {
-
+      if (allUsers.find(e => e.id === socket.data.idUser)) {
         socket.join(idConversation);
 
         socket.emit("new-conversation", {
@@ -384,16 +390,20 @@ export class ConversationService {
   }
 
   private async addAndRemoveUsers(idConversation: string, idUserLogged: string, idEmpresa: string) {
-    const sockets = await io.fetchSockets();
+    const sockets = await this.getSocketByEmpresa(idEmpresa)
+
+    const conversationUsers = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
+
+    const conversation = await this.findById(idConversation, idEmpresa)
 
     for await (const socket of sockets) {
-      if (socket.data.idUser === idUserLogged) {
-
+      if (
+        conversationUsers.some(u => u.idUser === socket.data.idUser) &&
+        socket.data.idUser !== idUserLogged
+      ) {
         socket.join(idConversation);
 
-        const conversationUser = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa, { users: true })
-
-        const users = conversationUser.map(e => {
+        const users = conversationUsers.map(e => {
           return new UserEntity({
             name: e.name,
             username: e.username,
@@ -401,18 +411,33 @@ export class ConversationService {
             idEmpresa,
             password: undefined,
           }, e.id)
-        })
+        });
 
         socket.emit("add-user-conversation", {
           users,
-          conversation: await this.findById(idConversation, idEmpresa)
+          conversation
         });
       }
     }
   }
 
-  private async emitConversation(idConversation: string, id: string, idEmpresa: string, idUser?: string) {
-    const sockets = await io.fetchSockets();
+  private async emitNewMessage(idConversation: string, id: string, idEmpresa: string, idUser?: string) {
+    const sockets = await this.getSocketByEmpresa(idEmpresa)
+
+    const conversationUsers = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
+
+    for await (const socket of sockets) {
+      if (
+        conversationUsers.some(u => u.idUser === socket.data.idUser) &&
+        socket.data.idUser !== idUser
+      ) {
+        socket.join(idConversation);
+
+        socket.emit('new-message', {
+          message: await this.#conversationMessageRepository.findById(id, idEmpresa),
+        });
+      }
+    }
 
     for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
       if (socket.data.idUser !== idUser) {
@@ -421,5 +446,11 @@ export class ConversationService {
         });
       }
     }
+  }
+
+  private async getSocketByEmpresa(idEmpresa: string) {
+    const sockets = await io.fetchSockets();
+
+    return sockets.filter(s => s.data.idEmpresa === idEmpresa)
   }
 }
