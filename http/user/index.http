@@ -21,7 +21,7 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3007/users/register
+POST http://localhost:3002/users/register
 Content-Type: application/json
 
 {

@@ -39,3 +39,6 @@ GET http://localhost:3000/conversations/list-messages/abf6b40e-b56d-42be-b70f-62
 
 ### transfe conversa para outro usuario
 POST http://localhost:3000/conversations/transfer/ea5b4c8c-fa84-433c-aece-8e9c2138409b/1539b4d6-0341-4a9d-9b75-df95e527e10a?trasnferMessages=false
+
+
+

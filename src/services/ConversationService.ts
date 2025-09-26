@@ -52,7 +52,6 @@ export class ConversationService {
     return conversationData.id!
   }
 
-
   public async removeAndAddUsers(idUserLogged: string, idEmpresa: string, conversationUser: ConversationUserEntity[]) {
     const conversation = await this.findById(conversationUser[0].idConversation, idEmpresa)
 
@@ -297,7 +296,7 @@ export class ConversationService {
   public async updateLastMessage(idConversation: string, idEmpresa: string, lastMessage: string) {
     await this.#conversationRepository.update({
       lastMessage,
-      isRead: false
+      isRead: true,
     }, idConversation, idEmpresa)
   }
 

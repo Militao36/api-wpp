@@ -148,7 +148,9 @@ export class WhatsAppController {
     ) {
       return response.status(200).send()
     }
-
+    
+    console.log('Webhook recebido', body.event, body.payload.type)
+    
     await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()

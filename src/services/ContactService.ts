@@ -1,7 +1,9 @@
+import container from "../container"
 import { ContactEntity } from "../entity/ContactEntity"
 import { SyncContacts } from "../queue"
 import { ContactRepository } from "../repositories/ContactRepository"
 import { ClientsWpp } from "../wpp"
+import { ConversationService } from "./ConversationService"
 
 export class ContactService {
   #contactRepository: ContactRepository
@@ -44,22 +46,23 @@ export class ContactService {
   async update(id: string, idEmpresa: string, contact: ContactEntity): Promise<void> {
     const contactData = new ContactEntity(contact, id)
 
-
     const contactExists = await this.#contactRepository.findById(id, idEmpresa)
 
     if (!contactExists) {
       throw new Error('Contato não encontrado')
     }
 
-    const chatId = await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)
 
-    if (!chatId) {
-      throw new Error('Número de telefone inválido, não tem wpp cadastrado')
+    if (contactExists.phone !== contactData.phone) {
+      const chatId = await container.resolve<ConversationService>('conversationService').formatChatId(idEmpresa, contactData.phone)
+
+      if (!chatId) {
+        throw new Error('Número de telefone inválido, não tem wpp cadastrado')
+      }
+
+      contactData.phone = chatId
     }
 
-    const phone = chatId.replace('@c.us', '')
-    contactData.phone = phone
-    
     await this.#contactRepository.update(contactData, id, idEmpresa)
   }
 

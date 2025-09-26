@@ -12,6 +12,8 @@ import { ConversationMessageRepository } from '../repositories/ConversationMessa
 import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 import { DateTime } from 'luxon'
 import { ContactRepository } from '../repositories/ContactRepository'
+import { SectorService } from '../services/SectorService'
+import { SectorsDefault } from '../entity/SectorEntity'
 
 export const SyncContacts = new Queue('queue-sync-contacts', {
   redis: {
@@ -31,7 +33,6 @@ SyncContacts.process(async (job) => {
     const contactRepository = container.resolve<ContactRepository>('contactRepository')
     const userService = container.resolve<UserService>('userService')
     const clientsWpp = container.resolve<ClientsWpp>('clientsWpp')
-    const awsService = container.resolve<AwsService>('awsService')
     const conversationMessageRepository = container.resolve<ConversationMessageRepository>('conversationMessageRepository')
 
     for await (const contact of data.contacts) {
@@ -44,13 +45,11 @@ SyncContacts.process(async (job) => {
 
       // const fileName = `${contact.id}-profile.jpg`
       // const upload = await awsService.uploadFile(urlProfile, fileName, process.env.BUCKET_NAME)
-      const chatId = await clientsWpp.numberExists(contact.idEmpresa, contact.phone)
+      const phone = await conversationService.formatChatId(contact.idEmpresa, contact.phone)
 
-      if (!chatId) {
+      if (!phone) {
         continue;
       }
-
-      const phone = chatId.replace('@c.us', '')
 
       const exists = await contactService.findByPhone(contact.idEmpresa, phone)
 
@@ -68,7 +67,7 @@ SyncContacts.process(async (job) => {
         ...contact,
         urlProfile: urlProfile || null,
         isManual: false,
-        phone: chatId.replace('@c.us', ''),
+        phone,
       })
 
       const idContact = newContact.id!
@@ -76,19 +75,9 @@ SyncContacts.process(async (job) => {
       await contactRepository.save(newContact)
 
       const userMaster = await userService.findMasterUsersByIdEmpresa(contact.idEmpresa)
-      const messagesByChatId = await clientsWpp.getMessagesByChatId(contact.idEmpresa, chatId)
+      const messagesByChatId = await clientsWpp.getMessagesByChatId(contact.idEmpresa, `55${phone}@c.us`)
 
-      const idConversaiton = await conversationService.save({
-        isRead: true,
-        idEmpresa: contact.idEmpresa,
-        idContact,
-        lastMessage: messagesByChatId?.[0]?.body || '',
-        users: userMaster.map(user => {
-          return {
-            id: user.id
-          }
-        }) as any,
-      })
+      const { id: idConversaiton } = await conversationService.findOrCreateConversation(contact.idEmpresa, idContact, userMaster[0].id)
 
       for await (const message of messagesByChatId) {
         if (!message.body) {
