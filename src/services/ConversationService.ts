@@ -296,7 +296,7 @@ export class ConversationService {
   public async updateLastMessage(idConversation: string, idEmpresa: string, lastMessage: string) {
     await this.#conversationRepository.update({
       lastMessage,
-      isRead: true,
+    isRead: true,
     }, idConversation, idEmpresa)
   }
 
