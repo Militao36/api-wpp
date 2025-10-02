@@ -9,7 +9,7 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3000/users
+POST http://localhost:3007/users
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3002/users/register
+POST http://localhost:3007/users/register
 Content-Type: application/json
 
 {

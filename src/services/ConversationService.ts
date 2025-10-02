@@ -47,7 +47,7 @@ export class ConversationService {
       }))
     }
 
-    if (conversation.users.length) {
+    if (conversation?.users?.length) {
       await this.emitConversationByUser(conversationData.id!, conversation.idEmpresa, conversation.users)
     }
 
