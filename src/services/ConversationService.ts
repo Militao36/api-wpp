@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { randomUUID } from 'crypto'
-import { ConversationEntity } from '../entity/ConversationEntity'
+import { ConversationEntity, StatusConversation } from '../entity/ConversationEntity'
 import { ConversationMessageEntity } from '../entity/ConversationMessageEntity'
 import { ConversationUserEntity } from '../entity/ConversationUserEntity'
 import { ConversationMessageRepository } from '../repositories/ConversationMessageRepository'
@@ -61,10 +61,6 @@ export class ConversationService {
   public async removeAndAddUsers(idUserLogged: string, idEmpresa: string, conversationUser: ConversationUserEntity[]) {
     const conversation = await this.findById(conversationUser[0].idConversation, idEmpresa)
 
-    if (conversation.step) {
-      throw new BadRequestExeption('Conversa em atendimento automático, não é possível alterar os usuários da conversa. Favor transferir a conversa para outro usuário.')
-    }
-
     const usersConverstion = await this.#conversationUsersRepository.findByConversation(conversationUser[0].idConversation, idEmpresa)
 
     const idsUsersNew = conversationUser.map(e => e.idUser)
@@ -86,6 +82,10 @@ export class ConversationService {
         idEmpresa: item.idEmpresa
       }))
     }
+
+    await this.#conversationRepository.update({
+      status: StatusConversation.OPEN,
+    } as ConversationEntity, conversation.id!, idEmpresa)
 
     await this.addAndRemoveUsers(conversationUser[0].idConversation, idUserLogged, idEmpresa)
   }
@@ -244,15 +244,10 @@ export class ConversationService {
 
     const conversation = await this.findById(conversationId, idEmpresa)
 
-    // essa regra é para caso a conversa esteja em atendimento automático, ai forço sair do atendimento automático
-    if (conversation.step) {
-      await this.update(conversation.id!, conversation.idEmpresa, { step: null })
-      trasnferMessges = true
-    }
-
     if (!trasnferMessges) {
       conversation.finishedAt = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
       conversation.isRead = true
+      conversation.status = StatusConversation.CLOSED
 
       await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
 
@@ -266,6 +261,10 @@ export class ConversationService {
           idEmpresa
         }
       ])
+
+      await this.#conversationRepository.update({
+        status: StatusConversation.OPEN,
+      } as ConversationEntity, id, idEmpresa)
 
       return
     }
@@ -355,6 +354,8 @@ export class ConversationService {
     }
 
     conversation.finishedAt = DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
+    conversation.status = StatusConversation.CLOSED
+    conversation.isRead = true
 
     await this.#conversationRepository.update(conversation, conversation.id!, idEmpresa)
   }

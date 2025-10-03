@@ -4,6 +4,12 @@ import { ConversationMessageEntity } from "./ConversationMessageEntity"
 import { SectorEntity } from "./SectorEntity"
 import { UserEntity } from "./UserEntity"
 
+export enum StatusConversation {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  PENDING = 'pending'
+}
+
 export class ConversationEntity extends Entity {
   idEmpresa?: string
   idContact?: string
@@ -13,6 +19,7 @@ export class ConversationEntity extends Entity {
   isRead: boolean
   lastMessage?: string
   step?: string
+  status?: StatusConversation
 
   users?: Partial<UserEntity>[]
   contact?: ContactEntity
@@ -30,5 +37,6 @@ export class ConversationEntity extends Entity {
     this.isRead = conversation.isRead ?? false
     this.lastMessage = conversation.lastMessage
     this.step = conversation.step
+    this.status = conversation.status ?? StatusConversation.PENDING
   }
 }

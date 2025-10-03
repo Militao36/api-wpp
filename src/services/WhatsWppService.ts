@@ -1,4 +1,4 @@
-import { ConversationEntity } from "../entity/ConversationEntity"
+import { ConversationEntity, StatusConversation } from "../entity/ConversationEntity"
 import { SectorsDefault } from "../entity/SectorEntity"
 import { ContactService } from "./ContactService"
 import { ConversationService } from "./ConversationService"
@@ -66,8 +66,9 @@ export class WhatsWppService {
       idConversation = await this.#conversationService.save({
         idContact,
         idEmpresa,
-        isRead: true,
+        isRead: false,
         idSector,
+        status: StatusConversation.PENDING,
       })
     } else {
       idConversation = conversation.id

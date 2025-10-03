@@ -48,6 +48,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       createdAtLessThan?: string
       page?: number
       idSector?: string
+      status?: string
     }
   ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
@@ -73,6 +74,10 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
     if (filter?.idSector) {
       data.where('conversations.idSector', '=', filter.idSector)
+    }
+
+    if (filter?.status) {
+      data.where('conversations.status', '=', filter.status)
     }
 
     // if (filter.messageId) {
