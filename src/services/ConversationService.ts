@@ -442,13 +442,14 @@ export class ConversationService {
       }
     }
 
-    for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
-      if (socket.data.idUser !== idUser) {
-        socket.emit('new-message', {
-          message: await this.#conversationMessageRepository.findById(id, idEmpresa),
-        });
-      }
-    }
+    // Não sei pq desgraça ta assim, más não deveria ter dois
+    // for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
+    //   if (socket.data.idUser !== idUser) {
+    //     socket.emit('new-message', {
+    //       message: await this.#conversationMessageRepository.findById(id, idEmpresa),
+    //     });
+    //   }
+    // }
   }
 
   private async getSocketByEmpresa(idEmpresa: string) {
