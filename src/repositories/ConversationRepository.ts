@@ -49,6 +49,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       page?: number
       idSector?: string
       status?: string
+      ids?: string[]
     }
   ): Promise<ConversationEntity[]> {
     const data = this.#database.table(this.table)
@@ -78,6 +79,10 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
 
     if (filter?.status) {
       data.where('conversations.status', '=', filter.status)
+    }
+
+    if (filter?.ids && filter.ids.length > 0) {
+      data.whereIn('conversations.id', filter.ids)
     }
 
     // if (filter.messageId) {

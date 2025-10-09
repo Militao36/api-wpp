@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('idEmpresa').notNullable()
     table.string('idUser').references('id').inTable('users').defaultTo(null)
     table.string('idConversation').references('id').inTable('conversations').defaultTo(null)
-    table.string('message').notNullable()
+    table.string('message').nullable()
     table.dateTime('createdAt').notNullable().defaultTo(knex.fn.now())
     table.dateTime('updatedAt').notNullable().defaultTo(knex.fn.now())
   })
