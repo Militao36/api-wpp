@@ -141,16 +141,14 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    if (
-      !eventsNamesValids.includes(body.event) ||
-      !body.payload.from.includes('@c.us') ||
-      body.payload.fromMe
-    ) {
+    if (!eventsNamesValids.includes(body.event)) {
+      return response.status(200).send()
+    } else if (!body.payload.from.includes('@c.us')) {
       return response.status(200).send()
     }
-    
+
     console.log('Webhook recebido', body.event, body.payload.type)
-    
+
     await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()
