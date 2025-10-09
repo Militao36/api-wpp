@@ -383,7 +383,7 @@ export class ConversationService {
       if (allUsers.find(e => e.id === socket.data.idUser)) {
         socket.join(idConversation);
 
-        const conversaitons = await this.findAll(idConversation, idEmpresa, { ids: [idConversation] })
+        const conversaitons = await this.findAll(idEmpresa, socket.data.idUser, { ids: [idConversation] })
         
         socket.emit("new-conversation", {
           conversation: conversaitons[0],
