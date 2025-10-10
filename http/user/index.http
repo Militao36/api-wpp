@@ -21,12 +21,12 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3007/users/register
+POST http://localhost:3002/users/register
 Content-Type: application/json
 
 {
   "name": "Matheus Militão",
-  "username": "matheus",
+  "username": "eriks",
   "password": "1234",
   "idEmpresa": "9555c67f-86bd-4b50-b9fb-90f07a87531b"
 }

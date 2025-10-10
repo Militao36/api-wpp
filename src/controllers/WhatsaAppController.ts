@@ -143,7 +143,17 @@ export class WhatsAppController {
 
     if (!eventsNamesValids.includes(body.event)) {
       return response.status(200).send()
-    } else if (!body.payload.from.includes('@c.us')) {
+    }
+
+    if (!body.payload.from.includes('@c.us')) {
+      return response.status(200).send()
+    }
+
+    if (body.payload.fromMe) {
+      return response.status(200).send()
+    }
+
+    if (body.me.id === body.payload.from) {
       return response.status(200).send()
     }
 

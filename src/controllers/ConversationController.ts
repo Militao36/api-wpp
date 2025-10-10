@@ -111,7 +111,7 @@ export class ConversationController {
     return response.status(200).json(data)
   }
 
-  @route('/list-messages/:idContact')
+  @route('/list-messages/:idConversation')
   @GET()
   async listMessages(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
@@ -120,7 +120,7 @@ export class ConversationController {
     const { page } = request.query
 
     const data = await this.#conversationService
-      .listMessages(idEmpresa, idUser, request?.params?.idContact, Number(page))
+      .listMessages(idEmpresa, request?.params?.idConversation, Number(page))
 
     return response.status(200).json(data)
   }

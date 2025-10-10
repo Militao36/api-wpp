@@ -20,12 +20,6 @@ export class WhatsWppService {
 
     const { id } = await this.createConversation(idEmpresa, idContact)
 
-    await this.#conversationService.updateLastMessage(
-      id,
-      idEmpresa,
-      body.payload.body
-    )
-
     await this.#conversationService.addMessage(
       idEmpresa,
       id,

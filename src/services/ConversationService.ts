@@ -94,7 +94,11 @@ export class ConversationService {
     conversationMessage: Partial<ConversationMessageEntity &
     { fileName: string, mimetype: string, idContact: string }>
   ): Promise<ConversationMessageEntity> {
-    const conversation = await this.findOrCreateConversation(conversationMessage.idEmpresa, conversationMessage.idContact!, conversationMessage.idUser!)
+    const conversation = await this.findById(conversationMessage.idConversation, conversationMessage.idEmpresa)
+
+    if (conversation.status === StatusConversation.CLOSED) {
+      throw new BadRequestExeption('Conversa finalizada, não é possível enviar mensagens')
+    }
 
     const contact = await this.#contactService.findById(
       conversationMessage.idEmpresa,
@@ -187,6 +191,11 @@ export class ConversationService {
       message
     )
 
+    await this.#conversationRepository.update({
+      isRead: false,
+      updatedAt: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
+    }, idConversation, idEmpresa)
+
     await this.emitNewMessage(idConversation, conversationData.id!, idEmpresa, idUser)
   }
 
@@ -278,18 +287,15 @@ export class ConversationService {
     ])
   }
 
-  public async listMessages(idEmpresa: string, idUser: string, idContact: string, page: number) {
-    const user = await this.#userService.findById(idUser, idEmpresa)
-
-    const conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
+  public async listMessages(idEmpresa: string, idConversation: string, page: number) {
+    const conversation = await this.findById(idConversation, idEmpresa)
 
     await this.#conversationRepository.update({ isRead: true }, conversation.id, idEmpresa)
 
     const messages = await this.#conversationMessageRepository
       .findAllPaginationWithConversationIdUser(
         idEmpresa,
-        idContact,
-        (user.isMaster ? null : idUser),
+        conversation.id,
         page
       )
 
@@ -384,7 +390,7 @@ export class ConversationService {
         socket.join(idConversation);
 
         const conversaitons = await this.findAll(idEmpresa, socket.data.idUser, { ids: [idConversation] })
-        
+
         socket.emit("new-conversation", {
           conversation: conversaitons[0],
         });
@@ -427,29 +433,30 @@ export class ConversationService {
   private async emitNewMessage(idConversation: string, id: string, idEmpresa: string, idUser?: string) {
     const sockets = await this.getSocketByEmpresa(idEmpresa)
 
-    const conversationUsers = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
+    if (idUser) {
+      const conversationUsers = await this.#conversationUsersRepository.findByConversation(idConversation, idEmpresa)
 
-    for await (const socket of sockets) {
-      if (
-        conversationUsers.some(u => u.idUser === socket.data.idUser) &&
-        socket.data.idUser !== idUser
-      ) {
-        socket.join(idConversation);
+      for await (const socket of sockets) {
+        if (
+          conversationUsers.find(u => u.idUser === socket.data.idUser) &&
+          socket.data.idUser !== idUser
+        ) {
+          socket.join(idConversation);
 
+          socket.emit('new-message', {
+            message: await this.#conversationMessageRepository.findById(id, idEmpresa),
+          });
+        }
+      }
+    }
+
+    if (!idUser) {
+      for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
         socket.emit('new-message', {
           message: await this.#conversationMessageRepository.findById(id, idEmpresa),
         });
       }
     }
-
-    // Não sei pq desgraça ta assim, más não deveria ter dois
-    // for (const socket of sockets.filter(s => s.rooms.has(idConversation))) {
-    //   if (socket.data.idUser !== idUser) {
-    //     socket.emit('new-message', {
-    //       message: await this.#conversationMessageRepository.findById(id, idEmpresa),
-    //     });
-    //   }
-    // }
   }
 
   private async getSocketByEmpresa(idEmpresa: string) {

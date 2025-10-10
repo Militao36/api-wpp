@@ -57,7 +57,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .where('conversations.idEmpresa', '=', idEmpresa)
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .leftJoin('sectors', 'sectors.id', '=', 'conversations.idSector')
-      .orderBy('conversations.updatedAt', 'desc')
       .limit((filter?.limit || 20))
       .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
 
@@ -115,6 +114,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       }
     }
 
-    return await data
+    return await data.orderBy('conversations.updatedAt', 'asc')
   }
 }

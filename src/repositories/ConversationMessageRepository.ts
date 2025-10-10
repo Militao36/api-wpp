@@ -13,14 +13,14 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
     const messagesConverstion = await this.#database.table(this.table)
       .select()
       .where({ idConversation, idEmpresa })
-      .limit(30)
       .offset((parseInt(`${page}`) - 1) * 30)
       .orderBy('id', 'desc')
+      .limit(30)
 
     return messagesConverstion
   }
 
-  async findAllPaginationWithConversationIdUser(idEmpresa: string, idContact: string, idUser: string, page = 30): Promise<ConversationMessageEntity[]> {
+  async findAllPaginationWithConversationIdUser(idEmpresa: string, idConversation: string, page = 30): Promise<ConversationMessageEntity[]> {
     const query = this.#database.table(this.table)
       .select<ConversationMessageEntity[]>(
         "conversation_message.*",
@@ -29,13 +29,7 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
       )
       .innerJoin('conversations', 'conversations.id', 'conversation_message.idConversation')
       .leftJoin('users', 'users.id', `${this.table}.idUser`)
-      .where('conversations.idContact', '=', idContact)
-
-    if (idUser) {
-      query
-        .innerJoin('conversation_users', 'conversation_users.idConversation', 'conversation_message.idConversation')
-        .andWhere('conversation_users.idUser', '=', idUser)
-    }
+      .where('conversations.id', '=', idConversation)
 
     return await query
       .andWhere('conversation_message.idEmpresa', '=', idEmpresa)
