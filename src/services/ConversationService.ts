@@ -352,8 +352,8 @@ export class ConversationService {
     return conversation
   }
 
-  async finishConversation(idEmpresa: string, idContact: string) {
-    const conversation = await this.findConversationByContactNotFinished(idEmpresa, idContact)
+  async finishConversation(idEmpresa: string, id: string) {
+    const conversation = await this.findById(idEmpresa, id)
 
     if (!conversation) {
       throw new BadRequestExeption('Conversa não encontrada')
@@ -378,7 +378,6 @@ export class ConversationService {
   }
 
   // sockets emitters
-
   private async emitConversationByUser(idConversation: string, idEmpresa: string, usersIncludes: Partial<UserEntity>[] = []) {
     const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
     const sockets = await this.getSocketByEmpresa(idEmpresa)

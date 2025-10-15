@@ -126,12 +126,12 @@ export class ConversationController {
   }
 
   @POST()
-  @route('/finish/:idContact')
+  @route('/finish/:id')
   async finishConversation(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-    const idContact = request.params.idContact
+    const id = request.params.id
 
-    const data = await this.#conversationService.finishConversation(idEmpresa, idContact)
+    const data = await this.#conversationService.finishConversation(idEmpresa, id)
 
     return response.status(200).json(data)
   }
