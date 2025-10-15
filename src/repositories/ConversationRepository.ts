@@ -58,7 +58,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .leftJoin('sectors', 'sectors.id', '=', 'conversations.idSector')
       .limit((filter?.limit || 20))
-      .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
+      .offset(((+filter?.page || 1) - 1) * (+filter?.page || 20))
 
     if (filter?.createdAtGraterThan) {
       data.where('createdAt', '>', filter.createdAtGraterThan)
