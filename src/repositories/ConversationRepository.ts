@@ -58,7 +58,6 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .leftJoin('sectors', 'sectors.id', '=', 'conversations.idSector')
 
-
     if (filter?.createdAtGraterThan) {
       data.where('createdAt', '>', filter.createdAtGraterThan)
     }
