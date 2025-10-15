@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { type Server } from 'socket.io'
 import container from '../container'
 import { ConversationService } from '../services/ConversationService'
+import { StatusConversation } from '../entity/ConversationEntity'
 
 export function authSocket(io: Server) {
   io.use((socket, next) => {
@@ -38,6 +39,7 @@ export function startSocket(io: Server) {
       const conversations = await container.resolve<ConversationService>('conversationService').findAll(
         idEmpresa,
         idUser,
+        { status: StatusConversation.OPEN }
       )
 
       conversations.forEach((conversation) => {
