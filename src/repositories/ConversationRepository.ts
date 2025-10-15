@@ -57,8 +57,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       .where('conversations.idEmpresa', '=', idEmpresa)
       .innerJoin('contacts', 'contacts.id', '=', 'conversations.idContact')
       .leftJoin('sectors', 'sectors.id', '=', 'conversations.idSector')
-      .limit((filter?.limit || 20))
-      .offset(((filter?.page || 1) - 1) * (filter?.page || 20))
+
 
     if (filter?.createdAtGraterThan) {
       data.where('createdAt', '>', filter.createdAtGraterThan)
@@ -69,7 +68,8 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     }
 
     if (idUser) {
-      data.innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation').where('conversation_users.idUser', '=', idUser)
+      data.innerJoin('conversation_users', 'conversations.id', '=', 'conversation_users.idConversation')
+        .where('conversation_users.idUser', '=', idUser)
     }
 
     if (filter?.idSector) {
@@ -115,5 +115,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     }
 
     return await data.orderBy('conversations.updatedAt', 'asc')
+      .limit(Number((filter?.limit || 20)))
+      .offset(Number(((filter?.page || 1) - 1) * (filter?.page || 20)))
   }
 }
