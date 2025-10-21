@@ -45,7 +45,7 @@ SyncContacts.process(async (job) => {
 
       // const fileName = `${contact.id}-profile.jpg`
       // const upload = await awsService.uploadFile(urlProfile, fileName, process.env.BUCKET_NAME)
-      const phone = await conversationService.formatChatId(contact.idEmpresa, contact.phone)
+      const phone = await conversationService.formatChatId(contact.idEmpresa, contact.phone.replace('@c.us', '').substring(2))
 
       if (!phone) {
         continue;

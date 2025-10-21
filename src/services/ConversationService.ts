@@ -154,16 +154,11 @@ export class ConversationService {
 
     await this.#conversationMessageRepository.save(conversationMessageData)
 
-    await this.updateLastMessage(
-      conversationMessage.idConversation,
-      conversationMessage.idEmpresa,
-      conversationMessage.message
-    )
-
-    await this.updateRead(
-      conversationMessage.idConversation,
-      conversationMessage.idEmpresa
-    )
+    await this.update(conversationMessage.idConversation, conversationMessage.idEmpresa, {
+      lastMessage: conversationMessage.message,
+      isRead: true,
+      status: StatusConversation.OPEN
+    })
 
     return {
       ...conversationMessageData,

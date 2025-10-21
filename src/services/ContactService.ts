@@ -36,7 +36,7 @@ export class ContactService {
     await this.#syncContacts.add({
       contacts: [{
         ...contactData,
-        phone,
+        phone: chatId,
       }]
     })
 
