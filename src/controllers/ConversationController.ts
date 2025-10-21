@@ -1,4 +1,4 @@
-import { GET, POST, before, route } from 'awilix-express'
+import { GET, POST, PUT, before, route } from 'awilix-express'
 import { NextFunction, Request, Response } from 'express'
 import Joi from 'joi'
 
@@ -23,6 +23,31 @@ export class ConversationController {
 
     })
     return response.status(201).json({ id })
+  }
+
+  @route('/:id')
+  @PUT()
+  async update(request: Request, response: Response) {
+    const idEmpresa = request.idEmpresa
+    const id = request.params.id
+
+    const conversation = await this.#conversationService.findById(id, idEmpresa)
+
+    if (!conversation) {
+      return response.status(404).json({ message: 'Conversation not found' })
+    }
+
+    await this.#conversationService.update(id,idEmpresa,{
+      ...request.body,
+      idEmpresa: idEmpresa,
+      id,
+      idPreviousConversation: conversation.idPreviousConversation,
+      idContact: conversation.idContact,
+      lastMessage: conversation.lastMessage,
+      idSector: conversation.idSector,
+    })
+    
+    return response.status(204).json({  })
   }
 
   @route('/add-users')
