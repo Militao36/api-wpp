@@ -1,7 +1,6 @@
 import { Knex } from 'knex'
 import { RepositoryBase } from './base/RepositoryBase'
-import { ConversationEntity } from '../entity/ConversationEntity'
-import { DateTime } from 'luxon'
+import { ConversationEntity, StatusConversation } from '../entity/ConversationEntity'
 
 export type FilterConversationRepository = {
   limit?: number
@@ -116,5 +115,14 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
     return await data.orderBy('conversations.updatedAt', 'asc')
       .limit(Number((filter?.limit || 20)))
       .offset(((+(filter?.page) || 1) - 1) * ((+filter?.limit) || 20))
+  }
+
+  async countConversationsByStatus(idEmpresa: string, status: StatusConversation[]): Promise<number> {
+    const data = await this.#database.table(this.table)
+      .count('id as quantity')
+      .where('idEmpresa', '=', idEmpresa)
+      .and.whereIn('conversations.status', status)
+
+    return data[0].quantity
   }
 }

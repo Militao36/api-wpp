@@ -227,6 +227,12 @@ export class ConversationService {
     }
   }
 
+  async countConversationsByStatus(idEmpresa: string, status: StatusConversation[]) {
+    const data = this.#conversationRepository.countConversationsByStatus(idEmpresa, status)
+
+    return data
+  }
+
   async findById(id: string, idEmpresa: string): Promise<ConversationEntity> {
     const conversation = await this.#conversationRepository.findById(id, idEmpresa)
 

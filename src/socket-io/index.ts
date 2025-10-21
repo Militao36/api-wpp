@@ -48,6 +48,10 @@ export function startSocket(io: Server) {
 
       socket.emit('preload-conversations', {
         conversations,
+        countConversationsPeding: await container.resolve<ConversationService>('conversationService').countConversationsByStatus(
+          idEmpresa,
+          [StatusConversation.PENDING]
+        )
       })
 
       socket.on('disconnect', (socket) => {
