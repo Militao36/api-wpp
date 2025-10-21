@@ -51,7 +51,11 @@ export function startSocket(io: Server) {
         countConversationsPeding: await container.resolve<ConversationService>('conversationService').countConversationsByStatus(
           idEmpresa,
           [StatusConversation.PENDING]
-        )
+        ),
+        countConversationsOpen: await container.resolve<ConversationService>('conversationService').countConversationsByStatus(
+          idEmpresa,
+          [StatusConversation.OPEN]
+        ),
       })
 
       socket.on('disconnect', (socket) => {
