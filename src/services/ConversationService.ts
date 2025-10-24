@@ -202,9 +202,7 @@ export class ConversationService {
       const conversations = await this.#conversationRepository.findAllConversationByUser(idEmpresa, user.isMaster ? null : idUser, filter)
 
       for await (const conversation of conversations) {
-        const conversationNotFisnihed = await this.#conversationRepository.findConversationByContactNotFinished(idEmpresa, conversation.idContact)
-
-        const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversationNotFisnihed.id, idEmpresa, { users: true })
+        const conversationUsers = await this.#conversationUsersRepository.findByConversation(conversation.id, idEmpresa, { users: true })
 
         data.push({
           ...conversation,
