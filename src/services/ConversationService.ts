@@ -354,7 +354,7 @@ export class ConversationService {
   }
 
   async finishConversation(idEmpresa: string, id: string) {
-    const conversation = await this.findById(idEmpresa, id)
+    const conversation = await this.findById(id, idEmpresa)
 
     if (!conversation) {
       throw new BadRequestExeption('Conversa não encontrada')
