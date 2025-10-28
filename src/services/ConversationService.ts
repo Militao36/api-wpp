@@ -178,10 +178,8 @@ export class ConversationService {
       file: hasMedia ? url : '',
     })
 
-    await this.#conversationMessageRepository.save(conversationData)
-
     try {
-      if (conversationData.hasMedia && url) {
+      if (hasMedia && url) {
         const result = await this.#awsService.uploadFile(url, `${conversationData.id}.${url.split('.').pop()}`, 'chat-media')
 
         conversationData.file = result.url;
@@ -189,6 +187,8 @@ export class ConversationService {
     } catch (error) {
       console.log('Erro ao fazer upload do arquivo para o S3', error);
     }
+
+    await this.#conversationMessageRepository.save(conversationData)
 
     await this.updateLastMessage(
       idConversation,
