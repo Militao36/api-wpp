@@ -172,7 +172,7 @@ export class ConversationService {
       idEmpresa: idEmpresa,
       idConversation: idConversation,
       idUser: idUser,
-      message: hasMedia ? null : message,
+      message: message || null,
       messageId,
       hasMedia: hasMedia,
       file: hasMedia ? url : '',
