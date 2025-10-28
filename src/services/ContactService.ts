@@ -23,6 +23,7 @@ export class ContactService {
     const chatId = await this.#clientsWpp.numberExists(contactData.idEmpresa, contactData.phone)
 
     if (!chatId) {
+      console.log('contact', contact)
       throw new Error('Número de telefone inválido, não tem wpp cadastrado')
     }
 
