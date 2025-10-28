@@ -21,7 +21,7 @@ export class ClientsWpp {
         proxy: null,
         webhooks: [
           {
-            url: `https://9a45c93c5b54.ngrok-free.app/zap/webhook?idEmpresa=${idEmpresa}`,
+            url: `https://unledu-api-wpp.auu75n.easypanel.host/zap/webhook?idEmpresa=${idEmpresa}`,
             events: [
               'message'
             ]

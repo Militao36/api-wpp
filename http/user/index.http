@@ -21,12 +21,12 @@ Content-Type: application/json
 
 #### criar outro usuario
 
-POST http://localhost:3007/users/register
+POST https://unledu-api-wpp.auu75n.easypanel.host/users/register
 Content-Type: application/json
 
 {
-  "name": "teste3",
-  "username": "teste3",
+  "name": "Matheus",
+  "username": "militao",
   "password": "1234",
   "idEmpresa": "9555c67f-86bd-4b50-b9fb-90f07a87531b"
 }
@@ -34,11 +34,11 @@ Content-Type: application/json
 
 #### auth user
 
-POST http://localhost:3002/users/auth
+POST https://unledu-api-wpp.auu75n.easypanel.host/users/auth
 Content-Type: application/json
 
 {
-  "userName": "matheus",
+  "userName": "militao",
   "password": "1234"
 }
 
