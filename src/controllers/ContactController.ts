@@ -34,7 +34,7 @@ export class ContactController {
       idEmpresa,
       isManual: true
     })
-    
+
     return response.status(204).send()
   }
 
