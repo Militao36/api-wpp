@@ -332,7 +332,7 @@ export class ClientsWpp {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${this.url}/api/sendImage`,
+        url: `${this.url}/api/sendVideo`,
         headers: {
           Authorization: `Basic ${this.token}`,
           "X-Api-Key": process.env.WPP_KEY
@@ -381,7 +381,7 @@ export class ClientsWpp {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${this.url}/api/sendImage`,
+        url: `${this.url}/api/sendFile`,
         headers: {
           Authorization: `Basic ${this.token}`,
           "X-Api-Key": process.env.WPP_KEY
@@ -410,6 +410,54 @@ export class ClientsWpp {
       console.log('sendMessage', error)
     }
   }
+
+  async sendMessageAudio(idEmpresa: string, data: { chatId: string, base64: string, fileName?: string, mimetype: string }) {
+    const health = await this.health(idEmpresa)
+
+    if (health !== 'Conectado') {
+      return
+    }
+
+    await this.startTyping(idEmpresa, data.chatId)
+
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
+
+    try {
+      const config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${this.url}/api/sendVoice`,
+        headers: {
+          Authorization: `Basic ${this.token}`,
+          "X-Api-Key": process.env.WPP_KEY
+        },
+        data: {
+          chatId: `55${data.chatId}@c.us`,
+          session: idEmpresa,
+          reply_to: null,
+          convert: true,
+          file: {
+            mimetype: data.mimetype,
+            filename: data.fileName,
+            data: data.base64
+          },
+        }
+      }
+
+      const response = await axios.request(config)
+
+      if (response?.status === 201) {
+        return response.data
+      }
+
+      throw new BadRequestExeption('Erro ao enviar mensagem, entre em contato com o suporte.')
+    } catch (error) {
+      console.log('sendMessage', error)
+    }
+  }
+
 
   async getMessagesByChatId(idEmpresa: string, chatId: string) {
     const config = {

@@ -186,6 +186,29 @@ export class ConversationService {
         })
       }
 
+      ///oga
+
+      const audioMimetypes = [
+        'audio/mpeg',
+        'audio/wav',
+        'audio/ogg',
+        'audio/aac',
+        'audio/flac',
+        'audio/mp4',
+        'audio/3gp',
+        'audio/amr',
+        'audio/oga'
+      ]
+
+      if (audioMimetypes.includes(conversationMessage.mimetype!)) {
+        isMessageSend = await this.#clientsWpp.sendMessageAudio(contact.idEmpresa, {
+          chatId,
+          base64: conversationMessage.file,
+          mimetype: conversationMessage.mimetype,
+          fileName: conversationMessage.fileName
+        })
+      }
+
 
       const { url } = await this.#awsService.uploadFileBase64(
         conversationMessage.file,
