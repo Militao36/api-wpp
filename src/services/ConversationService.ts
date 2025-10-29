@@ -129,13 +129,63 @@ export class ConversationService {
         throw new BadRequestExeption('Campos obrigatórios não informado (base64, file).')
       }
 
-      isMessageSend = await this.#clientsWpp.sendMessageImage(contact.idEmpresa, {
-        chatId,
-        caption: conversationMessage.message,
-        base64: conversationMessage.file,
-        mimetype: conversationMessage.mimetype,
-        fileName: conversationMessage.fileName
-      })
+      const imagesMimetypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+
+      if (imagesMimetypes.includes(conversationMessage.mimetype!)) {
+        isMessageSend = await this.#clientsWpp.sendMessageImage(contact.idEmpresa, {
+          chatId,
+          caption: conversationMessage.message,
+          base64: conversationMessage.file,
+          mimetype: conversationMessage.mimetype,
+          fileName: conversationMessage.fileName
+        })
+      }
+
+      const videoMimetypes = ['video/mp4', 'video/3gp', 'video/avi', 'video/mov', 'video/mkv']
+
+      if (videoMimetypes.includes(conversationMessage.mimetype!)) {
+        isMessageSend = await this.#clientsWpp.sendMessageVideo(contact.idEmpresa, {
+          chatId,
+          caption: conversationMessage.message,
+          base64: conversationMessage.file,
+          mimetype: conversationMessage.mimetype,
+          fileName: conversationMessage.fileName
+        })
+      }
+
+      const documentsMimetypes = [
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/pdf',
+        'text/plain',
+        'application/rtf',
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.oasis.opendocument.presentation',
+        'application/json',
+        'application/xml',
+        'application/x-yaml',
+        'application/zip',
+        'application/x-rar-compressed',
+        'application/x-7z-compressed',
+        'application/pdfa'
+      ]
+
+      if (documentsMimetypes.includes(conversationMessage.mimetype!)) {
+        isMessageSend = await this.#clientsWpp.sendMessageFile(contact.idEmpresa, {
+          chatId,
+          caption: conversationMessage.message,
+          base64: conversationMessage.file,
+          mimetype: conversationMessage.mimetype,
+          fileName: conversationMessage.fileName
+        })
+      }
+
 
       const { url } = await this.#awsService.uploadFileBase64(
         conversationMessage.file,
