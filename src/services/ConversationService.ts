@@ -197,7 +197,8 @@ export class ConversationService {
         'audio/mp4',
         'audio/3gp',
         'audio/amr',
-        'audio/oga'
+        'audio/oga',
+        'audio/webm'
       ]
 
       if (audioMimetypes.includes(conversationMessage.mimetype!)) {
