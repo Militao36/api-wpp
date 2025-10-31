@@ -389,6 +389,7 @@ export class ConversationService {
     await this.#conversationRepository.update({
       lastMessage,
       isRead: true,
+      updatedAt: DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss')
     }, idConversation, idEmpresa)
   }
 
