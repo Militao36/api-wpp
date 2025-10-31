@@ -236,6 +236,7 @@ export class ConversationService {
 
     return {
       ...conversationMessageData,
+      file: conversationMessageData.hasMedia ? conversationMessageData.file : null,
       createdAt: DateTime.fromSQL(conversationMessageData.createdAt!).toISO(),
       updatedAt: DateTime.fromSQL(conversationMessageData.updatedAt!).toISO(),
     }
