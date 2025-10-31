@@ -9,7 +9,9 @@ import { Authentication } from './util/middlewares/auth'
 
 const app = express()
 
-app.use(express.json())
+app.use(express.json({
+  limit: '300mb'
+}))
 app.use(cors())
 
 app.disable('x-powered-by')
