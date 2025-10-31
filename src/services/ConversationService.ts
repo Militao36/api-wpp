@@ -229,9 +229,10 @@ export class ConversationService {
     await this.#conversationMessageRepository.save(conversationMessageData)
 
     await this.update(conversationMessage.idConversation, conversationMessage.idEmpresa, {
-      lastMessage: conversationMessage.message,
+      lastMessage: conversationMessage.hasMedia ? conversationMessageData.file : conversationMessage.message,
       isRead: true,
-      status: StatusConversation.OPEN
+      status: StatusConversation.OPEN,
+      updatedAt: DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss')
     })
 
     return {
