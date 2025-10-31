@@ -267,7 +267,7 @@ export class ConversationService {
     await this.updateLastMessage(
       idConversation,
       idEmpresa,
-      message
+      (hasMedia ? conversationData.file : message)
     )
 
     await this.#conversationRepository.update({
