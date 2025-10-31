@@ -112,7 +112,7 @@ export class ConversationRepository extends RepositoryBase<ConversationEntity> {
       }
     }
 
-    return await data.orderBy('conversations.updatedAt', 'asc')
+    return await data.orderBy('conversations.updatedAt', 'desc')
       .limit(Number((filter?.limit || 20)))
       .offset(((+(filter?.page) || 1) - 1) * ((+filter?.limit) || 20))
   }
