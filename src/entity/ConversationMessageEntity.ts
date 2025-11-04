@@ -8,6 +8,7 @@ export class ConversationMessageEntity extends Entity {
   messageId: string
   hasMedia: boolean
   file: string
+  fileName: string
 
   // user: User
   // conversation: Conversation
@@ -20,5 +21,6 @@ export class ConversationMessageEntity extends Entity {
     this.messageId = data.messageId
     this.hasMedia = data.hasMedia ?? false
     this.file = data.file ?? ''
+    this.fileName = data.fileName ?? ''
   }
 }

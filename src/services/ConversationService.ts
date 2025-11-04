@@ -218,6 +218,7 @@ export class ConversationService {
       )
 
       conversationMessage.file = url
+      conversationMessage.fileName = conversationMessage.fileName
     }
 
     if (!isMessageSend) {
@@ -259,6 +260,11 @@ export class ConversationService {
         const result = await this.#awsService.uploadFile(url, `${conversationData.id}.${url.split('.').pop()}`, 'chat-media')
 
         conversationData.file = result.url;
+
+        const urlParts = url.split('/');
+        const originalFileName = urlParts[urlParts.length - 1].split('?')[0];
+
+        conversationData.fileName = originalFileName
       }
     } catch (error) {
       console.log('Erro ao fazer upload do arquivo para o S3', error);
