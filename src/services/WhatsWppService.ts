@@ -28,6 +28,7 @@ export class WhatsWppService {
       body.payload.id,
       body.payload.hasMedia,
       body.payload?.media?.url?.replace('http://localhost:3000', process.env.WPP_URL || ''),
+      body?.payload?._data?.message?.documentMessage?.fileName || null
     )
   }
 

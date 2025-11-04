@@ -244,7 +244,7 @@ export class ConversationService {
     }
   }
 
-  public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string) {
+  public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string, fileName: string) {
     const conversationData = new ConversationMessageEntity({
       idEmpresa: idEmpresa,
       idConversation: idConversation,
@@ -261,10 +261,7 @@ export class ConversationService {
 
         conversationData.file = result.url;
 
-        const urlParts = url.split('/');
-        const originalFileName = urlParts[urlParts.length - 1].split('?')[0];
-
-        conversationData.fileName = originalFileName
+        conversationData.fileName = fileName
       }
     } catch (error) {
       console.log('Erro ao fazer upload do arquivo para o S3', error);
