@@ -74,12 +74,7 @@ export class WhatsAppController {
 
       const chucks = _.chunk(contacts, 20)
 
-      let count = 0
       for (const chuck of chucks) {
-        if (count === chucks.length - 1) {
-          await this.#clientRedis.del(`sync-contacts-${request.idEmpresa}`)
-        }
-
         await this.#syncContacts.add(
           { contacts: chuck },
           {
@@ -91,13 +86,13 @@ export class WhatsAppController {
             removeOnComplete: true,
           }
         )
-
-        count++;
       }
+
+      await this.#clientRedis.del(`sync-contacts-${request.idEmpresa}`)
 
       await this.#clientRedis.set(`last-sync-contacts-${request.idEmpresa}`, DateTime.local().toISO())
 
-      return response.status(201).json({ imported: contacts.length })
+      return response.status(201).json({ imported: contacts.length, contacts: result })
     } catch (err) {
       console.log(err)
       return response.status(200).send('Desconectado')
@@ -135,7 +130,7 @@ export class WhatsAppController {
       })
     }
 
-    return response.status(200).send(Buffer.from(result,  'binary').toString('base64'))
+    return response.status(200).send(Buffer.from(result, 'binary').toString('base64'))
   }
 
   @route('/webhook')
