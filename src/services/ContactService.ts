@@ -27,17 +27,17 @@ export class ContactService {
       throw new Error('Número de telefone inválido, não tem wpp cadastrado')
     }
 
-    const phone = chatId.replace('@c.us', '').substring(2)
+    const phone = chatId
 
     await this.#contactRepository.save({
       ...contactData,
-      phone,
+      phone: phone.replace('@c.us', '').substring(2),
     })
 
     await this.#syncContacts.add({
       contacts: [{
         ...contactData,
-        phone: chatId,
+        phone: chatId.replace(/\D/g, ''),
       }]
     })
 

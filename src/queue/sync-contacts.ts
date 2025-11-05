@@ -31,10 +31,8 @@ SyncContacts.process(async (job) => {
     const conversationService = container.resolve<ConversationService>('conversationService')
     const contactService = container.resolve<ContactService>('contactService')
     const contactRepository = container.resolve<ContactRepository>('contactRepository')
-    const userService = container.resolve<UserService>('userService')
     const clientsWpp = container.resolve<ClientsWpp>('clientsWpp')
     const awsService = container.resolve<AwsService>('awsService')
-    const conversationMessageRepository = container.resolve<ConversationMessageRepository>('conversationMessageRepository')
 
     for await (const contact of data.contacts) {
       const urlProfile = await clientsWpp.getUrlProfileByContact(contact.idEmpresa, contact.phone)
@@ -72,29 +70,7 @@ SyncContacts.process(async (job) => {
         phone,
       })
 
-      const idContact = newContact.id!
-
       await contactRepository.save(newContact)
-
-      const userMaster = await userService.findMasterUsersByIdEmpresa(contact.idEmpresa)
-      const messagesByChatId = await clientsWpp.getMessagesByChatId(contact.idEmpresa, `55${phone}@c.us`)
-
-      const { id: idConversaiton } = await conversationService.findOrCreateConversation(contact.idEmpresa, idContact, userMaster[0].id)
-
-      for await (const message of messagesByChatId) {
-        if (!message.body) {
-          console.log(message)
-        }
-        await conversationMessageRepository.save({
-          id: randomUUID(),
-          idConversation: idConversaiton,
-          idEmpresa: contact.idEmpresa,
-          idUser: message.fromMe ? userMaster?.[0]?.id : null,
-          message: message.body || '',
-          createdAt: DateTime.fromSeconds(message.timestamp).setZone("America/Sao_Paulo").toISO(),
-          updatedAt: DateTime.fromSeconds(message.timestamp).setZone("America/Sao_Paulo").toISO(),
-        })
-      }
 
       console.log('Contato salvo', contact.phone)
     }
