@@ -6,9 +6,9 @@ const clientRedis = createClient({
   socket: {
     host: process.env.REDIS_HOST,
     port: 6379,
-    connectTimeout: 1000000,
-    passphrase: process.env.REDIS_PASSWORD
-  }
+    connectTimeout: 1000000
+  },
+  password: process.env.REDIS_PASSWORD
 });
 
 clientRedis.connect();
