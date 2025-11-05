@@ -87,9 +87,9 @@ export class ClientsWpp {
     }
   }
 
-  public async sendSeen(idEmpresa: string, chatId: string, messageId: string) {
+  public async sendSeen(idEmpresa: string, chatId: string, messageIds: string[]) {
     try {
-      if (!this.url || !this.token || !chatId || !messageId) {
+      if (!this.url || !this.token || !chatId || !Array.isArray(messageIds) || messageIds?.length === 0) {
         console.info('Webhook capturado porém não usado.')
         return
       }
@@ -105,8 +105,8 @@ export class ClientsWpp {
           "X-Api-Key": process.env.WPP_KEY
         },
         data: {
-          chatId: `55${chatId}@c.us`,
-          messageId,
+          chatId,
+          messageIds,
           session: idEmpresa
         }
       }

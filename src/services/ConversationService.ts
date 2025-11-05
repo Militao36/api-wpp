@@ -380,12 +380,20 @@ export class ConversationService {
 
     await this.#conversationRepository.update({ isRead: true }, conversation.id, idEmpresa)
 
+
     const messages = await this.#conversationMessageRepository
       .findAllPaginationWithConversationIdUser(
         idEmpresa,
         conversation.id,
         page
       )
+
+    if (messages.length > 0) {
+      const contact = await this.#contactService.findById(idEmpresa, conversation.idContact)
+
+      const chatId = await this.formatChatId(idEmpresa, contact.phone)
+      await this.#clientsWpp.sendSeen(idEmpresa, chatId, messages.map(m => m.messageId))
+    }
 
     return messages
   }

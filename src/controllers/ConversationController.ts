@@ -140,8 +140,6 @@ export class ConversationController {
   @GET()
   async listMessages(request: Request, response: Response) {
     const idEmpresa = request.idEmpresa
-    const idUser = request.idUser
-
     const { page } = request.query
 
     const data = await this.#conversationService
