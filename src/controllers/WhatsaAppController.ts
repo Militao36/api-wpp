@@ -99,6 +99,7 @@ export class WhatsAppController {
 
       return response.status(201).json({ imported: contacts.length })
     } catch (err) {
+      console.log(err)
       return response.status(200).send('Desconectado')
     }
   }
