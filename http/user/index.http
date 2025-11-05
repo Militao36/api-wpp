@@ -25,10 +25,10 @@ POST https://unledu-api-wpp.auu75n.easypanel.host/users/register
 Content-Type: application/json
 
 {
-  "name": "Matheus",
-  "username": "militao",
+  "name": "Eriks BMS",
+  "username": "eriksbms",
   "password": "1234",
-  "idEmpresa": "9555c67f-86bd-4b50-b9fb-90f07a87531b"
+  "idEmpresa": "2e59d1e7-13c5-418f-a247-6afd586e06ec"
 }
 
 

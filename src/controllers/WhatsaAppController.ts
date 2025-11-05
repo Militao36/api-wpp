@@ -8,6 +8,7 @@ import { SyncContacts } from '../queue'
 import { RedisClientType } from 'redis'
 import { DateTime } from 'luxon'
 import { WhatsWppService } from '../services/WhatsWppService'
+import { ConversationService } from '../services/ConversationService'
 
 @route('/zap')
 export class WhatsAppController {
@@ -15,12 +16,14 @@ export class WhatsAppController {
   #syncContacts: typeof SyncContacts
   #clientRedis: RedisClientType
   #whatsWppService: WhatsWppService
+  #conversationService: ConversationService
 
-  constructor({ whatsWppService, clientRedis, clientsWpp, syncContacts }) {
+  constructor({ whatsWppService, conversationService, clientRedis, clientsWpp, syncContacts }) {
     this.#clientsWpp = clientsWpp
     this.#syncContacts = syncContacts
     this.#clientRedis = clientRedis
     this.#whatsWppService = whatsWppService
+    this.#conversationService = conversationService
   }
 
   @route('/health')
@@ -131,7 +134,7 @@ export class WhatsAppController {
       })
     }
 
-    return response.status(200).send(Buffer.from(result, 'binary').toString('base64'))
+    return response.status(200).send(Buffer.from(result,  'binary').toString('base64'))
   }
 
   @route('/webhook')
@@ -150,6 +153,9 @@ export class WhatsAppController {
     }
 
     if (body.payload.fromMe) {
+      console.log('Mensagem enviada pelo próprio número, ignorando')
+      console.log(body.payload)
+
       return response.status(200).send()
     }
 
