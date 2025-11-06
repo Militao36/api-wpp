@@ -27,7 +27,7 @@ export class ClientsWpp {
             ]
           }
         ],
-        "webjs": {
+        webjs: {
           "tagsEventsOn": false
         }
       }

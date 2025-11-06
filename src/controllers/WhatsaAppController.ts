@@ -136,7 +136,7 @@ export class WhatsAppController {
   @route('/webhook')
   @POST()
   async webhoook(request: Request, response: Response) {
-    const eventsNamesValids = ['message', 'message.any', 'message.ack']
+    const eventsNamesValids = ['message.any']
     const body = request.body as any
     const idEmpresa = body.session
 
@@ -150,29 +150,23 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    if (body.event === 'message.ack') {
-      await this.#whatsWppService.ack(idEmpresa, body)
-    } else if (body.event === 'message.any') {
-      if (body.payload.fromMe) {
+    if (body.payload.fromMe) {
+      const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
 
-        const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
-
-        if (users.length === 0) {
-          return response.status(200).send()
-        }
-
-        await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
-
+      if (users.length === 0) {
         return response.status(200).send()
       }
 
-      if (body.me.id === body.payload.from) {
-        return response.status(200).send()
-      }
+      await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
 
-      await this.#whatsWppService.handle(idEmpresa, body)
+      return response.status(200).send()
     }
 
+    if (body.me.id === body.payload.from) {
+      return response.status(200).send()
+    }
+
+    await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()
   }
