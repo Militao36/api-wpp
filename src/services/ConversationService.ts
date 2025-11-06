@@ -248,6 +248,8 @@ export class ConversationService {
     const existsMessageWithMessageId = await this.#conversationMessageRepository.findByMessageId(idEmpresa, messageId)
 
     if (existsMessageWithMessageId) {
+      console.log('Mensagem já existe com esse messageId:', messageId);
+      console.log(existsMessageWithMessageId)
       return
     }
     
