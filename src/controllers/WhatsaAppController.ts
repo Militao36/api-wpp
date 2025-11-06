@@ -152,8 +152,7 @@ export class WhatsAppController {
 
     if (body.event === 'message.ack' && body.payload.ackName === 'READ') {
       await this.#whatsWppService.ack(idEmpresa, body)
-    } else if (body.event === 'message') {
-
+    } else if (body.event === 'message.any') {
       if (body.payload.fromMe) {
         console.log('Mensagem enviada pelo próprio número, ignorando')
         console.log(body.payload)
