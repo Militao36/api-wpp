@@ -41,7 +41,13 @@ export class WhatsWppService {
   }
 
   async createContact(idEmpresa: string, body: Record<string, any>): Promise<string> {
-    const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, body.payload.from)
+    let phone = body.payload.from
+
+    if (phone === body.me.id) {
+      phone = body.payload.to
+    }
+
+    const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, phone)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
     if (contact) {
