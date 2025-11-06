@@ -244,7 +244,8 @@ export class ConversationService {
     }
   }
 
-  public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string, fileName: string) {
+  // Só quem vai usar esse método vai ser o whatsapp webhook
+  public async addMessageWebhook(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string, fileName: string) {
     const existsMessageWithMessageId = await this.#conversationMessageRepository.findByMessageId(idEmpresa, messageId)
 
     if (existsMessageWithMessageId) {
@@ -288,7 +289,7 @@ export class ConversationService {
       updatedAt: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
     }, idConversation, idEmpresa)
 
-    await this.emitNewMessage(idConversation, conversationData.id!, idEmpresa, idUser)
+    await this.emitNewMessage(idConversation, conversationData.id!, idEmpresa, null)
   }
 
   public async findAll(idEmpresa: string, idUser: string, filter?: Record<string, any>): Promise<ConversationEntity[]> {

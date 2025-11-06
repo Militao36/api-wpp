@@ -24,7 +24,7 @@ export class WhatsWppService {
 
     const { id } = await this.createConversation(idEmpresa, idContact)
 
-    await this.#conversationService.addMessage(
+    await this.#conversationService.addMessageWebhook(
       idEmpresa,
       id,
       idUser ? idUser : null,
