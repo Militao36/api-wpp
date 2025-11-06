@@ -97,8 +97,6 @@ export class ClientsWpp {
         return
       }
 
-      await this.sleep(Math.random() * 500)
-
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
@@ -238,12 +236,6 @@ export class ClientsWpp {
       return
     }
 
-    await this.startTyping(idEmpresa, data.chatId)
-
-    await this.sleep(Math.random() * 1000).catch(console.error)
-
-    await this.stopTyping(idEmpresa, data.chatId)
-
     try {
       const config = {
         method: 'post',
@@ -278,12 +270,6 @@ export class ClientsWpp {
     if (health !== 'Conectado') {
       return
     }
-
-    await this.startTyping(idEmpresa, data.chatId)
-
-    await this.sleep(Math.random() * 1000).catch(console.error)
-
-    await this.stopTyping(idEmpresa, data.chatId)
 
     try {
       const config = {
@@ -324,12 +310,6 @@ export class ClientsWpp {
     if (health !== 'Conectado') {
       return
     }
-
-    await this.startTyping(idEmpresa, data.chatId)
-
-    await this.sleep(Math.random() * 1000).catch(console.error)
-
-    await this.stopTyping(idEmpresa, data.chatId)
 
     try {
       const config = {
@@ -374,12 +354,6 @@ export class ClientsWpp {
       return
     }
 
-    await this.startTyping(idEmpresa, data.chatId)
-
-    await this.sleep(Math.random() * 1000).catch(console.error)
-
-    await this.stopTyping(idEmpresa, data.chatId)
-
     try {
       const config = {
         method: 'post',
@@ -421,12 +395,6 @@ export class ClientsWpp {
       return
     }
 
-    await this.startTyping(idEmpresa, data.chatId)
-
-    await this.sleep(Math.random() * 1000).catch(console.error)
-
-    await this.stopTyping(idEmpresa, data.chatId)
-
     try {
       const config = {
         method: 'post',
@@ -460,7 +428,6 @@ export class ClientsWpp {
       console.log('sendMessage', error)
     }
   }
-
 
   async getMessagesByChatId(idEmpresa: string, chatId: string) {
     const config = {
@@ -502,14 +469,6 @@ export class ClientsWpp {
     }
   }
 
-  public async startBot(idEmpresa: string, body: Record<string, any>, idConversation: string) {
-    await axios.post(process.env.N8N_BOT, {
-      wpp: body,
-      idConversation,
-      idEmpresa
-    })
-  }
-
   private async startTyping(idEmpresa: string, chatId: string) {
     const config = {
       method: 'post',
@@ -545,13 +504,5 @@ export class ClientsWpp {
     }
 
     await axios.request(config)
-  }
-
-  private async sleep(seconds: number = 1000) {
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        return resolve('')
-      }, seconds)
-    })
   }
 }

@@ -154,8 +154,6 @@ export class WhatsAppController {
       await this.#whatsWppService.ack(idEmpresa, body)
     } else if (body.event === 'message.any') {
       if (body.payload.fromMe) {
-        console.log('Mensagem enviada pelo próprio número, ignorando')
-        console.log(body.payload)
 
         const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
 
