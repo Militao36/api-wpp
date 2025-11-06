@@ -27,8 +27,11 @@ export class ClientsWpp {
             ]
           }
         ],
-        webjs: {
-          "tagsEventsOn": false
+        noweb: {
+          store: {
+            enabled: true,
+            fullSync: false
+          }
         }
       }
     })
