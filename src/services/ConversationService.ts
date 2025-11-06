@@ -284,10 +284,12 @@ export class ConversationService {
       (hasMedia ? conversationData.file : message)
     )
 
-    await this.#conversationRepository.update({
-      isRead: false,
-      updatedAt: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
-    }, idConversation, idEmpresa)
+    if (!idUser) {
+      await this.#conversationRepository.update({
+        isRead: false,
+        updatedAt: DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')
+      }, idConversation, idEmpresa)
+    }
 
     await this.emitNewMessage(idConversation, conversationData.id!, idEmpresa, null)
   }
