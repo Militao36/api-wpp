@@ -395,13 +395,6 @@ export class ConversationService {
         page
       )
 
-    if (messages.length > 0) {
-      const contact = await this.#contactService.findById(idEmpresa, conversation.idContact)
-
-      const chatId = await this.formatChatId(idEmpresa, contact.phone)
-      await this.#clientsWpp.sendSeen(idEmpresa, chatId, messages.map(m => m.messageId).filter(e => !!e))
-    }
-
     return messages
   }
 
