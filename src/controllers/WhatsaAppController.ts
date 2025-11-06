@@ -150,7 +150,7 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    if (body.event === 'message.ack' && body.payload.ackName === 'READ') {
+    if (body.event === 'message.ack') {
       await this.#whatsWppService.ack(idEmpresa, body)
     } else if (body.event === 'message.any') {
       if (body.payload.fromMe) {
