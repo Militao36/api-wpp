@@ -16,7 +16,7 @@ export class WhatsWppService {
   }
 
   public async handle(idEmpresa: string, body: Record<string, any>, idUser?: string,): Promise<void> {
-    if (!body?.payload?.body || !body.payload?.media?.url) {
+    if (!body?.payload?.body && !body.payload?.media?.url) {
       return
     }
 
