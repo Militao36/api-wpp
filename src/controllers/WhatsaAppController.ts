@@ -102,9 +102,16 @@ export class WhatsAppController {
   @route('/connect')
   @POST()
   async connect(request: Request, response: Response) {
-    await this.#clientsWpp.start(request.idEmpresa)
+    try {
+      await this.#clientsWpp.start(request.idEmpresa)
 
-    return response.status(200).json({})
+      return response.status(200).json({})
+    } catch (error) {
+      console.log(error)
+      return response.status(400).json({
+        message: 'Ocorreu um erro ao conectar no WhatsApp'
+      })
+    }
   }
 
   @route('/disconnect')
