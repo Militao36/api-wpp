@@ -24,8 +24,6 @@ export class ClientsWpp {
             url: `${process.env.URL_BACKEND}/zap/webhook?idEmpresa=${idEmpresa}`,
             events: [
               'message.any',
-              'message',
-              'message.ack'
             ]
           }
         ],
