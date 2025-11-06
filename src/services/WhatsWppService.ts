@@ -16,6 +16,10 @@ export class WhatsWppService {
   }
 
   public async handle(idEmpresa: string, body: Record<string, any>, idUser?: string,): Promise<void> {
+    if (!body?.payload?.body || !body.payload?.media?.url) {
+      return
+    }
+
     const idContact = await this.createContact(idEmpresa, body)
 
     const { id } = await this.createConversation(idEmpresa, idContact)
@@ -57,7 +61,7 @@ export class WhatsWppService {
     const data = body.payload._data
     const idContact = await this.#contactService.save({
       idEmpresa,
-      name: data.pushName,
+      name: data?.pushName || phoneNumber,
       phone: phoneNumber
     })
 
