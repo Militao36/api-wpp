@@ -89,8 +89,14 @@ export class ClientsWpp {
 
   public async sendSeen(idEmpresa: string, chatId: string, messageIds: string[]) {
     try {
-      if (!this.url || !this.token || !chatId || !Array.isArray(messageIds) || messageIds?.length === 0) {
+      if (!Array.isArray(messageIds) || messageIds?.length === 0) {
         console.info('Webhook capturado porém não usado.')
+        return
+      }
+
+      const health = await this.health(idEmpresa)
+
+      if (health !== 'Conectado') {
         return
       }
 
@@ -447,7 +453,7 @@ export class ClientsWpp {
       }
 
       const response = await axios.request(config)
-      
+
       if (response?.status === 201) {
         return response.data
       }

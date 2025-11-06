@@ -388,7 +388,6 @@ export class ConversationService {
 
     await this.#conversationRepository.update({ isRead: true }, conversation.id, idEmpresa)
 
-
     const messages = await this.#conversationMessageRepository
       .findAllPaginationWithConversationIdUser(
         idEmpresa,
