@@ -252,7 +252,7 @@ export class ConversationService {
       console.log(existsMessageWithMessageId)
       return
     }
-    
+
     const conversationData = new ConversationMessageEntity({
       idEmpresa: idEmpresa,
       idConversation: idConversation,
@@ -400,7 +400,7 @@ export class ConversationService {
       const contact = await this.#contactService.findById(idEmpresa, conversation.idContact)
 
       const chatId = await this.formatChatId(idEmpresa, contact.phone)
-      await this.#clientsWpp.sendSeen(idEmpresa, chatId, messages.map(m => m.messageId))
+      await this.#clientsWpp.sendSeen(idEmpresa, chatId, messages.map(m => m.messageId).filter(e => !!e))
     }
 
     return messages
