@@ -140,6 +140,8 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
+    console.log('Webhook recebido:', body)
+
     if (!eventsNamesValids.includes(body.event)) {
       return response.status(200).send()
     }
