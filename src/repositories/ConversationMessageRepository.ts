@@ -48,4 +48,14 @@ export class ConversationMessageRepository extends RepositoryBase<Partial<Conver
 
     return messagesConverstion
   }
+
+
+  async findByMessageId(idEmpresa: string, messageId: string): Promise<ConversationMessageEntity> {
+    const message = await this.#database.table(this.table)
+      .select()
+      .where({ idEmpresa, messageId })
+      .first()
+
+    return message
+  }
 }

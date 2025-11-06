@@ -15,7 +15,7 @@ export class WhatsWppService {
     this.#sectorService = sectorService
   }
 
-  public async handle(idEmpresa: string, body: Record<string, any>): Promise<void> {
+  public async handle(idEmpresa: string, body: Record<string, any>, idUser?: string,): Promise<void> {
     let idContact = await this.createContact(idEmpresa, body)
 
     const { id } = await this.createConversation(idEmpresa, idContact)
@@ -23,7 +23,7 @@ export class WhatsWppService {
     await this.#conversationService.addMessage(
       idEmpresa,
       id,
-      null,
+      idUser ? idUser : null,
       body.payload.body,
       body.payload.id,
       body.payload.hasMedia,
@@ -32,7 +32,7 @@ export class WhatsWppService {
     )
   }
 
-  private async createContact(idEmpresa: string, body: Record<string, any>): Promise<string> {
+  async createContact(idEmpresa: string, body: Record<string, any>): Promise<string> {
     const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, body.payload.from)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
 
@@ -50,7 +50,7 @@ export class WhatsWppService {
     return idContact
   }
 
-  private async createConversation(idEmpresa: string, idContact: string): Promise<{ id: string, conversation: ConversationEntity }> {
+  async createConversation(idEmpresa: string, idContact: string): Promise<{ id: string, conversation: ConversationEntity }> {
     const conversation = await this.#conversationService.findConversationByContactNotFinished(idEmpresa, idContact)
 
     let idConversation = null

@@ -23,14 +23,14 @@ export class ClientsWpp {
           {
             url: `${process.env.URL_BACKEND}/zap/webhook?idEmpresa=${idEmpresa}`,
             events: [
-              'message'
+              'message.any'
             ]
           }
         ],
-        "noweb": {
-          "store": {
-            "enabled": true,
-            "fullSync": false
+        noweb: {
+          store: {
+            enabled: true,
+            fullSync: false
           }
         }
       }

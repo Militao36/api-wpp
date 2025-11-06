@@ -245,6 +245,12 @@ export class ConversationService {
   }
 
   public async addMessage(idEmpresa: string, idConversation: string, idUser: string, message: string, messageId: string, hasMedia: boolean, url: string, fileName: string) {
+    const existsMessageWithMessageId = await this.#conversationMessageRepository.findByMessageId(idEmpresa, messageId)
+
+    if (existsMessageWithMessageId) {
+      return
+    }
+    
     const conversationData = new ConversationMessageEntity({
       idEmpresa: idEmpresa,
       idConversation: idConversation,

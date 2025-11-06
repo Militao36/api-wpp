@@ -8,7 +8,7 @@ import { SyncContacts } from '../queue'
 import { RedisClientType } from 'redis'
 import { DateTime } from 'luxon'
 import { WhatsWppService } from '../services/WhatsWppService'
-import { ConversationService } from '../services/ConversationService'
+import { UserService } from '../services/UserService'
 
 @route('/zap')
 export class WhatsAppController {
@@ -16,14 +16,14 @@ export class WhatsAppController {
   #syncContacts: typeof SyncContacts
   #clientRedis: RedisClientType
   #whatsWppService: WhatsWppService
-  #conversationService: ConversationService
+  #userService: UserService
 
-  constructor({ whatsWppService, conversationService, clientRedis, clientsWpp, syncContacts }) {
+  constructor({ userService, whatsWppService, clientRedis, clientsWpp, syncContacts }) {
     this.#clientsWpp = clientsWpp
     this.#syncContacts = syncContacts
     this.#clientRedis = clientRedis
     this.#whatsWppService = whatsWppService
-    this.#conversationService = conversationService
+    this.#userService = userService
   }
 
   @route('/health')
@@ -151,6 +151,14 @@ export class WhatsAppController {
     if (body.payload.fromMe) {
       console.log('Mensagem enviada pelo próprio número, ignorando')
       console.log(body.payload)
+
+      const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
+
+      if (users.length === 0) {
+        return response.status(200).send()
+      }
+
+      await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
 
       return response.status(200).send()
     }
