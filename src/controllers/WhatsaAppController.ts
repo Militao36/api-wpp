@@ -150,26 +150,32 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
-    if (body.payload.fromMe) {
-      console.log('Mensagem enviada pelo próprio número, ignorando')
-      console.log(body.payload)
+    if (body.event === 'message.ack' && body.payload.ackName === 'READ') {
+      await this.#whatsWppService.ack(idEmpresa, body)
+    } else if (body.event === 'message') {
 
-      const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
+      if (body.payload.fromMe) {
+        console.log('Mensagem enviada pelo próprio número, ignorando')
+        console.log(body.payload)
 
-      if (users.length === 0) {
+        const users = await this.#userService.findMasterUsersByIdEmpresa(idEmpresa)
+
+        if (users.length === 0) {
+          return response.status(200).send()
+        }
+
+        await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
+
         return response.status(200).send()
       }
 
-      await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
+      if (body.me.id === body.payload.from) {
+        return response.status(200).send()
+      }
 
-      return response.status(200).send()
+      await this.#whatsWppService.handle(idEmpresa, body)
     }
 
-    if (body.me.id === body.payload.from) {
-      return response.status(200).send()
-    }
-
-    await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()
   }

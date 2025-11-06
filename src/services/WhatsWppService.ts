@@ -16,7 +16,7 @@ export class WhatsWppService {
   }
 
   public async handle(idEmpresa: string, body: Record<string, any>, idUser?: string,): Promise<void> {
-    let idContact = await this.createContact(idEmpresa, body)
+    const idContact = await this.createContact(idEmpresa, body)
 
     const { id } = await this.createConversation(idEmpresa, idContact)
 
@@ -30,6 +30,14 @@ export class WhatsWppService {
       body.payload?.media?.url?.replace('http://localhost:3000', process.env.WPP_URL || ''),
       body?.payload?._data?.message?.documentMessage?.fileName || null
     )
+  }
+
+  public async ack(idEmpresa: string, body: Record<string, any>): Promise<void> {
+    const idContact = await this.createContact(idEmpresa, body)
+
+    const { id } = await this.createConversation(idEmpresa, idContact)
+
+    await this.#conversationService.updateRead(id, idEmpresa)
   }
 
   async createContact(idEmpresa: string, body: Record<string, any>): Promise<string> {
