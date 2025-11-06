@@ -140,7 +140,6 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    console.log('Webhook recebido:', body)
 
     if (!eventsNamesValids.includes(body.event)) {
       return response.status(200).send()
@@ -149,6 +148,8 @@ export class WhatsAppController {
     if (!body.payload.from.includes('@c.us')) {
       return response.status(200).send()
     }
+
+    console.log('Webhook recebido:', body)
 
     if (body.payload.fromMe) {
       console.log('Mensagem enviada pelo próprio número, ignorando')
