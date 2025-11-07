@@ -61,7 +61,7 @@ export class WhatsWppService {
     const data = body.payload._data
     const idContact = await this.#contactService.save({
       idEmpresa,
-      name: phone === body.me.id ? phoneNumber : data?.pushName,
+      name: phone === body.me.id ? data?.pushName : phoneNumber,
       phone: phoneNumber
     })
 
