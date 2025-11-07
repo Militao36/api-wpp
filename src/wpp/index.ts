@@ -32,7 +32,7 @@ export class ClientsWpp {
             enabled: true,
             fullSync: false
           }
-        }
+        },
       }
     })
 
@@ -87,13 +87,8 @@ export class ClientsWpp {
     }
   }
 
-  public async sendSeen(idEmpresa: string, chatId: string, messageIds: string[]) {
+  public async sendSeen(idEmpresa: string, chatId: string) {
     try {
-      if (!Array.isArray(messageIds) || messageIds?.length === 0) {
-        console.info('Webhook capturado porém não usado.')
-        return
-      }
-
       const health = await this.health(idEmpresa)
 
       if (health !== 'Conectado') {
@@ -103,16 +98,12 @@ export class ClientsWpp {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${this.url}/api/sendSeen`,
+        url: `${this.url}/api/${idEmpresa}/chats/${chatId}/messages/read`,
         headers: {
           Authorization: `Basic ${this.token}`,
           "X-Api-Key": process.env.WPP_KEY
         },
-        data: {
-          chatId,
-          messageIds,
-          session: idEmpresa
-        }
+        data: {}
       }
 
       await axios.request(config)
@@ -239,6 +230,14 @@ export class ClientsWpp {
       return
     }
 
+    await this.sendSeen(idEmpresa, data.chatId)
+
+    await this.startTyping(idEmpresa, data.chatId)
+    
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
+
     try {
       const config = {
         method: 'post',
@@ -273,6 +272,14 @@ export class ClientsWpp {
     if (health !== 'Conectado') {
       return
     }
+
+    await this.startTyping(idEmpresa, data.chatId)
+    
+    await this.sendSeen(idEmpresa, data.chatId)
+
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
 
     try {
       const config = {
@@ -313,6 +320,14 @@ export class ClientsWpp {
     if (health !== 'Conectado') {
       return
     }
+
+    await this.startTyping(idEmpresa, data.chatId)
+
+    await this.sendSeen(idEmpresa, data.chatId)
+
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
 
     try {
       const config = {
@@ -357,6 +372,14 @@ export class ClientsWpp {
       return
     }
 
+    await this.startTyping(idEmpresa, data.chatId)
+
+    await this.sendSeen(idEmpresa, data.chatId)
+
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
+
     try {
       const config = {
         method: 'post',
@@ -398,6 +421,14 @@ export class ClientsWpp {
       return
     }
 
+    await this.startTyping(idEmpresa, data.chatId)
+
+    await this.sendSeen(idEmpresa, data.chatId)
+
+    await this.sleep(Math.random() * 1000).catch(console.error)
+
+    await this.stopTyping(idEmpresa, data.chatId)
+
     try {
       const config = {
         method: 'post',
@@ -431,6 +462,7 @@ export class ClientsWpp {
       console.log('sendMessage', error)
     }
   }
+
 
   async getMessagesByChatId(idEmpresa: string, chatId: string) {
     const config = {
@@ -507,5 +539,13 @@ export class ClientsWpp {
     }
 
     await axios.request(config)
+  }
+
+  private async sleep(seconds: number = 1000) {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        return resolve('')
+      }, seconds)
+    })
   }
 }
