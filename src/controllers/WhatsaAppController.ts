@@ -147,16 +147,6 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    const from = body.payload.from;
-    const remoteJid = body?.payload?._data?.key?.remoteJid;
-    const remoteJidAlt = body?.payload?._data?.key?.remoteJidAlt;
-
-    console.log(JSON.stringify(body, null, 2))
-
-    if (!from || !remoteJid || !remoteJidAlt) {
-      return response.status(200).send();
-    }
-
     if (!eventsNamesValids.includes(body.event)) {
       return response.status(200).send();
     }
@@ -172,8 +162,6 @@ export class WhatsAppController {
 
       return response.status(200).send()
     }
-
-    console.log(body)
 
     await this.#whatsWppService.handle(idEmpresa, body)
 

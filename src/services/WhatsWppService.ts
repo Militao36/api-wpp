@@ -45,18 +45,9 @@ export class WhatsWppService {
   }
 
   async createContact(idEmpresa: string, body: Record<string, any>): Promise<string> {
-    const from = body.payload.from;
-    const remoteJid = body?.payload?._data?.key?.remoteJid;
-    const remoteJidAlt = body?.payload?._data?.key?.remoteJidAlt;
+    const senderAlt = body.payload._data.Info.SenderAlt
 
-    let phone = '';
-    if (!from.includes('@lid')) {
-      phone = from.split('@')[0];
-    } else if (!remoteJid.includes('@lid')) {
-      phone = remoteJid.split('@')[0];
-    } else if (!remoteJidAlt.includes('@lid')) {
-      phone = remoteJidAlt.split('@')[0];
-    }
+    const phone = senderAlt.split('@')[0].split(':')[0]
 
     const phoneNumber = await this.#conversationService.formatChatId(idEmpresa, phone)
     const contact = await this.#contactService.findByPhone(idEmpresa, phoneNumber)
