@@ -20,6 +20,8 @@ export class Authentication {
       '/zap/webhook'
     ]
 
+    console.log(req.url)
+
     if (excludes.includes(req.url.split('?')[0])) {
       return next();
     }
