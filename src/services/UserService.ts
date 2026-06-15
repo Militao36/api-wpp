@@ -49,8 +49,6 @@ export class UserService {
 
   public async save(user: UserEntity): Promise<string> {
     const idEmpresa = user.idEmpresa || randomUUID()
-
-
     const userExists = await this.#userRepository.findByUserName(user.username!)
     if (userExists) throw new Error('Username already exists')
 
@@ -58,7 +56,9 @@ export class UserService {
       idEmpresa,
       name: SectorsDefault.geral,
     }))
-    
+
+
+    console.log('idSector', idSector)
     const userData = new UserEntity({
       ...user,
       idEmpresa,

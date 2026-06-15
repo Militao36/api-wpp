@@ -21,4 +21,4 @@ export class UserEntity extends Entity {
     this.isMaster = user.isMaster
     this.idSector = this.isMaster ? null : user.idSector
   }
-} 
+}

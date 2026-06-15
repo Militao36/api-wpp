@@ -35,16 +35,6 @@ SyncContacts.process(async (job) => {
     const awsService = container.resolve<AwsService>('awsService')
 
     for await (const contact of data.contacts) {
-      const urlProfile = await clientsWpp.getUrlProfileByContact(contact.idEmpresa, contact.phone)
-
-      if(!urlProfile){
-        console.log('Contato sem foto de perfil', contact.phone)
-        continue
-      }
-
-      const fileName = `${contact.id}-profile.jpg`
-      const upload = await awsService.uploadFile(urlProfile, fileName, process.env.BUCKET_NAME)
-
       const phone = await conversationService.formatChatId(contact.idEmpresa, contact.phone.replace('@c.us', '').substring(2))
 
       if (!phone) {
@@ -56,7 +46,7 @@ SyncContacts.process(async (job) => {
       if (exists) {
         await contactService.update(exists.id, contact.idEmpresa, {
           ...exists,
-          urlProfile: upload?.url || null,
+          urlProfile: null,
           isManual: false,
           name: contact.name || exists.name,
         })
@@ -65,7 +55,7 @@ SyncContacts.process(async (job) => {
 
       const newContact = new ContactEntity({
         ...contact,
-        urlProfile: urlProfile || null,
+        urlProfile: null,
         isManual: false,
         phone,
       })
