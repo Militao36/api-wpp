@@ -151,7 +151,7 @@ export class WhatsAppController {
     const remoteJid = body?.payload?._data?.key?.remoteJid;
     const remoteJidAlt = body?.payload?._data?.key?.remoteJidAlt;
 
-    console.log(body)
+    console.log(JSON.stringify(body, null, 2))
 
     if (!from || !remoteJid || !remoteJidAlt) {
       return response.status(200).send();
