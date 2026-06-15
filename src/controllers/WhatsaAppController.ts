@@ -147,12 +147,18 @@ export class WhatsAppController {
     const body = request.body as any
     const idEmpresa = body.session
 
-    if (!eventsNamesValids.includes(body.event)) {
-      return response.status(200).send()
+    const from = body.payload.from;
+    const remoteJid = body?.payload?._data?.key?.remoteJid;
+    const remoteJidAlt = body?.payload?._data?.key?.remoteJidAlt;
+
+    console.log(body)
+
+    if (!from || !remoteJid || !remoteJidAlt) {
+      return response.status(200).send();
     }
 
-    if (!body.payload.from.includes('@c.us')) {
-      return response.status(200).send()
+    if (!eventsNamesValids.includes(body.event)) {
+      return response.status(200).send();
     }
 
     if (body.payload.fromMe) {
@@ -164,10 +170,6 @@ export class WhatsAppController {
 
       await this.#whatsWppService.handle(idEmpresa, body, users[0].id)
 
-      return response.status(200).send()
-    }
-
-    if (body.me.id === body.payload.from) {
       return response.status(200).send()
     }
 
