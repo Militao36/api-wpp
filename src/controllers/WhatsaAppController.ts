@@ -171,6 +171,8 @@ export class WhatsAppController {
       return response.status(200).send()
     }
 
+    console.log(body)
+
     await this.#whatsWppService.handle(idEmpresa, body)
 
     return response.status(200).send()
